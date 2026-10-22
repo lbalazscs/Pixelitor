@@ -44,13 +44,6 @@ public class VerGroupedParamGUI extends JPanel implements ParamGUI {
     }
 
     @Override
-    public void setEnabled(boolean b) {
-//        for (JComponent childGui : childGuis) {
-//            childGui.setEnabled(b);
-//        }
-    }
-
-    @Override
     public void setToolTip(String tip) {
 
     }

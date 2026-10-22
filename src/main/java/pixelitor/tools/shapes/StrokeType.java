@@ -27,6 +27,7 @@ import com.jhlabs.awt.ZigzagStroke;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.StrokeParam;
 import pixelitor.tools.util.Drag;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.RailwayTrackStroke;
 import pixelitor.utils.TaperingStroke;
 
@@ -37,7 +38,7 @@ import java.awt.Stroke;
 /**
  * Different stroke types available for drawing shapes.
  */
-public enum StrokeType {
+public enum StrokeType implements EnumChoice {
     BASIC("Basic", false, true) {
         @Override
         public Stroke createStroke(float width, int cap, int join, float[] dashPattern) {

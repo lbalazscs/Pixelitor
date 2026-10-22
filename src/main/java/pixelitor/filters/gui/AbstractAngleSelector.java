@@ -90,7 +90,8 @@ public abstract class AbstractAngleSelector extends JComponent implements MouseL
         // draw main arrow line
         g.draw(new Line2D.Float(startX, startY, endX, endY));
 
-        // the arrowhead angles are calculated relative to the main arrow's angle
+        // the arrowhead angles are calculated relative to the
+        // main arrow's angle (the added numbers are π ∓ 15°)
         double arrowheadAngle1 = 2.8797926 + angle;
         double arrowheadAngle2 = 3.4033926 + angle;
         int arrowRadius = 10;

@@ -23,40 +23,36 @@ import javax.swing.*;
 import java.awt.Dimension;
 
 /**
- * A button that resets a {@link Resettable} object  when clicked, and
+ * A button that resets a {@link Resettable} object when clicked, and
  * displays an arrow icon when the {@link Resettable} is not set to
  * its default value.
  */
 public class ResetButton extends JButton {
     private static final Dimension PREFERRED_SIZE = new Dimension(28, 28);
-    private Resettable resettable;
+    private final Resettable resettable;
+    private boolean enabledByParent = true;
 
     public ResetButton(Resettable resettable) {
-        setPreferredSize(PREFERRED_SIZE);
-        initialize(resettable);
-    }
-
-    private void initialize(Resettable resettable) {
         this.resettable = resettable;
+
         addActionListener(_ -> resettable.reset(true));
+        setPreferredSize(PREFERRED_SIZE);
         setToolTipText(resettable.getResetToolTip());
+
         updateState();
     }
 
     public void updateState() {
-        if (resettable.isAtDefault()) {
-            setIcon(null);
-            setEnabled(false);
-        } else {
-            setIcon(Icons.getResetIcon());
-            setEnabled(true);
-        }
+        boolean atDefault = resettable.isAtDefault();
+        setIcon(atDefault ? null : Icons.getResetIcon());
+        super.setEnabled(enabledByParent && !atDefault);
     }
 
     @Override
     public void setEnabled(boolean b) {
         // can be disabled either because the parent component
         // is disabled or because it's at the default value
+        enabledByParent = b;
         super.setEnabled(b && !resettable.isAtDefault());
     }
 }

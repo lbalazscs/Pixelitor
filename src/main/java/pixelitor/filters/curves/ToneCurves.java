@@ -18,8 +18,8 @@
 package pixelitor.filters.curves;
 
 import pixelitor.colors.Colors;
+import pixelitor.filters.channels.ChannelAdjustmentsModel;
 import pixelitor.filters.util.Channel;
-import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.utils.Themes;
 
 import java.awt.BasicStroke;
@@ -29,8 +29,6 @@ import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.EnumMap;
-import java.util.Map;
 
 import static java.awt.RenderingHints.KEY_ANTIALIASING;
 import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
@@ -40,7 +38,7 @@ import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
-public class ToneCurves {
+public class ToneCurves extends ChannelAdjustmentsModel<ToneCurve> {
     public static final int CURVE_SIZE = 255;
     private static final int CURVE_PADDING = 10;
     private static final int AXIS_PADDING = 20;
@@ -50,76 +48,8 @@ public class ToneCurves {
     private static final int GRID_DIVISIONS = 4;
     private static final BasicStroke GRID_STROKE = new BasicStroke(1);
 
-    private final Map<Channel, ToneCurve> curves = new EnumMap<>(Channel.class);
-    private ColorSpace activeColorSpace = ColorSpace.SRGB;
-    private Channel activeChannel = activeColorSpace.getPrimaryChannel();
-
     public ToneCurves() {
-        for (Channel channel : Channel.values()) {
-            curves.put(channel, new ToneCurve(channel));
-        }
-    }
-
-    public ToneCurve getCurve(Channel channel) {
-        return curves.get(channel);
-    }
-
-    public ToneCurve getActiveCurve() {
-        return curves.get(activeChannel);
-    }
-
-    /**
-     * Sets the active channel.
-     *
-     * @return true if the active channel changed
-     */
-    public boolean setActiveChannel(Channel newActiveChannel) {
-        if (newActiveChannel == null || newActiveChannel.getColorSpace() != activeColorSpace || activeChannel == newActiveChannel) {
-            return false;
-        }
-        activeChannel = newActiveChannel;
-        return true;
-    }
-
-    public Channel getActiveChannel() {
-        return activeChannel;
-    }
-
-    public void setColorSpace(ColorSpace colorSpace) {
-        if (this.activeColorSpace == colorSpace) {
-            return;
-        }
-        this.activeColorSpace = colorSpace;
-        this.activeChannel = colorSpace.getPrimaryChannel();
-    }
-
-    public ColorSpace getColorSpace() {
-        return activeColorSpace;
-    }
-
-    /**
-     * Resets the active color space and active channel to their default values (sRGB and RGB).
-     */
-    public void selectDefaults() {
-        this.activeColorSpace = ColorSpace.SRGB;
-        this.activeChannel = ColorSpace.SRGB.getPrimaryChannel();
-    }
-
-    /**
-     * Resets every curve in every color space to the identity curve.
-     */
-    public void reset() {
-        for (ToneCurve curve : curves.values()) {
-            curve.reset();
-        }
-    }
-
-    public void randomize() {
-        for (Channel channel : activeColorSpace.getChannels()) {
-            getCurve(channel).reset();
-        }
-        // randomize only the primary channel of the active color space
-        getCurve(activeColorSpace.getPrimaryChannel()).randomize();
+        super((ch, _) -> new ToneCurve(ch));
     }
 
     /**
@@ -204,6 +134,7 @@ public class ToneCurves {
      * Draws the gradient scales along the horizontal and vertical axes.
      */
     private void drawScales(Graphics2D g) {
+        Channel activeChannel = getActiveChannel();
         Color startColor = switch (activeChannel) {
             case OK_A, OK_B, RGB, OK_L -> activeChannel.getDarkColor();
             case RED, GREEN, BLUE -> Color.BLACK;
@@ -235,14 +166,15 @@ public class ToneCurves {
      * with the active one on top.
      */
     private void drawCurves(Graphics2D g, boolean darkTheme) {
+        Channel activeChannel = getActiveChannel();
         // draw the inactive curves of the active color space first
-        for (Channel channel : activeColorSpace.getChannels()) {
+        for (Channel channel : getColorSpace().getChannels()) {
             if (channel != activeChannel) {
-                getCurve(channel).draw(g, false, darkTheme);
+                getAdjustment(channel).draw(g, false, darkTheme);
             }
         }
 
         // then draw the active curve on top
-        getActiveCurve().draw(g, true, darkTheme);
+        getActiveAdjustment().draw(g, true, darkTheme);
     }
 }

@@ -54,20 +54,15 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        var gui = new ColorParamGUI(this, sideButtonModel, true);
-        paramGUI = gui;
-        syncWithGui();
-
-        return gui;
+        return installGUI(new ColorParamGUI(
+            this, sideButtonModel, true));
     }
 
-    public ColorParam withRandomizeAction() {
+    public FilterParam withRandomizeAction() {
         String toolTip = "<html>Randomize the color of <b>" + getName() + "</b>";
-        sideButtonModel = new FilterButtonModel("",
+        return withSideButton(new FilterButtonModel("",
             this::randomize, Icons.getRandomizeIcon(),
-            toolTip, null);
-
-        return this;
+            toolTip, null));
     }
 
     @Override
@@ -108,24 +103,24 @@ public class ColorParam extends AbstractFilterParam {
         color = newColor;
         ColorHistory.remember(newColor);
 
-        if (paramGUI != null) {
-            paramGUI.updateGUI();
-        }
+        updateGUI();
 
-        if (trigger && adjustmentListener != null) {
-            adjustmentListener.paramAdjusted();
+        if (trigger) {
+            triggerFilter();
         }
     }
 
     public void darken() {
-        float[] hsb = Colors.toHsb(color);
-        hsb[2] = Math.max(0.0f, hsb[2] - 0.1f); // decrease brightness by 10%
-        setColor(new Color(Colors.hsbToArgb(hsb, color.getAlpha()), true), false);
+        adjustBrightness(-0.1f);
     }
 
     public void brighten() {
+        adjustBrightness(+0.1f);
+    }
+
+    private void adjustBrightness(float delta) {
         float[] hsb = Colors.toHsb(color);
-        hsb[2] = Math.min(1.0f, hsb[2] + 0.1f); // increase brightness by 10%
+        hsb[2] = Math.clamp(hsb[2] + delta, 0f, 1f);
         setColor(new Color(Colors.hsbToArgb(hsb, color.getAlpha()), true), false);
     }
 
@@ -155,12 +150,13 @@ public class ColorParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(String savedValue) {
+        Color newColor;
         try {
-            Color newColor = Colors.fromHtmlHexRgba(savedValue);
-            setColor(newColor, false);
+            newColor = Colors.fromHtmlHexRgba(savedValue);
         } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("Could not parse " + savedValue);
+            throw new IllegalStateException("Could not parse " + savedValue, e);
         }
+        setColor(newColor, false);
     }
 
     @Override

@@ -63,7 +63,7 @@ public class Canny extends ParametrizedFilter {
             contrastNormalized,
             invert
         );
-        highThreshold.ensureHigherValueThan(lowThreshold);
+        highThreshold.ensureNotLowerThan(lowThreshold);
 
         help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Canny_edge_detector");
     }

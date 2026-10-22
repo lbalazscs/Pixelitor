@@ -19,11 +19,12 @@ package pixelitor.filters.util;
 
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.gui.GUIText;
+import pixelitor.utils.EnumChoice;
 
 /**
  * A cylindrical color space.
  */
-public enum CylColorSpace {
+public enum CylColorSpace implements EnumChoice {
     HSV("HSV (Faster)"),
     OKLCH("Oklch (Better)");
 

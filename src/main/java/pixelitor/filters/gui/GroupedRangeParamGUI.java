@@ -35,6 +35,7 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
     private final GroupedRangeParam model;
     private final GridBagHelper gbh;
     private final SliderSpinner[] sliders;
+    private final JCheckBox linkedCB;
 
     public GroupedRangeParamGUI(GroupedRangeParam model) {
         super(new GridBagLayout());
@@ -47,7 +48,10 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
         addSliderSpinners();
 
         if (model.isLinkable()) {
-            addLinkCheckBox();
+            linkedCB = GUIUtils.createLinkCheckBox(this.model);
+            gbh.addLabelAndControl(i18n("linked") + ":", linkedCB, numChildren);
+        } else {
+            linkedCB = null;
         }
 
         setBorder(createTitledBorder(model.getName()));
@@ -66,11 +70,6 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
             sliders[i].setLabel(label);
             gbh.addTwoControls(label, sliders[i], i);
         }
-    }
-
-    private void addLinkCheckBox() {
-        JCheckBox linkedCB = GUIUtils.createLinkCheckBox(model);
-        gbh.addLabelAndControl(i18n("linked") + ":", linkedCB, numChildren);
     }
 
     @Override
@@ -96,6 +95,9 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
 
         for (SliderSpinner slider : sliders) {
             slider.setEnabled(enabled);
+        }
+        if (linkedCB != null) {
+            linkedCB.setEnabled(enabled);
         }
     }
 }

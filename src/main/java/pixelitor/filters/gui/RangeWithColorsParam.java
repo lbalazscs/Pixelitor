@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -38,10 +38,7 @@ public class RangeWithColorsParam extends RangeParam {
 
     @Override
     public JComponent createGUI() {
-        var sliderSpinner = new SliderSpinner(this, leftColor, rightColor);
-        paramGUI = sliderSpinner;
-        syncWithGui();
-        return sliderSpinner;
+        return installGUI(new SliderSpinner(this, leftColor, rightColor));
     }
 
     public Color getLeftColor() {

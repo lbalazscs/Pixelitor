@@ -20,7 +20,6 @@ package pixelitor.filters.gui;
 import com.bric.util.JVM;
 import pixelitor.AppMode;
 import pixelitor.colors.Colors;
-import pixelitor.filters.Truchet;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.io.FileUtils;
 import pixelitor.utils.Messages;
@@ -29,7 +28,9 @@ import javax.swing.*;
 import java.awt.Color;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * Usually represents a user-created preset that stores configuration
@@ -98,6 +99,20 @@ public class UserPreset implements Preset {
     }
 
     /**
+     * Returns the keys as an unmodifiable set view.
+     */
+    public Set<String> keySet() {
+        return Collections.unmodifiableSet(content.keySet());
+    }
+
+    /**
+     * Returns an unmodifiable set view of the entries.
+     */
+    public Set<Map.Entry<String, String>> entrySet() {
+        return Collections.unmodifiableMap(content).entrySet();
+    }
+
+    /**
      * Returns the setting value for a given key.
      */
     public String get(String key) {
@@ -110,23 +125,9 @@ public class UserPreset implements Preset {
             value = content.get(legacyKey);
         }
 
-        if (value == null) {
-            // legacy migration support
-            if ("Ray Colors".equals(key)) {
-                // oct 2021: temporary hack for compatible color list upgrade of starburst
-                value = content.get("Ray Color");
-            } else if ("Sides".equals(key)) {
-                // sept 2023: 4.3.0 => 4.3.1 migration in Concentric Shapes
-                value = content.get("Polygon Sides");
-            }
-
+        if (value == null) { // both keys failed to find it
             if (AppMode.isDevelopment()) {
                 System.out.println("UserPreset::get: no value found for the key " + key);
-            }
-        } else {
-            // sept 2023: migration in Truchet Tiles
-            if (Truchet.migration_helper.containsKey(value)) {
-                value = Truchet.migration_helper.get(value);
             }
         }
 
@@ -138,8 +139,24 @@ public class UserPreset implements Preset {
      */
     public void put(String key, String value) {
         assert !key.isBlank();
+        assert !key.contains("=");
+        assert !key.contains("\n") && !key.contains("\r");
+        assert value != null;
+        assert !value.contains("\n") && !value.contains("\r");
 
         content.put(key, value);
+    }
+
+    private <T> T getOrDefault(String key, Function<String, T> parser, T defaultValue) {
+        String value = get(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return parser.apply(value);
+        } catch (IllegalArgumentException e) { // includes NumberFormatException
+            return defaultValue;
+        }
     }
 
     public int getInt(String key) {
@@ -147,21 +164,11 @@ public class UserPreset implements Preset {
     }
 
     public int getInt(String key, int defaultValue) {
-        String value = get(key);
-        try {
-            return value != null ? Integer.parseInt(value) : defaultValue;
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
+        return getOrDefault(key, Integer::parseInt, defaultValue);
     }
 
     public long getLong(String key, long defaultValue) {
-        String value = get(key);
-        try {
-            return value != null ? Long.parseLong(value) : defaultValue;
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
+        return getOrDefault(key, Long::parseLong, defaultValue);
     }
 
     public void putInt(String key, int value) {
@@ -185,12 +192,7 @@ public class UserPreset implements Preset {
     }
 
     public float getFloat(String key, float defaultValue) {
-        String value = get(key);
-        try {
-            return (value != null) ? Float.parseFloat(value) : defaultValue;
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
+        return getOrDefault(key, Float::parseFloat, defaultValue);
     }
 
     public void putFloat(String key, float f) {
@@ -202,12 +204,7 @@ public class UserPreset implements Preset {
     }
 
     public double getDouble(String key, double defaultValue) {
-        String value = get(key);
-        try {
-            return (value != null) ? Double.parseDouble(value) : defaultValue;
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
+        return getOrDefault(key, Double::parseDouble, defaultValue);
     }
 
     public void putDouble(String key, double d) {
@@ -219,12 +216,7 @@ public class UserPreset implements Preset {
     }
 
     public Color getColor(String key, Color defaultValue) {
-        String color = get(key);
-        try {
-            return (color != null) ? Colors.fromHtmlHexRgba(color) : defaultValue;
-        } catch (IllegalArgumentException e) {
-            return defaultValue;
-        }
+        return getOrDefault(key, Colors::fromHtmlHexRgba, defaultValue);
     }
 
     public void putColor(String key, Color c) {
@@ -240,19 +232,16 @@ public class UserPreset implements Preset {
 
     public <T extends Enum<T>> T getEnum(String key, String legacyKey, Class<T> clazz) {
         String storedValue = get(key, legacyKey);
-
-        T[] enumConstants = clazz.getEnumConstants();
-
         if (storedValue != null) {
-            for (T constant : enumConstants) {
-                if (constant.name().equals(storedValue)) {
-                    return constant;
-                }
+            try {
+                return Enum.valueOf(clazz, storedValue);
+            } catch (IllegalArgumentException e) {
+                // fall back to default
             }
         }
 
         // default to the first enum constant if no match is found
-        return enumConstants[0];
+        return clazz.getEnumConstants()[0];
     }
 
     //  uses a simple key=value format instead of
@@ -260,10 +249,7 @@ public class UserPreset implements Preset {
     private void loadFromFile() throws IOException {
         assert !contentLoaded;
 
-        try (InputStream input = new FileInputStream(file);
-             Reader reader = new InputStreamReader(input, StandardCharsets.UTF_8);
-             BufferedReader br = new BufferedReader(reader)) {
-
+        try (BufferedReader br = Files.newBufferedReader(file.toPath())) {
             loadFromReader(br);
         }
 
@@ -299,8 +285,8 @@ public class UserPreset implements Preset {
         assert contentLoaded;
 
         File presetFile = getSaveFile(true);
-        try (PrintWriter writer = new PrintWriter(presetFile, StandardCharsets.UTF_8)) {
-            writeTo(writer);
+        try {
+            Files.writeString(presetFile.toPath(), writeToString(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -309,18 +295,11 @@ public class UserPreset implements Preset {
         Messages.showStatusMessage("Preset saved to <b>" + presetFile.getAbsolutePath() + "</b>");
     }
 
-    private void writeTo(PrintWriter writer) {
-        for (Map.Entry<String, String> entry : content.entrySet()) {
-            writer.println(entry.getKey() + "=" + entry.getValue());
-        }
-    }
-
     public String writeToString() {
-        StringWriter writer = new StringWriter();
-        PrintWriter printWriter = new PrintWriter(writer);
-        writeTo(printWriter);
-        printWriter.flush();
-        return writer.toString();
+        var sb = new StringBuilder();
+        content.forEach((k, v) ->
+            sb.append(k).append('=').append(v).append(System.lineSeparator()));
+        return sb.toString();
     }
 
     @Override
@@ -342,12 +321,14 @@ public class UserPreset implements Preset {
      * ending in ".txt". The presets' contents are not loaded into memory.
      */
     public static List<UserPreset> detectPresetNames(String presetDirName) {
+        Objects.requireNonNull(presetDirName);
+
         File presetsDir = getSaveDir(presetDirName);
         if (!presetsDir.exists()) {
             return List.of();
         }
 
-        String[] fileNames = presetsDir.list((dir, name) -> name.endsWith(".txt"));
+        String[] fileNames = presetsDir.list((_, name) -> name.endsWith(".txt"));
         if (fileNames == null || fileNames.length == 0) {
             return List.of();
         }
@@ -364,15 +345,21 @@ public class UserPreset implements Preset {
     }
 
     private File getSaveFile(boolean createDirs) {
+        assert directoryName != null;
+
         File dir = getSaveDir(directoryName);
-        if (createDirs && !dir.exists()) {
-            dir.mkdirs();
+        if (createDirs) {
+            try {
+                Files.createDirectories(dir.toPath());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
         }
         return new File(dir, name + ".txt");
     }
 
     private static File getSaveDir(String presetDirName) {
-        return new File(PRESETS_DIR + File.separator + presetDirName);
+        return new File(PRESETS_DIR, presetDirName);
     }
 
     @Override

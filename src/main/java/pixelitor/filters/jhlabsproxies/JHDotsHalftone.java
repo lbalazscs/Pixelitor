@@ -22,6 +22,7 @@ import com.jhlabs.image.ImageMath;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Graphics2D;
@@ -45,7 +46,7 @@ public class JHDotsHalftone extends ParametrizedFilter {
 
     public static final String NAME = "Dots Halftone";
 
-    public enum DotShape {
+    public enum DotShape implements EnumChoice {
         CIRCLE("Circle", Math::hypot),
         SQUARE("Square", (dx, dy) -> Math.max(Math.abs(dx), Math.abs(dy))),
         DIAMOND("Diamond", (dx, dy) -> Math.abs(dx) + Math.abs(dy)),

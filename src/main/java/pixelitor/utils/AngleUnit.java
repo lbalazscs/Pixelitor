@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -81,7 +81,7 @@ public enum AngleUnit {
 
         @Override
         public double toIntuitiveRadians(double angle) {
-            return Math.toRadians(Geometry.atan2ToIntuitive(angle));
+            return Geometry.atan2ToIntuitive(Math.toRadians(angle));
         }
 
         @Override
@@ -91,12 +91,7 @@ public enum AngleUnit {
 
         @Override
         public double toIntuitiveDegrees(double angle) {
-            if (angle <= 0) {
-                angle = -angle;
-            } else {
-                angle = 360 - angle;
-            }
-            return angle;
+            return angle <= 0 ? -angle : 360 - angle;
         }
     },
     /**
@@ -119,11 +114,7 @@ public enum AngleUnit {
 
         @Override
         public double toDegrees(double angle) {
-            if (angle > 180) {
-                return 360 - angle;
-            } else {
-                return -angle;
-            }
+            return angle > 180 ? 360 - angle : -angle;
         }
 
         @Override

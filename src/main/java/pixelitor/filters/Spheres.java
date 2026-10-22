@@ -21,6 +21,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.gui.GUIText;
 import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.utils.CustomShapes;
+import pixelitor.utils.EnumChoice;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -41,7 +42,7 @@ public class Spheres extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = -2472078121608102477L;
 
-    enum Layout {
+    enum Layout implements EnumChoice {
         PATTERN("Pattern"), RANDOM("Random");
 
         private final String displayName;
@@ -100,7 +101,7 @@ public class Spheres extends ParametrizedFilter {
             lightElevation
         );
 
-        maxRadius.ensureHigherValueThan(minRadius);
+        maxRadius.ensureNotLowerThan(minRadius);
     }
 
     @Override

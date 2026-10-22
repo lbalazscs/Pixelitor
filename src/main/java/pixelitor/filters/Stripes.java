@@ -24,6 +24,7 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.util.ShapeWithColor;
 import pixelitor.io.FileIO;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.Geometry;
 import pixelitor.utils.ImageUtils;
 
@@ -55,7 +56,7 @@ public class Stripes extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    enum Type {
+    enum Type implements EnumChoice {
         STRAIGHT("Straight") {
             @Override
             public double calcPeriod(int thickness, int gap, double wavelength, double amplitude) {

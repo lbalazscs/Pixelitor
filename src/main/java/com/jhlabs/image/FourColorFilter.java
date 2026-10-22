@@ -18,6 +18,7 @@ package com.jhlabs.image;
 
 import net.jafama.FastMath;
 import pixelitor.colors.ColorSpaces;
+import pixelitor.utils.EnumChoice;
 
 import java.util.Arrays;
 
@@ -32,7 +33,7 @@ import java.util.Arrays;
 public abstract class FourColorFilter extends PointFilter {
     private static final double EPSILON = 1.0e-6;
 
-    public enum InterpolationType {
+    public enum InterpolationType implements EnumChoice {
         LINEAR("Linear") {
             @Override
             public float calcInterpolatedWeight(float ratio) {
@@ -72,7 +73,7 @@ public abstract class FourColorFilter extends PointFilter {
         }
     }
 
-    public enum ColorSpaceType {
+    public enum ColorSpaceType implements EnumChoice {
         OKLAB("Oklab") {
             @Override
             public int toSrgb(int a, float c1, float c2, float c3) {

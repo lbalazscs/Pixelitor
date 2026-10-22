@@ -36,7 +36,7 @@ public class BoxFitting extends GMICFilter {
     private final BooleanParam transparency = new BooleanParam("Transparency");
 
     public BoxFitting() {
-        maxSize.ensureHigherValueThan(minSize);
+        maxSize.ensureNotLowerThan(minSize);
 
         initParams(minSize, maxSize,
             density, minSpacing,

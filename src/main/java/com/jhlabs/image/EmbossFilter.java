@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
+import pixelitor.utils.EnumChoice;
+
 import java.util.Objects;
 
 /**
@@ -29,7 +31,7 @@ public class EmbossFilter extends WholeImageFilter {
      * all modes; the modes differ only in the white Blinn-Phong highlight that is
      * added on top of it. Each mode carries its own highlight parameters.
      */
-    public enum LightingMode {
+    public enum LightingMode implements EnumChoice {
         /**
          * Diffuse shading only, without any specular highlight.
          */

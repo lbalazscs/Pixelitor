@@ -69,7 +69,7 @@ public class AngleParamGUI extends JPanel implements ParamGUI {
         var retVal = new SliderSpinner(sliderModel, NONE, true);
         setupSliderTicks(retVal, angleParam.getMaxAngleInDegrees());
 
-        angleParam.addChangeListener(_ ->
+        angleParam.addUIChangeListener(() ->
             angleParamChanged(angleParam, angleSelector, sliderModel));
         return retVal;
     }

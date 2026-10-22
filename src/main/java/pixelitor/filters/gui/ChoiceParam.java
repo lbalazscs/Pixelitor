@@ -17,6 +17,8 @@
 
 package pixelitor.filters.gui;
 
+import pixelitor.AppMode;
+import pixelitor.utils.Choice;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
@@ -26,13 +28,14 @@ import javax.swing.event.ListDataListener;
 import java.io.Serial;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
 /**
  * Base class for filter parameters that have a JComboBox in their GUI.
  */
-public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel<E> {
+public class ChoiceParam<E extends Choice> extends AbstractFilterParam implements ComboBoxModel<E> {
     protected List<E> choices;
     protected E defaultValue;
     protected E selectedValue;
@@ -53,6 +56,8 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     public ChoiceParam(String name, List<E> choices, E defaultValue,
                        RandomizeMode randomizeMode) {
         super(name, randomizeMode);
+
+        assert idsAreUnique(choices);
         this.choices = choices;
         this.defaultValue = defaultValue;
         this.selectedValue = defaultValue;
@@ -60,10 +65,7 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
 
     @Override
     public JComponent createGUI() {
-        var gui = new ChoiceParamGUI<>(this, sideButtonModel);
-        paramGUI = gui;
-        syncWithGui();
-        return gui;
+        return installGUI(new ChoiceParamGUI<>(this, sideButtonModel));
     }
 
     @Override
@@ -78,11 +80,8 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
 
     @Override
     protected void doRandomize() {
-        setSelectedValue(Rnd.chooseFrom(choices), false);
-    }
-
-    private void setSelectedValue(E newChoice, boolean trigger) {
-        setSelectedItem(newChoice, trigger);
+        E newChoice = Rnd.chooseFrom(choices);
+        setSelectedItem(newChoice, false);
     }
 
     @Override
@@ -102,15 +101,15 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
         selectedValue = item;
         fireContentsChanged(this, -1, -1);
 
-        if (trigger && adjustmentListener != null) {
-            adjustmentListener.paramAdjusted();
+        if (trigger) {
+            triggerFilter();
         }
     }
 
     public void setChoices(List<E> newChoices, boolean keepSelection) {
-        if (newChoices == null || newChoices.isEmpty()) {
-            throw new IllegalArgumentException();
-        }
+        assert newChoices != null && !newChoices.isEmpty();
+        assert idsAreUnique(newChoices);
+
         E oldSelection = selectedValue;
         this.choices = List.copyOf(newChoices);
 
@@ -120,11 +119,12 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
             selectedValue = choices.getFirst();
         }
 
-        fireContentsChanged(this, 0, getSize() - 1);
-
-        if (adjustmentListener != null) {
-            adjustmentListener.paramAdjusted();
+        if (!choices.contains(defaultValue)) {
+            defaultValue = choices.getFirst();
         }
+
+        fireContentsChanged(this, 0, getSize() - 1);
+        triggerFilter();
     }
 
     @Override
@@ -200,14 +200,29 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
 
     @Override
     public void loadStateFrom(String savedValue) {
-        int numEntries = getSize();
-        for (int i = 0; i < numEntries; i++) {
-            E item = getElementAt(i);
-            if (item.toString().equals(savedValue)) {
-                setSelectedItem(item, false);
-                break;
+        E match = find(savedValue, Choice::presetId);
+        if (match == null) {
+            // presets saved before presetIds existed contain display names
+            match = find(savedValue, Object::toString);
+        }
+        if (match != null) {
+            setSelectedItem(match, false);
+        } else if (AppMode.isDevelopment()) {
+            System.err.println(getName() + ": unknown preset value '" + savedValue + "'");
+        }
+    }
+
+    private E find(String saved, Function<E, String> keyFn) {
+        for (E item : choices) {
+            if (keyFn.apply(item).equals(saved)) {
+                return item;
             }
         }
+        return null;
+    }
+
+    private static boolean idsAreUnique(List<? extends Choice> choices) {
+        return choices.stream().map(Choice::presetId).distinct().count() == choices.size();
     }
 
     /**
@@ -227,20 +242,15 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     }
 
     private void setupDependentSetting(FilterSetting other, Predicate<E> condition, boolean enable) {
-        other.setEnabled(!enable);
-        addSelectionListener(() -> {
-            if (condition.test(getSelected())) {
-                other.setEnabled(enable);
-            } else {
-                other.setEnabled(!enable);
-            }
-        });
+        Runnable update = () -> other.setEnabled(condition.test(getSelected()) == enable);
+        update.run();
+        addSelectionListener(update);
     }
 
     /**
      * Sets up the automatic limiting of a {@link RangeParam} to a maximum value that depends on the selected item.
      */
-    public void limitOtherMaxWhen(RangeParam other, ToIntFunction<E> mapper) {
+    public void capOtherValueWhen(RangeParam other, ToIntFunction<E> mapper) {
         addSelectionListener(() -> {
             int maxValue = mapper.applyAsInt(getSelected());
             if (other.getValue() > maxValue) {
@@ -280,7 +290,7 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
     /**
      * Encapsulates the state of a {@link ChoiceParam} as a memento object.
      */
-    public record ChoiceParamState<E>(E value) implements ParamState<ChoiceParamState<E>> {
+    public record ChoiceParamState<E extends Choice>(E value) implements ParamState<ChoiceParamState<E>> {
         @Serial
         private static final long serialVersionUID = 1L;
 
@@ -291,7 +301,7 @@ public class ChoiceParam<E> extends AbstractFilterParam implements ComboBoxModel
 
         @Override
         public String toPresetString() {
-            return value.toString();
+            return value.presetId();
         }
     }
 }

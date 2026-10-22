@@ -20,10 +20,9 @@ package pixelitor.gui.utils;
 import com.bric.util.JVM;
 import pixelitor.AppMode;
 import pixelitor.Composition;
-import pixelitor.filters.gui.FilterSetting;
+import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.Linkable;
 import pixelitor.filters.gui.ParamSet;
-import pixelitor.filters.gui.Resettable;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
 import pixelitor.gui.PixelitorWindow;
@@ -104,25 +103,25 @@ public final class GUIUtils {
         return createVerticalPanel(paramSet.getParams());
     }
 
-    public static JPanel createVerticalPanel(Iterable<? extends FilterSetting> settings) {
+    public static JPanel createVerticalPanel(Iterable<? extends FilterParam> params) {
         JPanel panel = new JPanel();
-        arrangeVertically(panel, settings);
+        arrangeVertically(panel, params);
         return panel;
     }
 
-    public static JPanel createHorizontalPanel(Iterable<? extends FilterSetting> settings) {
+    public static JPanel createHorizontalPanel(Iterable<? extends FilterParam> params) {
         JPanel panel = new JPanel(new FlowLayout(CENTER));
-        for (FilterSetting setting : settings) {
-            panel.add(new JLabel(setting.getName() + ":"));
-            panel.add(setting.createGUI());
+        for (FilterParam param : params) {
+            panel.add(new JLabel(param.getName() + ":"));
+            panel.add(param.createGUI());
         }
         return panel;
     }
 
     public static void arrangeVertically(JPanel panel,
-                                         Iterable<? extends FilterSetting> settings) {
+                                         Iterable<? extends FilterParam> params) {
         panel.setLayout(new GridBagLayout());
-        new GridBagHelper(panel).arrangeVertically(settings);
+        new GridBagHelper(panel).arrangeVertically(params);
     }
 
     public static void showDialog(JDialog dialog, JComponent parent) {
@@ -383,7 +382,7 @@ public final class GUIUtils {
 
     public static JButton createRandomizeSettingsButton(ActionListener action) {
         JButton button = new JButton("Randomize", Icons.getRandomizeIcon());
-        button.setToolTipText(ParamSet.RANDOMIZE_BUTTON_TOOLTIP);
+        button.setToolTipText(GUIText.RANDOMIZE_BUTTON_TOOLTIP);
         button.addActionListener(action);
         button.setName("randomize");
         return button;
@@ -391,7 +390,7 @@ public final class GUIUtils {
 
     public static JButton createResetAllButton(ActionListener action) {
         JButton button = new JButton("Reset All", Icons.getResetIcon());
-        button.setToolTipText(Resettable.RESET_ALL_TOOLTIP);
+        button.setToolTipText(GUIText.RESET_ALL_TOOLTIP);
         button.addActionListener(action);
         button.setName("resetAll");
         return button;
@@ -440,7 +439,7 @@ public final class GUIUtils {
     public static JCheckBox createLinkCheckBox(Linkable linkable) {
         JCheckBox linkedCB = new JCheckBox();
         linkedCB.setModel(linkable.getLinkedModel());
-        linkedCB.setToolTipText(linkable.createLinkedToolTip());
+        linkedCB.setToolTipText(linkable.getLinkedToolTip());
         linkedCB.addActionListener(_ -> linkable.setLinked(linkedCB.isSelected()));
         return linkedCB;
     }

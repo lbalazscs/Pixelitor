@@ -21,6 +21,7 @@ import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.WholeImageFilter;
 import org.jdesktop.swingx.graphics.ColorUtilities;
 import pixelitor.colors.ColorSpaces;
+import pixelitor.utils.EnumChoice;
 
 import java.awt.Color;
 
@@ -34,7 +35,7 @@ public class EqualizeFilter extends WholeImageFilter {
     /**
      * Defines the color space/channel combination used for equalization.
      */
-    public enum Equalizer {
+    public enum Equalizer implements EnumChoice {
         /**
          * Equalizes the Y (luma) channel of YCbCr.
          */

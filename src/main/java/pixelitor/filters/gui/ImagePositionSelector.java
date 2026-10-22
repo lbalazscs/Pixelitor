@@ -39,7 +39,7 @@ public class ImagePositionSelector extends JComponent {
     public static final int THUMBNAIL_SIZE = 100;
 
     private final ImagePositionParam model;
-    private BufferedImage thumb; // a thumbnail image for the background
+    private final BufferedImage thumb; // a thumbnail image for the background
 
     public ImagePositionSelector(ImagePositionParam model) {
         this.model = model;
@@ -59,20 +59,20 @@ public class ImagePositionSelector extends JComponent {
         addMouseListener(mouseAdapter);
         addMouseMotionListener(mouseAdapter);
 
-        createThumbnail();
+        thumb = createThumbnail();
 
         setPreferredSize(new Dimension(thumb.getWidth(), thumb.getHeight()));
         setCursor(Cursors.CROSSHAIR);
     }
 
-    private void createThumbnail() {
+    private BufferedImage createThumbnail() {
         Drawable dr = Views.getActiveDrawable();
         if (dr == null) {
             // no active drawable, e.g. when editing an adjustment layer
-            thumb = ImageUtils.createSysCompatibleImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+            return ImageUtils.createSysCompatibleImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
         } else {
             BufferedImage sourceImage = dr.getImageForFilterDialogs();
-            thumb = Thumbnails.createThumbnail(sourceImage, THUMBNAIL_SIZE, null);
+            return Thumbnails.createThumbnail(sourceImage, THUMBNAIL_SIZE, null);
         }
     }
 
@@ -116,7 +116,7 @@ public class ImagePositionSelector extends JComponent {
         double relX = (e.getX() - xOffset) / (double) thumb.getWidth();
         double relY = (e.getY() - yOffset) / (double) thumb.getHeight();
 
-        model.setRelativePosition(relX, relY, true, isAdjusting, true);
+        model.setRelativePosition(relX, relY, true, !isAdjusting);
     }
 
     private int getXOffset() {

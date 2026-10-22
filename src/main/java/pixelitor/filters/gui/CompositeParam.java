@@ -70,7 +70,7 @@ public class CompositeParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        paramGUI = switch (layout) {
+        var gui = switch (layout) {
             case DIALOG -> {
                 resetButton = new ResetButton(this);
                 yield new DialogLauncherGUI(this::configureDialog, resetButton);
@@ -78,8 +78,7 @@ public class CompositeParam extends AbstractFilterParam {
             case VERTICAL -> new VerGroupedParamGUI(this);
             case HORIZONTAL -> new HorGroupedParamGUI(this);
         };
-        syncWithGui();
-        return (JComponent) paramGUI;
+        return installGUI(gui);
     }
 
     private void configureDialog(DialogBuilder builder) {
@@ -183,7 +182,7 @@ public class CompositeParam extends AbstractFilterParam {
             param.reset(false);
         }
         if (trigger) {
-            adjustmentListener.paramAdjusted();
+            triggerFilter();
         } else {
             // this class updates the reset button state
             // by putting a decorator on the adjustment
@@ -213,6 +212,14 @@ public class CompositeParam extends AbstractFilterParam {
 
         for (FilterParam child : children) {
             child.setAdjustmentListener(decoratedListener);
+        }
+    }
+
+    @Override
+    public void guiDisposed() {
+        super.guiDisposed();
+        for (FilterParam child : children) {
+            child.guiDisposed();
         }
     }
 

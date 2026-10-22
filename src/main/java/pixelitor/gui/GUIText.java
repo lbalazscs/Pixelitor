@@ -70,6 +70,9 @@ public class GUIText {
     public static final String BACK = "Back";
     public static final String NEXT = "Next";
 
+    public static final String RANDOMIZE_BUTTON_TOOLTIP = "Randomize the settings for this filter.";
+    public static final String RESET_ALL_TOOLTIP = "Reset all settings to their default values.";
+
     private GUIText() {
     }
 }

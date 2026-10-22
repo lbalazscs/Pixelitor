@@ -68,9 +68,8 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         resetButton = new ResetButton(this);
-        paramGUI = new DialogLauncherGUI(this::configureSettingsDialog, resetButton);
-        syncWithGui();
-        return (JComponent) paramGUI;
+        return installGUI(new DialogLauncherGUI(
+            this::configureSettingsDialog, resetButton));
     }
 
     @Override
@@ -89,6 +88,14 @@ public class StrokeParam extends AbstractFilterParam {
 
         for (FilterParam param : childParams) {
             param.setAdjustmentListener(decoratedListener);
+        }
+    }
+
+    @Override
+    public void guiDisposed() {
+        super.guiDisposed();
+        for (FilterParam param : childParams) {
+            param.guiDisposed();
         }
     }
 
@@ -214,7 +221,7 @@ public class StrokeParam extends AbstractFilterParam {
         }
 
         if (trigger) {
-            adjustmentListener.paramAdjusted();
+            triggerFilter();
             // the reset button state is updated in the decorated adjustment listener
         } else {
             // if not triggered, the reset button state must be updated manually

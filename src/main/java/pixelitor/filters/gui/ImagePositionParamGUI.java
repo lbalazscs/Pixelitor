@@ -93,7 +93,8 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
 
     private void sliderChanged(RangeParam sliderModel, BiConsumer<Double, Boolean> modelUpdater) {
         if (updateModelFromSliders) {
-            modelUpdater.accept(sliderModel.getPercentage(), sliderModel.getValueIsAdjusting());
+            boolean trigger = !sliderModel.getValueIsAdjusting();
+            modelUpdater.accept(sliderModel.getPercentage(), trigger);
             positionSelector.repaint();
         }
     }
@@ -101,19 +102,13 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     /**
      * Updates the sliders based on model changes without triggering filter execution.
      */
-    public void updateSlidersFromModel() {
+    private void updateSlidersFromModel() {
         updateModelFromSliders = false;
         try {
-            updateSlider(xSliderModel, model.getRelativeX() * 100);
-            updateSlider(ySliderModel, model.getRelativeY() * 100);
+            xSliderModel.setValueNoTrigger(model.getRelativeX() * 100);
+            ySliderModel.setValueNoTrigger(model.getRelativeY() * 100);
         } finally {
             updateModelFromSliders = true;
-        }
-    }
-
-    private static void updateSlider(RangeParam sliderModel, double newValue) {
-        if (newValue != sliderModel.getValue()) {
-            sliderModel.setValue(newValue, true);
         }
     }
 

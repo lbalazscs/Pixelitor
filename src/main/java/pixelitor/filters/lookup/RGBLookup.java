@@ -26,9 +26,9 @@ import java.util.Arrays;
 public class RGBLookup {
     private static final int LUT_SIZE = 256;
 
-    private short[] redLut;
-    private short[] greenLut;
-    private short[] blueLut;
+    private final short[] redLut;
+    private final short[] greenLut;
+    private final short[] blueLut;
 
     /**
      * Creates a new {@link RGBLookup} from existing lookup tables.
@@ -46,7 +46,7 @@ public class RGBLookup {
                      ChannelLookup r,
                      ChannelLookup g,
                      ChannelLookup b) {
-        allocateArrays();
+        this(new short[LUT_SIZE], new short[LUT_SIZE], new short[LUT_SIZE]);
 
         for (short i = 0; i < LUT_SIZE; i++) {
             // apply the base lookup first, then the channel-specific one
@@ -55,12 +55,6 @@ public class RGBLookup {
             greenLut[i] = g.map(baseValue);
             blueLut[i] = b.map(baseValue);
         }
-    }
-
-    private void allocateArrays() {
-        redLut = new short[LUT_SIZE];
-        greenLut = new short[LUT_SIZE];
-        blueLut = new short[LUT_SIZE];
     }
 
     /**

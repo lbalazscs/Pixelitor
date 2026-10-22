@@ -28,6 +28,8 @@ import java.io.Serializable;
  * interpolating between states: a parameter state can only be
  * interpolated with another state of the same concrete type.
  */
+// TODO it's currently serializable so that StyledShape
+//   can be serialized inside shape layers
 public interface ParamState<S extends ParamState<S>> extends Serializable {
     /**
      * Calculates a new interpolated state between this state and the

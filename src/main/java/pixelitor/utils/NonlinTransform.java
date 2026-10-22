@@ -33,7 +33,7 @@ import static net.jafama.FastMath.*;
 /**
  * Nonlinear transformations that can be applied to points.
  */
-public enum NonlinTransform {
+public enum NonlinTransform implements EnumChoice {
     NONE("None", false) {
         @Override
         public PointMapper createMapper(Point2D center, double amount, int width, int height) {

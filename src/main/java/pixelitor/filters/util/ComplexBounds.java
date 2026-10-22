@@ -17,6 +17,8 @@
 
 package pixelitor.filters.util;
 
+import pixelitor.utils.Rnd;
+
 /**
  * Rectangular bounds in the complex plane.
  */
@@ -71,7 +73,7 @@ public record ComplexBounds(double minRe, double maxRe, double minIm, double max
      */
     public Complex random() {
         return new Complex(
-            minRe + Math.random() * width(),
-            minIm + Math.random() * height());
+            minRe + Rnd.nextDouble() * width(),
+            minIm + Rnd.nextDouble() * height());
     }
 }

@@ -140,9 +140,7 @@ public class GradientParam extends AbstractFilterParam {
     public void selectPreset(String name) {
         Objects.requireNonNull(name, "name");
         if (CUSTOM_PRESET_NAME.equals(name)) {
-            if (paramGUI != null) {
-                paramGUI.updateGUI();
-            }
+            updateGUI();
             return;
         }
 
@@ -151,9 +149,7 @@ public class GradientParam extends AbstractFilterParam {
                 if (Arrays.equals(this.thumbPositions, preset.thumbPositions())
                     && Arrays.equals(this.colors, preset.colors())) {
                     this.selectedPresetName = preset.name();
-                    if (paramGUI != null) {
-                        paramGUI.updateGUI();
-                    }
+                    updateGUI();
                     return;
                 }
                 setValues(preset.thumbPositions(), preset.colors(), true);
@@ -176,10 +172,7 @@ public class GradientParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        GradientParamGUI gui = new GradientParamGUI(this);
-        paramGUI = gui;
-        syncWithGui();
-        return gui;
+        return installGUI(new GradientParamGUI(this));
     }
 
     public void setValues(float[] thumbPositions, Color[] colors, boolean trigger) {
@@ -192,11 +185,9 @@ public class GradientParam extends AbstractFilterParam {
         this.colors = colors.clone();
         updateSelectedPresetName();
 
-        if (paramGUI != null) {
-            paramGUI.updateGUI();
-        }
-        if (trigger && adjustmentListener != null) {
-            adjustmentListener.paramAdjusted();
+        updateGUI();
+        if (trigger) {
+            triggerFilter();
         }
     }
 
@@ -253,7 +244,7 @@ public class GradientParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isComplex() {
+    public boolean requiresPresetSupport() {
         return true;
     }
 
@@ -317,9 +308,7 @@ public class GradientParam extends AbstractFilterParam {
         }
 
         setValues(newThumbPositions, newColors, false);
-        if (paramGUI != null) {
-            paramGUI.updateGUI();
-        }
+        updateGUI();
     }
 
     @Override

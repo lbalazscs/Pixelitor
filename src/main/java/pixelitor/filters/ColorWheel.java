@@ -27,6 +27,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.GUIText;
 import pixelitor.progress.StatusBarProgressTracker;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
@@ -47,7 +48,7 @@ public class ColorWheel extends ParametrizedFilter {
 
     private static final double SPIRAL_EFFECT_SCALE = 0.0005;
 
-    public enum ColorSpaceType {
+    public enum ColorSpaceType implements EnumChoice {
         Oklch {
             @Override
             int toSrgb(double angle, double sat, double bri) {

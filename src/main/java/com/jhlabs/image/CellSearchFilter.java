@@ -19,6 +19,7 @@ package com.jhlabs.image;
 import com.jhlabs.math.Noise;
 import pixelitor.ThreadPool;
 import pixelitor.utils.CachedFloatRandom;
+import pixelitor.utils.EnumChoice;
 
 import java.util.concurrent.Future;
 
@@ -143,7 +144,7 @@ public abstract class CellSearchFilter extends WholeImageFilter {
      * Within each cell, one or more feature points are generated.
      * The different grid types define how these points are placed.
      */
-    public enum GridType {
+    public enum GridType implements EnumChoice {
         // this one ignores the randomness setting
         RANDOM("Fully Random") {
             @Override

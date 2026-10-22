@@ -22,6 +22,7 @@ import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.impl.ComplexPlaneFilter;
 import pixelitor.filters.util.ComplexBounds;
 import pixelitor.gui.GUIText;
+import pixelitor.utils.EnumChoice;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -54,7 +55,7 @@ public abstract class EscapeTimeFractal extends ParametrizedFilter {
     /**
      * The available iteration algorithms.
      */
-    protected enum IterationType {
+    protected enum IterationType implements EnumChoice {
         // plain powers: z^d + c
         MANDELBROT("Mandelbrot", new MandelbrotStrategy()),
         MULTIBROT_3("Multibrot d=3", new MultibrotStrategy3()),

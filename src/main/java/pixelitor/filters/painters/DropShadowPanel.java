@@ -59,8 +59,8 @@ public class DropShadowPanel extends EffectPanel {
 
         ChangeListener changeListener = _ -> updateResetButtonIcon();
         distanceParam.addChangeListener(changeListener);
-        angleParam.addChangeListener(changeListener);
         spreadParam.addChangeListener(changeListener);
+        angleParam.addUIChangeListener(this::updateResetButtonIcon);
     }
 
     @Override

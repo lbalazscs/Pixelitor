@@ -19,22 +19,23 @@ package pixelitor.filters.levels;
 
 import org.junit.jupiter.api.*;
 import pixelitor.TestHelper;
-import pixelitor.filters.lookup.FastLookupOp;
-import pixelitor.filters.lookup.RGBLookup;
+import pixelitor.filters.curves.ToneCurve;
+import pixelitor.filters.gui.UserPreset;
+import pixelitor.filters.lookup.*;
 import pixelitor.filters.util.Channel;
 import pixelitor.filters.util.ColorSpace;
 
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ShortLookupTable;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 @DisplayName("Levels tests")
 @TestMethodOrder(MethodOrderer.Random.class)
 class LevelsTest {
     private LevelsModel model;
-    private LevelsGUI filterGUI;
+    private final AtomicInteger previewCount = new AtomicInteger();
     private ChannelLevelsModel rgbPage;
     private ChannelLevelsModel rPage;
 
@@ -46,33 +47,41 @@ class LevelsTest {
     @BeforeEach
     void beforeEachTest() {
         model = new LevelsModel();
-        filterGUI = mock(LevelsGUI.class);
-        model.setLevelsGUI(filterGUI);
+        previewCount.set(0);
+        model.setAdjustmentListener(previewCount::incrementAndGet);
 
-        rgbPage = model.getModelForChannel(Channel.RGB);
-        rPage = model.getModelForChannel(Channel.RED);
+        rgbPage = model.getAdjustment(Channel.RGB);
+        rPage = model.getAdjustment(Channel.RED);
     }
 
     @Test
     void filterOpIsInitializedImmediately() {
         var newModel = new LevelsModel();
-        assertThat(newModel.createFilterOp())
-            .isNotNull()
-            .isInstanceOf(FastLookupOp.class);
+        BufferedImageOp op = newModel.createOp();
+        assertThat(op).isNotNull();
+        if (LookupOps.isSrgbFastLookup()) {
+            assertThat(op).isInstanceOf(FastLookupOp.class);
+        } else {
+            assertThat(op).isInstanceOf(RgbTransferFilter.class);
+        }
     }
 
     @Test
     void resetAllLeavesFilterOpValid() {
-        model.setColorSpace(ColorSpace.OKLAB, false);
+        model.setColorSpace(ColorSpace.OKLAB);
         model.resetAll();
-        assertThat(model.createFilterOp())
-            .isNotNull()
-            .isInstanceOf(FastLookupOp.class);
+        BufferedImageOp op = model.createOp();
+        assertThat(op).isNotNull();
+        if (LookupOps.isSrgbFastLookup()) {
+            assertThat(op).isInstanceOf(FastLookupOp.class);
+        } else {
+            assertThat(op).isInstanceOf(RgbTransferFilter.class);
+        }
     }
 
     @Test
     void defaultSettingsProduceIdentity() {
-        model.resetAllAndRun();
+        model.resetAll();
 
         var lookup = getCalculatedSrgbLookup();
 
@@ -168,22 +177,22 @@ class LevelsTest {
 
         checkRGBMapping(lookup, 0, 0, 0, 0); // black remains black
         checkRGBMapping(lookup, 255, 150, 255, 255); // only the red channel is affected
-        checkRGBMapping(lookup, 128, 75, 128, 128); // // only the red channel is affected
+        checkRGBMapping(lookup, 128, 75, 128, 128); // only the red channel is affected
     }
 
     @Test
     @DisplayName("Oklab, page L, input dark = 100")
     void pageOklabL_inputDark100() {
-        model.setColorSpace(ColorSpace.OKLAB, true);
-        // the Oklab L model is the 5th one (index 4)
-        ChannelLevelsModel okLPage = model.getModelForChannel(Channel.OK_L);
+        model.setColorSpace(ColorSpace.OKLAB);
+        model.fireAdjustmentChanged();
+        ChannelLevelsModel okLPage = model.getAdjustment(Channel.OK_L);
         okLPage.getInputDark().setValue(100);
 
-        BufferedImageOp op = model.createFilterOp();
+        BufferedImageOp op = model.createOp();
         assertThat(op)
             .isNotNull()
-            .isInstanceOf(OklabLevelsFilter.class);
-        OklabLevelsFilter oklabFilter = (OklabLevelsFilter) op;
+            .isInstanceOf(OklabLookupFilter.class);
+        OklabLookupFilter oklabFilter = (OklabLookupFilter) op;
 
         // black (L=0) should be unaffected by an input range adjustment that starts at 100
         int black = 0xFF_00_00_00;
@@ -208,25 +217,262 @@ class LevelsTest {
         assertThat(resultRed)
             .as("Gray should become darker")
             .isLessThan(128);
+
+        assertThat(previewCount.get()).isPositive();
+    }
+
+    @Test
+    @DisplayName("resetAll selects sRGB and its primary channel and resets all adjustments")
+    void resetAll_selectsSrgbAndResetsAll() {
+        model.setColorSpace(ColorSpace.OKLAB);
+        model.setActiveChannel(Channel.OK_A);
+        model.getAdjustment(Channel.RGB).getInputDark().setValue(50);
+        model.getAdjustment(Channel.OK_A).getInputLight().setValue(200);
+
+        previewCount.set(0);
+        model.resetAll();
+
+        assertThat(model.getColorSpace()).isEqualTo(ColorSpace.SRGB);
+        assertThat(model.getActiveChannel()).isEqualTo(Channel.RGB);
+        assertThat(previewCount.get()).isEqualTo(1);
+
+        for (ChannelLevelsModel adj : model.getAllAdjustments()) {
+            assertThat(adj.getInputDark().getValue()).isEqualTo(0);
+            assertThat(adj.getInputLight().getValue()).isEqualTo(255);
+            assertThat(adj.getOutputDark().getValue()).isEqualTo(0);
+            assertThat(adj.getOutputLight().getValue()).isEqualTo(255);
+        }
+    }
+
+    @Test
+    @DisplayName("randomize preserves color space and active channel, randomizing only the active channel")
+    void randomize_preservesColorSpaceAndRandomizesOnlyActiveChannel() {
+        model.setColorSpace(ColorSpace.OKLAB);
+        model.setActiveChannel(Channel.OK_A);
+        model.getAdjustment(Channel.OK_B).getInputDark().setValue(50);
+
+        previewCount.set(0);
+        model.randomize();
+
+        assertThat(model.getColorSpace()).isEqualTo(ColorSpace.OKLAB);
+        assertThat(model.getActiveChannel()).isEqualTo(Channel.OK_A);
+        assertThat(previewCount.get()).isEqualTo(1);
+
+        ChannelLevelsModel active = model.getActiveAdjustment();
+        assertThat(active.getInputDark().getValue()).isBetween(0, 127);
+        assertThat(active.getInputLight().getValue()).isBetween(128, 255);
+        assertThat(active.getOutputDark().getValue()).isEqualTo(0);
+        assertThat(active.getOutputLight().getValue()).isEqualTo(255);
+
+        for (ChannelLevelsModel adj : model.getAllAdjustments()) {
+            if (adj != active) {
+                assertThat(adj.getInputDark().getValue()).isEqualTo(0);
+                assertThat(adj.getInputLight().getValue()).isEqualTo(255);
+                assertThat(adj.getOutputDark().getValue()).isEqualTo(0);
+                assertThat(adj.getOutputLight().getValue()).isEqualTo(255);
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("loadStateFrom with missing keys uses defaults and does not throw")
+    void loadStateFrom_missingKeysUsesDefaults() {
+        model.setColorSpace(ColorSpace.OKLAB);
+        model.getAdjustment(Channel.OK_L).getInputDark().setValue(60);
+        model.getAdjustment(Channel.RGB).getInputDark().setValue(70);
+
+        UserPreset partialPreset = new UserPreset("partial");
+        partialPreset.put(ColorSpace.PRESET_KEY, ColorSpace.OKLAB.name());
+        partialPreset.put("L Input Dark", "35");
+
+        model.loadStateFrom(partialPreset);
+
+        assertThat(model.getColorSpace()).isEqualTo(ColorSpace.OKLAB);
+        assertThat(model.getActiveChannel()).isEqualTo(Channel.OK_L);
+        assertThat(model.getAdjustment(Channel.OK_L).getInputDark().getValue()).isEqualTo(35);
+        assertThat(model.getAdjustment(Channel.OK_L).getInputLight().getValue()).isEqualTo(255);
+        assertThat(model.getAdjustment(Channel.OK_L).getOutputDark().getValue()).isEqualTo(0);
+        assertThat(model.getAdjustment(Channel.OK_L).getOutputLight().getValue()).isEqualTo(255);
+
+        assertThat(model.getAdjustment(Channel.OK_A).getInputDark().getValue()).isEqualTo(0);
+        assertThat(model.getAdjustment(Channel.OK_B).getInputDark().getValue()).isEqualTo(0);
+        assertThat(model.getAdjustment(Channel.RGB).getInputDark().getValue()).isEqualTo(0);
+
+        // completely empty preset defaults to SRGB with all defaults
+        UserPreset emptyPreset = new UserPreset("empty");
+        model.loadStateFrom(emptyPreset);
+
+        assertThat(model.getColorSpace()).isEqualTo(ColorSpace.SRGB);
+        assertThat(model.getActiveChannel()).isEqualTo(Channel.RGB);
+        for (ChannelLevelsModel adj : model.getAllAdjustments()) {
+            assertThat(adj.getInputDark().getValue()).isEqualTo(0);
+            assertThat(adj.getInputLight().getValue()).isEqualTo(255);
+            assertThat(adj.getOutputDark().getValue()).isEqualTo(0);
+            assertThat(adj.getOutputLight().getValue()).isEqualTo(255);
+        }
+    }
+
+    @Test
+    @DisplayName("loadStateFrom notifies exactly once when listener attached")
+    void loadStateFrom_notifiesExactlyOnce() {
+        UserPreset preset = new UserPreset("test");
+        preset.put(ColorSpace.PRESET_KEY, ColorSpace.OKLAB.name());
+
+        previewCount.set(0);
+        model.loadStateFrom(preset);
+
+        assertThat(previewCount.get()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("saveStateTo saves only the active color space and does not notify")
+    void saveStateTo_savesOnlyActiveColorSpaceAndDoesNotNotify() {
+        model.setColorSpace(ColorSpace.SRGB);
+        model.getAdjustment(Channel.RGB).getInputDark().setValue(15);
+        model.getAdjustment(Channel.OK_L).getInputDark().setValue(45);
+
+        previewCount.set(0);
+        UserPreset srgbPreset = new UserPreset("srgb");
+        model.saveStateTo(srgbPreset);
+
+        assertThat(previewCount.get()).isZero();
+        assertThat(srgbPreset.get(ColorSpace.PRESET_KEY)).isEqualTo("SRGB");
+        assertThat(srgbPreset.get("rgb Input Dark")).isEqualTo("15");
+        assertThat(srgbPreset.get("L Input Dark")).isNull();
+
+        model.setColorSpace(ColorSpace.OKLAB);
+        previewCount.set(0);
+        UserPreset oklabPreset = new UserPreset("oklab");
+        model.saveStateTo(oklabPreset);
+
+        assertThat(previewCount.get()).isZero();
+        assertThat(oklabPreset.get(ColorSpace.PRESET_KEY)).isEqualTo("OKLAB");
+        assertThat(oklabPreset.get("L Input Dark")).isEqualTo("45");
+        assertThat(oklabPreset.get("rgb Input Dark")).isNull();
+    }
+
+    @Nested
+    @DisplayName("ChannelAdjustment sub-model tests")
+    class ChannelAdjustmentTests {
+        @Test
+        @DisplayName("ChannelLevelsModel.loadFrom with missing keys keeps defaults")
+        void channelLevelsModel_loadFrom_missingKeysKeepsDefaults() {
+            var levels = new ChannelLevelsModel(Channel.RED, (Runnable) null);
+
+            // empty preset has no keys for this channel: defaults must remain untouched
+            var emptyPreset = new UserPreset("empty");
+            levels.loadFrom(emptyPreset);
+
+            assertThat(levels.getInputDark().getValue()).isEqualTo(0);
+            assertThat(levels.getInputLight().getValue()).isEqualTo(255);
+            assertThat(levels.getOutputDark().getValue()).isEqualTo(0);
+            assertThat(levels.getOutputLight().getValue()).isEqualTo(255);
+
+            // preset with only one key set: missing keys must still keep their defaults
+            var partialPreset = new UserPreset("partial");
+            partialPreset.put("red Input Dark", "50");
+            levels.loadFrom(partialPreset);
+
+            assertThat(levels.getInputDark().getValue()).isEqualTo(50);
+            assertThat(levels.getInputLight().getValue()).isEqualTo(255);
+            assertThat(levels.getOutputDark().getValue()).isEqualTo(0);
+            assertThat(levels.getOutputLight().getValue()).isEqualTo(255);
+        }
+
+        @Test
+        @DisplayName("ChannelLevelsModel saveTo / loadFrom round trip")
+        void channelLevelsModel_saveToLoadFrom_roundTrip() {
+            var source = new ChannelLevelsModel(Channel.GREEN, (Runnable) null);
+            source.getInputDark().setValue(25);
+            source.getInputLight().setValue(220);
+            source.getOutputDark().setValue(15);
+            source.getOutputLight().setValue(240);
+
+            var preset = new UserPreset("test");
+            source.saveTo(preset);
+
+            var target = new ChannelLevelsModel(Channel.GREEN, (Runnable) null);
+            target.loadFrom(preset);
+
+            assertThat(target.getInputDark().getValue()).isEqualTo(25);
+            assertThat(target.getInputLight().getValue()).isEqualTo(220);
+            assertThat(target.getOutputDark().getValue()).isEqualTo(15);
+            assertThat(target.getOutputLight().getValue()).isEqualTo(240);
+            assertThat(target.toLookup().getTable()).isEqualTo(source.toLookup().getTable());
+        }
+
+        @Test
+        @DisplayName("ChannelLevelsModel randomize sets input dark in [0,127] and input light in [128,255]")
+        void channelLevelsModel_randomize() {
+            var levels = new ChannelLevelsModel(Channel.RGB, (Runnable) null);
+            levels.reset();
+
+            levels.randomize();
+
+            assertThat(levels.getInputDark().getValue()).isBetween(0, 127);
+            assertThat(levels.getInputLight().getValue()).isBetween(128, 255);
+            assertThat(levels.getOutputDark().getValue()).isEqualTo(0);
+            assertThat(levels.getOutputLight().getValue()).isEqualTo(255);
+        }
+
+        @Test
+        @DisplayName("ToneCurve saveTo / loadFrom round trip")
+        void toneCurve_saveToLoadFrom_roundTrip() {
+            var source = new ToneCurve(Channel.BLUE);
+            source.addKnot(0.25f, 0.4f, false);
+            source.addKnot(0.75f, 0.6f, false);
+
+            var preset = new UserPreset("test");
+            source.saveTo(preset);
+
+            var target = new ToneCurve(Channel.BLUE);
+            target.loadFrom(preset);
+
+            assertThat(target.curveData.x).isEqualTo(source.curveData.x);
+            assertThat(target.curveData.y).isEqualTo(source.curveData.y);
+            assertThat(target.toLookup().getTable()).isEqualTo(source.toLookup().getTable());
+        }
+
+        @Test
+        @DisplayName("ToneCurve randomize adds exactly two knots to a reset curve")
+        void toneCurve_randomize_addsExactlyTwoKnotsToResetCurve() {
+            var curve = new ToneCurve(Channel.OK_L);
+            curve.reset();
+            assertThat(curve.curveData.x).hasSize(2);
+
+            curve.randomize();
+
+            // reset curve had 2 knots (0,0) and (1,1); randomize must add exactly 2 knots
+            assertThat(curve.curveData.x).hasSize(4);
+            assertThat(curve.curveData.y).hasSize(4);
+            assertThat(curve.curveData.x[0]).isEqualTo(0.0f);
+            assertThat(curve.curveData.y[0]).isEqualTo(0.0f);
+            assertThat(curve.curveData.x[3]).isEqualTo(1.0f);
+            assertThat(curve.curveData.y[3]).isEqualTo(1.0f);
+            assertThat(curve.curveData.x[1]).isBetween(0.1f, 0.4f);
+            assertThat(curve.curveData.x[2]).isBetween(0.6f, 0.9f);
+        }
     }
 
     private RGBLookup getCalculatedSrgbLookup() {
-        // Verify that the model notified the GUI to update the preview.
+        // Verify that the model notified to update the preview.
         // This is triggered by the setValue() calls in the test methods.
-        verify(filterGUI, atLeastOnce()).startPreview(false);
+        assertThat(previewCount.get()).isPositive();
 
         // get the BufferedImageOp that the model configured
-        BufferedImageOp op = model.createFilterOp();
-        assertThat(op)
-            .isNotNull()
-            .isInstanceOf(FastLookupOp.class);
+        BufferedImageOp op = model.createOp();
+        assertThat(op).isNotNull();
 
-        // extract the lookup table data and reconstruct an RGBLookup for assertions
-        FastLookupOp fastOp = (FastLookupOp) op;
-        ShortLookupTable table = fastOp.getLookupTable();
-        short[][] data = table.getTable();
-
-        return new RGBLookup(data[0], data[1], data[2]);
+        if (LookupOps.isSrgbFastLookup()) {
+            assertThat(op).isInstanceOf(FastLookupOp.class);
+            FastLookupOp fastOp = (FastLookupOp) op;
+            ShortLookupTable table = fastOp.getLookupTable();
+            short[][] data = table.getTable();
+            return new RGBLookup(data[0], data[1], data[2]);
+        } else {
+            assertThat(op).isInstanceOf(RgbTransferFilter.class);
+            return ((RgbTransferFilter) op).getLookup();
+        }
     }
 
     private static void checkRedMapping(RGBLookup lookup, int input, int expected) {

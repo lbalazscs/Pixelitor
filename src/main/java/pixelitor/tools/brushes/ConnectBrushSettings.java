@@ -21,6 +21,7 @@ import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.EnumChoice;
 
 import javax.swing.*;
 import java.util.function.Consumer;
@@ -75,7 +76,7 @@ public class ConnectBrushSettings extends BrushSettings {
         return Param.getValueAsFloat();
     }
 
-    public enum Style {
+    public enum Style implements EnumChoice {
         NORMAL("Normal", 0.0), // lines connect directly between points
         CHROME("Chrome", -0.2), // lines are offset slightly inwards
         FUR("Fur", 0.2); // lines are offset slightly outwards

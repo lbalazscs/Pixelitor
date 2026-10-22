@@ -36,7 +36,7 @@ public class BooleanParam extends AbstractFilterParam {
     private final boolean defaultValue;
     private boolean value;
     private final boolean hasResetButton;
-    private List<ItemListener> pendingItemListeners;
+    private List<ItemListener> itemListeners;
 
     public BooleanParam(String name) {
         this(name, false, RandomizeMode.ALLOW);
@@ -61,18 +61,15 @@ public class BooleanParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         var gui = new BooleanParamGUI(this, hasResetButton, sideButtonModel);
-        paramGUI = gui;
-        syncWithGui();
 
-        if (pendingItemListeners != null) {
-            // add any item listeners that were queued before the GUI was created
-            for (ItemListener listener : pendingItemListeners) {
+        if (itemListeners != null) {
+            // add the item listeners that were added before the GUI was created
+            for (ItemListener listener : itemListeners) {
                 gui.addItemListener(listener);
             }
-            pendingItemListeners = null;
         }
 
-        return gui;
+        return installGUI(gui);
     }
 
     public static BooleanParam forHPSharpening() {
@@ -142,11 +139,11 @@ public class BooleanParam extends AbstractFilterParam {
         }
 
         value = newValue;
-        if (trigger && adjustmentListener != null) {
-            adjustmentListener.paramAdjusted();
-        }
         if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
+        }
+        if (trigger) {
+            triggerFilter();
         }
     }
 
@@ -156,7 +153,7 @@ public class BooleanParam extends AbstractFilterParam {
     }
 
     @Override
-    public ParamState<?> copyState() {
+    public BooleanParamState copyState() {
         return value ? BooleanParamState.YES : BooleanParamState.NO;
     }
 
@@ -179,19 +176,16 @@ public class BooleanParam extends AbstractFilterParam {
         setValue(newValue, true, false);
     }
 
-    private void addItemListener(ItemListener itemListener) {
+    private void addItemListener(ItemListener listener) {
         if (paramGUI != null) {
-            // if a GUI was already created, pass the listener to it
-            ((BooleanParamGUI) paramGUI).addItemListener(itemListener);
-            return;
+            // all item listeners must be added before any GUI creation
+            throw new IllegalStateException();
         }
 
-        // If there is no GUI, store the listener so that
-        // it can be added to the GUI as soon as the GUI is created.
-        if (pendingItemListeners == null) {
-            pendingItemListeners = new ArrayList<>(2);
+        if (itemListeners == null) {
+            itemListeners = new ArrayList<>(2);
         }
-        pendingItemListeners.add(itemListener);
+        itemListeners.add(listener);
     }
 
     @Override
@@ -217,7 +211,7 @@ public class BooleanParam extends AbstractFilterParam {
         private final String saveString;
 
         BooleanParamState() {
-            this.saveString = super.toString().toLowerCase(Locale.ROOT);
+            this.saveString = name().toLowerCase(Locale.ROOT);
         }
 
         @Override

@@ -52,7 +52,6 @@ public class JHKaleidoscope extends ParametrizedFilter {
     public JHKaleidoscope() {
         super(true);
 
-        zoom.setPresetKey("Zoom (%)");
         initParams(
             sides,
             center,
@@ -61,7 +60,7 @@ public class JHKaleidoscope extends ParametrizedFilter {
             new CompositeParam("Transform",
                 twist,
                 lens,
-                zoom,
+                zoom.withPresetKey("Zoom (%)"),
                 rotateResult),
             edgeAction,
             interpolation

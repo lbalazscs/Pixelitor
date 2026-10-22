@@ -50,9 +50,7 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        paramGUI = new TextParamGUI(this, value, adjustmentListener);
-        syncWithGui();
-        return (JComponent) paramGUI;
+        return installGUI(new TextParamGUI(this, value, adjustmentListener));
     }
 
     @Override
@@ -83,11 +81,9 @@ public class TextParam extends AbstractFilterParam {
     public void setValue(String s, boolean trigger) {
         if (!value.equals(s)) {
             value = s;
-            if (paramGUI != null) {
-                paramGUI.updateGUI();
-            }
-            if (trigger && adjustmentListener != null) {
-                adjustmentListener.paramAdjusted();
+            updateGUI();
+            if (trigger) {
+                triggerFilter();
             }
         }
     }
@@ -109,8 +105,7 @@ public class TextParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        String newValue = Utils.decodeNewlines(((TextParamState) state).value());
-        value = newValue;
+        value = Utils.decodeNewlines(((TextParamState) state).value());
         if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
         }
@@ -135,7 +130,7 @@ public class TextParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isComplex() {
+    public boolean requiresPresetSupport() {
         return true;
     }
 

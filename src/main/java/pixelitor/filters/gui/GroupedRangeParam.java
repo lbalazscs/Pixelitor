@@ -100,16 +100,13 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
 
     @Override
     public JComponent createGUI() {
-        var gui = new GroupedRangeParamGUI(this);
-        paramGUI = gui;
-        syncWithGui();
-        return gui;
+        return installGUI(new GroupedRangeParamGUI(this));
     }
 
     public void updateGUIAppearance() {
         if (paramGUI != null) {
             for (RangeParam child : children) {
-                child.updateGUIAppearance(true);
+                child.updateGUIAppearance(false);
             }
             GroupedRangeParamGUI gui = (GroupedRangeParamGUI) paramGUI;
             gui.revalidate();
@@ -158,7 +155,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         notLinkable();
 
         // validate preconditions for the normalization algorithm to work correctly
-        assert calcSumOfValues() == NORMALIZED_SUM;
+        assert Math.abs(calcSumOfValues() - NORMALIZED_SUM) < 0.001;
         assert checkRangesForAutoNormalization();
 
         // enable auto-normalization
@@ -191,24 +188,24 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
             // avoid infinite recursion if change listeners call each other
             return;
         }
-        normalizationInProgress = true;
 
-        int sumOfAllValues = calcSumOfValues();
-        int diff = sumOfAllValues - NORMALIZED_SUM;
-        if (diff == 0) {
-            normalizationInProgress = false;
+        double diff = calcSumOfValues() - NORMALIZED_SUM;
+        if (Math.abs(diff) < 0.001) {
             return; // nothing to do
         }
 
-        runAutoNormalize(source, diff);
-
-        normalizationInProgress = false;
+        normalizationInProgress = true;
+        try {
+            runAutoNormalize(source, diff);
+        } finally {
+            normalizationInProgress = false;
+        }
     }
 
     // the other sliders are moved by an amount proportional to the space
     // they have left, as described in the "weighted move" approach at
     // https://softwareengineering.stackexchange.com/questions/261017/algorithm-for-a-ui-showing-x-percentage-sliders-whose-linked-values-always-total
-    private void runAutoNormalize(RangeParam source, int diff) {
+    private void runAutoNormalize(RangeParam source, double diff) {
         // 1. define how to calculate "space left" based on the direction of change
         ToDoubleFunction<RangeParam> spaceLeftFunc = (diff > 0)
             // the other sliders have to decrease their value
@@ -234,24 +231,30 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
         }
     }
 
-    private int calcSumOfValues() {
-        int sumOfAllValues = 0;
-        for (RangeParam param : children) {
-            sumOfAllValues += param.getValue();
+    private double calcSumOfValues() {
+        double sum = 0.0;
+        for (RangeParam child : children) {
+            sum += child.getValueAsDouble();
         }
-        return sumOfAllValues;
+        return sum;
     }
 
-    // this method is much simpler than {@link #autoNormalize}, but also
-    // limited: it can't be used interactively, and ignores the min/max values
+    /**
+     * This method is much simpler than {@link #autoNormalize}, but also
+     * limited: it can't be used interactively, and ignores the min/max values.
+     */
     private void normalizeAll() {
-        int diff = calcSumOfValues() - NORMALIZED_SUM;
-        if (diff != 0) {
-            double correction = diff / (double) children.length;
-            for (RangeParam child : children) {
-                double currentValue = child.getValueAsDouble();
-                child.setValueNoTrigger(currentValue - correction);
-            }
+        normalizeAll(calcSumOfValues() - NORMALIZED_SUM);
+    }
+
+    private void normalizeAll(double diff) {
+        if (Math.abs(diff) < 0.001) {
+            return;
+        }
+        double correction = diff / children.length;
+        for (RangeParam child : children) {
+            double currentValue = child.getValueAsDouble();
+            child.setValueNoTrigger(currentValue - correction);
         }
     }
 
@@ -273,7 +276,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     @Override
-    public String createLinkedToolTip() {
+    public String getLinkedToolTip() {
         if (children.length == 2) {
             return "<html>Whether the <b>%s</b> and <b>%s</b> sliders move together"
                 .formatted(children[0].getName(), children[1].getName());
@@ -284,10 +287,18 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
 
     @Override
     public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        super.setAdjustmentListener(listener);
         for (RangeParam child : children) {
             child.setAdjustmentListener(listener);
         }
-        adjustmentListener = listener;
+    }
+
+    @Override
+    public void guiDisposed() {
+        super.guiDisposed();
+        for (RangeParam child : children) {
+            child.guiDisposed();
+        }
     }
 
     public int getValue(int index) {
@@ -381,8 +392,8 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
             }
 
             // ... and then trigger only once
-            if (trigger && adjustmentListener != null) {
-                adjustmentListener.paramAdjusted();
+            if (trigger) {
+                triggerFilter();
             }
 
             setLinked(linkedByDefault);
@@ -456,7 +467,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
                 if (updateGUI) {
                     children[i].setValueNoTrigger(value);
                 } else {
-                    children[i].setValueProgrammatically(value);
+                    children[i].setValueSilently(value);
                 }
             }
         });
@@ -509,7 +520,7 @@ public class GroupedRangeParam extends AbstractFilterParam implements Linkable {
     }
 
     @Override
-    public boolean isComplex() {
+    public boolean requiresPresetSupport() {
         return true;
     }
 

@@ -19,6 +19,9 @@ package pixelitor.filters.curves;
 
 import com.jhlabs.image.Curve;
 import com.jhlabs.image.ImageMath;
+import pixelitor.filters.channels.ChannelAdjustment;
+import pixelitor.filters.gui.UserPreset;
+import pixelitor.filters.lookup.ChannelLookup;
 import pixelitor.filters.util.Channel;
 
 import java.awt.BasicStroke;
@@ -38,7 +41,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author Łukasz Kurzaj lukaszkurzaj@gmail.com
  */
-public class ToneCurve {
+public class ToneCurve implements ChannelAdjustment {
     // maximum allowed number of knots (control points) on the curve
     private static final int MAX_KNOTS = 16;
 
@@ -65,14 +68,26 @@ public class ToneCurve {
         this.channel = channel;
     }
 
+    @Override
+    public Channel getChannel() {
+        return channel;
+    }
+
+    @Override
+    public ChannelLookup toLookup() {
+        return ChannelLookup.ofCurve(curveData);
+    }
+
     /**
      * Resets the curve to a straight diagonal line from (0,0) to (1,1).
      */
+    @Override
     public void reset() {
         curveData.reset();
         plotTableStale = true;
     }
 
+    @Override
     public void randomize() {
         // the curve is assumed to be in its reset state
 
@@ -85,6 +100,16 @@ public class ToneCurve {
         float x2 = (float) rnd.nextDouble(0.6, 0.9);
         float y2 = (float) rnd.nextDouble(0.6, 0.9);
         addKnot(x2, y2, false);
+    }
+
+    @Override
+    public void saveTo(UserPreset preset) {
+        preset.put(channel.getPresetKey(), toSaveString());
+    }
+
+    @Override
+    public void loadFrom(UserPreset preset) {
+        setStateFrom(preset.get(channel.getPresetKey()));
     }
 
     /**

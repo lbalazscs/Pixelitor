@@ -22,6 +22,7 @@ import pixelitor.tools.shapes.custom.RandomStarShape;
 import pixelitor.tools.util.Drag;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.utils.CustomShapes;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.Geometry;
 
 import java.awt.BasicStroke;
@@ -33,7 +34,7 @@ import java.util.function.Supplier;
 /**
  * The shape types used in the shapes tool (and in some other places as well).
  */
-public enum ShapeType {
+public enum ShapeType implements EnumChoice {
     RECTANGLE("Rectangle", false, true, OverlayType.WIDTH_HEIGHT,
         Rectangle2D.Double::new, RectangleSettings::new) {
         @Override

@@ -18,52 +18,40 @@
 package pixelitor.filters.convolve;
 
 import com.jhlabs.image.ConvolveFilter;
-import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.gui.FilterWithGUI;
+import pixelitor.filters.Filter;
+import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.util.FilterAction;
-import pixelitor.layers.Filterable;
 import pixelitor.utils.Messages;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ImagingOpException;
 import java.awt.image.Kernel;
-import java.util.concurrent.ThreadLocalRandom;
+import java.io.Serial;
+import java.util.function.Supplier;
 
 /**
- * A customizable convolution filter.
+ * A customizable convolution filter. The kernel size is determined
+ * by the concrete subclasses ({@link Convolve3x3}, {@link Convolve5x5}),
+ * which must have public no-arg constructors in order to be smart filters.
  */
-public class Convolve extends FilterWithGUI {
-    private final String filterName;
+public abstract class Convolve extends ParametrizedFilter {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    private float[] kernelMatrix; // the matrix as a flat array
-    private final int kernelSize;
+    private final ConvolveParam kernelParam;
 
-    private Convolve(int kernelSize, String filterName) {
-        if (kernelSize <= 0 || kernelSize % 2 == 0) {
-            throw new IllegalArgumentException("kernel size = " + kernelSize);
-        }
-        this.kernelSize = kernelSize;
-        this.filterName = filterName;
-    }
+    protected Convolve(int kernelSize) {
+        super(false);
 
-    public void setKernelMatrix(float[] kernelMatrix) {
-        if (kernelMatrix.length != kernelSize * kernelSize) {
-            throw new IllegalArgumentException("array length = " + kernelMatrix.length + ", kernel size = " + kernelSize);
-        }
-        this.kernelMatrix = kernelMatrix;
-    }
-
-    public float[] getKernelMatrix() {
-        return kernelMatrix;
+        kernelParam = new ConvolveParam("Kernel", kernelSize);
+        initParams(kernelParam);
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        // must be set before calling this method
-        assert kernelMatrix != null;
-
-        Kernel kernel = new Kernel(kernelSize, kernelSize, kernelMatrix);
+        int size = kernelParam.getKernelSize();
+        Kernel kernel = new Kernel(size, size, kernelParam.getKernel());
         BufferedImageOp convolveOp = createConvolveOp(kernel);
 
         try {
@@ -75,53 +63,19 @@ public class Convolve extends FilterWithGUI {
         return dest;
     }
 
-    @Override
-    public FilterGUI createGUI(Filterable layer, boolean resetSettings) {
-        return new ConvolveGUI(this, layer, resetSettings);
-    }
-
-    @Override
-    public void randomize() {
-        kernelMatrix = createRandomKernel(kernelSize);
-    }
-
     private BufferedImageOp createConvolveOp(Kernel kernel) {
-        var filter = new ConvolveFilter(filterName, kernel);
+        var filter = new ConvolveFilter(getName(), kernel);
         filter.setPremultiplyAlpha(false);
         return filter;
     }
 
-    /**
-     * Returns a randomized array that is on average close to being
-     * normalized: each value is uniform in [-1/n, 3/n), which
-     * averages to 1/n, so the sum of all n values averages to 1.
-     */
-    public static float[] createRandomKernel(int size) {
-        ThreadLocalRandom rand = ThreadLocalRandom.current();
-        int numValues = size * size;
-        float[] kernelValues = new float[numValues];
-        for (int i = 0; i < numValues; i++) {
-            kernelValues[i] = rand.nextFloat() * (4.0f / numValues) - (1.0f / numValues);
-        }
-        return kernelValues;
-    }
-
-    public int getKernelSize() {
-        return kernelSize;
-    }
-
     public static FilterAction createFilterAction(int size) {
         String name = "Custom " + size + 'x' + size + " Convolution";
-        return new FilterAction(name, () -> new Convolve(size, name));
-    }
-
-    @Override
-    public boolean supportsUserPresets() {
-        return false;
-    }
-
-    @Override
-    public boolean canBeSmart() {
-        return false;
+        Supplier<Filter> factory = switch (size) {
+            case 3 -> Convolve3x3::new;
+            case 5 -> Convolve5x5::new;
+            default -> throw new IllegalArgumentException("size = " + size);
+        };
+        return new FilterAction(name, factory);
     }
 }

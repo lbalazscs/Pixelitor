@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -19,6 +19,7 @@ package pixelitor.selection;
 
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.gui.GUIText;
+import pixelitor.utils.EnumChoice;
 
 import java.awt.BasicStroke;
 import java.awt.Shape;
@@ -27,7 +28,7 @@ import java.awt.geom.Area;
 /**
  * The modification type for a selection, used in the "Modify Selection" dialog.
  */
-public enum SelectionModifyType {
+public enum SelectionModifyType implements EnumChoice {
     EXPAND("Expand") {
         @Override
         protected Shape modifyArea(Area previousSelection, Area borderArea) {

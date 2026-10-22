@@ -21,6 +21,7 @@ import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.gui.View;
 import pixelitor.layers.Filterable;
+import pixelitor.utils.Choice;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
@@ -85,7 +86,7 @@ public class SelectImageParam extends ChoiceParam<NamedImage> {
         throw new IllegalStateException("not found");
     }
 
-    static class NamedImage {
+    static class NamedImage implements Choice {
         private final BufferedImage image;
         private final Composition comp;
 
@@ -109,6 +110,12 @@ public class SelectImageParam extends ChoiceParam<NamedImage> {
 
         public Composition getComp() {
             return comp;
+        }
+
+        @Override
+        public String presetId() {
+            // should not be saved to a preset
+            throw new UnsupportedOperationException();
         }
 
         @Override

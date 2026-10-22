@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import com.jhlabs.image.TransformFilter;
 import com.jhlabs.image.WaveType;
+import pixelitor.utils.Choice;
 
 import java.util.Objects;
 
@@ -78,7 +79,13 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
     /**
      * Represents an integer value with a string description.
      */
-    public record Item(String descr, int value) {
+    public record Item(String descr, int value, String id) implements Choice {
+        // compatibility constructor
+        public Item(String descr, int value) {
+//            this(descr, value, String.valueOf(value));
+            this(descr, value, descr);
+        }
+
         public boolean hasValue(int v) {
             return value == v;
         }
@@ -111,6 +118,11 @@ public class IntChoiceParam extends ChoiceParam<IntChoiceParam.Item> {
         @Override
         public String toString() {
             return descr;
+        }
+
+        @Override
+        public String presetId() {
+            return id;
         }
     }
 

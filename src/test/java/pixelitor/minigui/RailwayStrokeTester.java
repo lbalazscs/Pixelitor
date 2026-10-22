@@ -72,7 +72,7 @@ public class RailwayStrokeTester extends JFrame {
         paramsPanel.setBorder(new TitledBorder("Stroke Parameters"));
         GridBagHelper gbh = new GridBagHelper(paramsPanel, 5);
 
-        crosstieLengthModel.ensureHigherValueThan(railDistanceModel);
+        crosstieLengthModel.ensureNotLowerThan(railDistanceModel);
         gbh.addFullRow(railDistanceModel);
         gbh.addFullRow(railWidthModel);
         gbh.addFullRow(crosstieLengthModel);

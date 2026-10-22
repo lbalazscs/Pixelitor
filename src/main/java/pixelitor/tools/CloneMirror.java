@@ -17,11 +17,13 @@
 
 package pixelitor.tools;
 
+import pixelitor.utils.EnumChoice;
+
 /**
  * A mirroring effect achieved with negative scaling.
  * Not to be confused with {@link Symmetry}.
  */
-public enum CloneMirror {
+public enum CloneMirror implements EnumChoice {
     NONE("None", 1.0, 1.0),
     VERTICAL("Vertical", -1.0, 1.0),
     HORIZONTAL("Horizontal", 1.0, -1.0);

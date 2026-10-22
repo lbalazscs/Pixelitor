@@ -64,7 +64,7 @@ public class GridParamGUI extends JPanel implements ParamGUI {
         randomizeButton = new JButton(Icons.getRandomizeIcon());
         randomizeButton.addActionListener(_ -> {
             model.randomize();
-            model.trigger();
+            model.triggerFilter();
         });
         randomizeButton.setToolTipText("Randomize " + model.getName());
 

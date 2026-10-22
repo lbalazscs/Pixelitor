@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.ImageMath;
+import pixelitor.utils.Rnd;
 
 import javax.swing.*;
 import java.awt.geom.Point2D;
@@ -30,6 +31,8 @@ import java.util.Locale;
  * relative coordinates (0.0 to 1.0) that are independent of the actual image size.
  */
 public class ImagePositionParam extends AbstractFilterParam {
+    private static final double DEFAULT_TOLERANCE = 5e-5; // 2 decimals in percent
+
     private double relativeX;
     private double relativeY;
     private int decimalPlaces = 1;
@@ -52,16 +55,13 @@ public class ImagePositionParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        var gui = new ImagePositionParamGUI(this, defaultRelativeX, defaultRelativeY);
-        paramGUI = gui;
-        syncWithGui();
-        paramGUI.updateGUI();
-        return gui;
+        return installGUI(new ImagePositionParamGUI(
+            this, defaultRelativeX, defaultRelativeY));
     }
 
     @Override
     protected void doRandomize() {
-        setRelativePosition(Math.random(), Math.random(), true, false, false);
+        setRelativePosition(Rnd.nextDouble(), Rnd.nextDouble(), true, false);
     }
 
     public double getRelativeX() {
@@ -85,35 +85,49 @@ public class ImagePositionParam extends AbstractFilterParam {
             relativeY * image.getHeight());
     }
 
+    /**
+     * Sets the relative position, updates the GUI, and triggers filter execution.
+     */
+    public void setRelativePosition(double relX, double relY) {
+        setRelativePosition(relX, relY, true, true);
+    }
+
+    /**
+     * Sets the relative position from a {@link Point2D}, updates the GUI, and triggers filter execution.
+     */
+    public void setRelativePosition(Point2D pt) {
+        setRelativePosition(pt.getX(), pt.getY(), true, true);
+    }
+
     public void setRelativePosition(double relX, double relY,
-                                    boolean updateGUI, boolean isAdjusting,
-                                    boolean trigger) {
+                                    boolean updateGUI, boolean trigger) {
         relativeX = relX;
         relativeY = relY;
         if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
         }
-        if (trigger && !isAdjusting) {
-            adjustmentListener.paramAdjusted();
+        if (trigger) {
+            triggerFilter();
         }
     }
 
-    void setRelativeX(double x, boolean isAdjusting) {
-        setRelativePosition(x, relativeY, false, isAdjusting, true);
+    void setRelativeX(double x, boolean trigger) {
+        setRelativePosition(x, relativeY, false, trigger);
     }
 
-    void setRelativeY(double y, boolean isAdjusting) {
-        setRelativePosition(relativeX, y, false, isAdjusting, true);
+    void setRelativeY(double y, boolean trigger) {
+        setRelativePosition(relativeX, y, false, trigger);
     }
 
     @Override
     public boolean isAtDefault() {
-        return relativeX == defaultRelativeX && relativeY == defaultRelativeY;
+        return Math.abs(relativeX - defaultRelativeX) < DEFAULT_TOLERANCE
+            && Math.abs(relativeY - defaultRelativeY) < DEFAULT_TOLERANCE;
     }
 
     @Override
     public void reset(boolean trigger) {
-        setRelativePosition(defaultRelativeX, defaultRelativeY, true, false, trigger);
+        setRelativePosition(defaultRelativeX, defaultRelativeY, true, trigger);
     }
 
     @Override
@@ -138,7 +152,7 @@ public class ImagePositionParam extends AbstractFilterParam {
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         ImagePositionParamState s = (ImagePositionParamState) state;
-        setRelativePosition(s.relativeX, s.relativeY, updateGUI, false, false);
+        setRelativePosition(s.relativeX, s.relativeY, updateGUI, false);
     }
 
     @Override
@@ -149,7 +163,7 @@ public class ImagePositionParam extends AbstractFilterParam {
         }
         double newRelX = Double.parseDouble(savedValue.substring(0, commaIndex));
         double newRelY = Double.parseDouble(savedValue.substring(commaIndex + 1));
-        setRelativePosition(newRelX, newRelY, true, false, false);
+        setRelativePosition(newRelX, newRelY, true, false);
     }
 
     @Override

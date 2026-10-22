@@ -20,6 +20,7 @@ package pixelitor.autopaint;
 import com.jhlabs.math.Noise;
 import net.jafama.FastMath;
 import pixelitor.Canvas;
+import pixelitor.utils.EnumChoice;
 
 import java.awt.geom.Point2D;
 import java.util.random.RandomGenerator;
@@ -27,7 +28,7 @@ import java.util.random.RandomGenerator;
 /**
  * Determines how the angle of each auto-painted stroke is generated.
  */
-public enum StrokeDirection {
+public enum StrokeDirection implements EnumChoice {
     RANDOM("Random"), // uniform randomness
     RADIAL("Radial"), // points away from the canvas center
     CIRCULAR("Circular"), // tangent to the circle around the center

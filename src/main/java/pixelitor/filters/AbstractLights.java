@@ -21,6 +21,7 @@ import net.jafama.FastMath;
 import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.progress.StatusBarProgressTracker;
+import pixelitor.utils.EnumChoice;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -52,7 +53,7 @@ public class AbstractLights extends ParametrizedFilter {
 
     private static final int DEFAULT_NUM_ITERATIONS = 1000;
 
-    public enum Type {
+    public enum Type implements EnumChoice {
         // random particles connected in a closed chain
         CHAOS("Chaos"),
 
@@ -104,12 +105,14 @@ public class AbstractLights extends ParametrizedFilter {
     public AbstractLights() {
         super(false);
 
-        // disable hue variation when complexity is 1 (two particles)
-        complexityParam.disableOtherWhen(hueRandomnessParam, value -> value == 1);
-
-        // disable hue controls when fully white blend is selected
+        // disable the hue chooser when fully white blend is selected
         whiteBlendParam.disableOtherWhen(hueParam, value -> value == 100);
-        whiteBlendParam.disableOtherWhen(hueRandomnessParam, value -> value == 100);
+
+        // disable hue randomness when complexity is 1  (two particles)
+        // OR fully white blend is selected
+        RangeParam.bindEnabled(hueRandomnessParam,
+            () -> complexityParam.getValue() > 1 && whiteBlendParam.getValue() < 100,
+            complexityParam, whiteBlendParam);
 
         CompositeParam advancedParam = new CompositeParam("Advanced",
             hueRandomnessParam, whiteBlendParam, blurParam, speedParam, bounceParam);

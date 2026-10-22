@@ -31,9 +31,8 @@ public interface ParamGUI {
     void setToolTip(String tip);
 
     /**
-     * Return the number of layout columns, either 1 or 2.
-     * If 2 is returned, then a label based on the name is added
-     * to the GUI.
+     * Returns the number of layout columns, either 1 or 2.
+     * If 2 is returned, then a label based on the name is added to the GUI.
      */
     int getNumLayoutColumns();
 }

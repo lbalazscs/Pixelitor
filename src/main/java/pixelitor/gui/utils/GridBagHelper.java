@@ -18,7 +18,6 @@
 package pixelitor.gui.utils;
 
 import pixelitor.filters.gui.FilterParam;
-import pixelitor.filters.gui.FilterSetting;
 import pixelitor.filters.gui.ParamGUI;
 
 import javax.swing.*;
@@ -114,13 +113,13 @@ public class GridBagHelper {
         addLabelAndControl(leftLabelText, new JLabel(rightLabelText));
     }
 
-    public void addLabelAndControl(FilterSetting setting) {
-        addLabelAndControl(setting.getName() + ":", setting.createGUI());
+    public void addLabelAndControl(FilterParam param) {
+        addLabelAndControl(param.getName() + ":", param.createGUI());
     }
 
-    public void addLabelAndControl(FilterSetting setting, String lookupName) {
-        addLabelAndControl(setting.getName() + ":",
-            setting.createGUI(lookupName));
+    public void addLabelAndControl(FilterParam param, String lookupName) {
+        addLabelAndControl(param.getName() + ":",
+            param.createGUI(lookupName));
     }
 
     public void addLabelAndControl(String labelText, Component c) {
@@ -206,8 +205,8 @@ public class GridBagHelper {
         container.add(c, componentConstraints);
     }
 
-    public void addLabelAndLastControl(FilterSetting setting) {
-        addLabelAndLastControl(setting.getName() + ":", setting.createGUI());
+    public void addLabelAndLastControl(FilterParam param) {
+        addLabelAndLastControl(param.getName() + ":", param.createGUI());
     }
 
     public void addLabelAndLastControl(String labelText, Component c) {
@@ -237,15 +236,15 @@ public class GridBagHelper {
         container.add(c, lastComponentConstraints);
     }
 
-    public void arrangeVertically(Iterable<? extends FilterSetting> settings) {
-        for (FilterSetting setting : settings) {
-            JComponent control = setting.createGUI(setting.getName());
+    public void arrangeVertically(Iterable<? extends FilterParam> params) {
+        for (FilterParam param : params) {
+            JComponent control = param.createGUI(param.getName());
 
             int numColumns = ((ParamGUI) control).getNumLayoutColumns();
             if (numColumns == 1) {
                 addFullRow(control);
             } else if (numColumns == 2) {
-                addLabelAndLastControl(setting.getName() + ':', control);
+                addLabelAndLastControl(param.getName() + ':', control);
             } else {
                 throw new IllegalStateException("numColumns = " + numColumns);
             }

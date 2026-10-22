@@ -26,18 +26,11 @@ import javax.swing.*;
  */
 public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
     /**
-     * Returns the display name of this filter setting.
-     */
-    String getName();
-
-    /**
-     * Sets the display name of this filter setting.
-     */
-    void setName(String displayName);
-
-    /**
      * Creates the GUI component that represents this model in the UI.
-     *
+     * This method may be called multiple times (the filter parameters
+     * are persisted between the filter invocations, but the UI
+     * widgets are recreated for each dialog session).
+     * <p>
      * If this is an instance of {@link FilterParam},
      * the returned component must also implement {@link ParamGUI}.
      */
@@ -53,6 +46,14 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
         gui.setName(lookupName);
         return gui;
     }
+
+    /**
+     * Called when the current GUI is disposed. The GUI is recreated and
+     * disposed for every dialog, but the filter and its settings persist
+     * indefinitely. This method is therefore the place to release resources
+     * and prevent memory leaks.
+     */
+    void guiDisposed();
 
     /**
      * Sets the listener that will be notified whenever this filter setting is changed or activated.
@@ -82,6 +83,7 @@ public sealed interface FilterSetting permits FilterButtonModel, FilterParam {
          * The enabled state is determined by the filter's internal logic.
          */
         FILTER_LOGIC,
+
         /**
          * The enabled state is determined by the app's animation mode
          * (disabling non-animatable parameters when configuring an animation's end frame).

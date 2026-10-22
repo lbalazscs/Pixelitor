@@ -23,6 +23,7 @@ import pixelitor.filters.gui.*;
 import pixelitor.filters.util.ShapeWithColor;
 import pixelitor.io.FileIO;
 import pixelitor.utils.Distortion;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Transform;
 
@@ -51,7 +52,7 @@ public class Cubes extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private enum CubeType {
+    private enum CubeType implements EnumChoice {
         BASIC("Basic", 0, false),
         CORNER_CUT("Corner Cut", 1, false),
         CORNER_CUT2("Corner Cut 2", 2, false),

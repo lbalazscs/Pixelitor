@@ -18,6 +18,7 @@
 package pixelitor.autopaint;
 
 import pixelitor.colors.Colors;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.Rnd;
 
 import java.awt.Color;
@@ -26,7 +27,7 @@ import java.util.random.RandomGenerator;
 /**
  * Determines how the paint color is chosen for each auto-painted stroke.
  */
-public enum ColorMode {
+public enum ColorMode implements EnumChoice {
     INTERPOLATED("Foreground-Background Mix"),
     FOREGROUND("Foreground"),
     RANDOM("Random");

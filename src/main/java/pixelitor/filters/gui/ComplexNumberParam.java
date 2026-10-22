@@ -56,11 +56,7 @@ public class ComplexNumberParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        var gui = new ComplexNumberParamGUI(this);
-        paramGUI = gui;
-        syncWithGui();
-        paramGUI.updateGUI();
-        return gui;
+        return installGUI(new ComplexNumberParamGUI(this));
     }
 
     // when selecting a step multiplier for the Newton fractal,
@@ -136,8 +132,8 @@ public class ComplexNumberParam extends AbstractFilterParam {
         if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
         }
-        if (trigger && !isAdjusting && adjustmentListener != null) {
-            adjustmentListener.paramAdjusted();
+        if (trigger && !isAdjusting) {
+            triggerFilter();
         }
     }
 

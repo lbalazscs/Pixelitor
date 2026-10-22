@@ -70,9 +70,8 @@ public class ValueNoise extends ParametrizedFilter {
     public ValueNoise() {
         super(false);
 
-        scale.setPresetKey("Zoom");
         initParams(
-            scale.withAdjustedRange(0.3),
+            scale.withAdjustedRange(0.3).withPresetKey("Zoom"),
             angleParam,
             details,
             persistenceParam,

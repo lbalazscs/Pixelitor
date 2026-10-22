@@ -20,6 +20,7 @@ package pixelitor.filters.util;
 import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.gui.GUIText;
+import pixelitor.utils.EnumChoice;
 
 import java.awt.Color;
 
@@ -31,7 +32,7 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * Represents a color channel or composite channel.
  */
-public enum Channel {
+public enum Channel implements EnumChoice {
     RGB("RGB", "rgb", BLACK, ColorSpace.SRGB) {
         @Override
         public Color getDarkColor() {

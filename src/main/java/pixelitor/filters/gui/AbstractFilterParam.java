@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.utils.debug.DebugNode;
 
+import javax.swing.*;
 import java.util.Objects;
 
 /**
@@ -34,13 +35,14 @@ public abstract class AbstractFilterParam implements FilterParam {
     private RandomizeMode randomizeMode;
     private String toolTip;
     private String presetKey;
+    private String legacyPresetKey;
 
     // If this is not null, it's the model for an additional action button
     // to the right of the normal GUI. Typically, it's used for randomization,
     // and it's enabled only for specific values of this filter parameter.
     protected FilterButtonModel sideButtonModel;
 
-    AbstractFilterParam(String name, RandomizeMode randomizeMode) {
+    protected AbstractFilterParam(String name, RandomizeMode randomizeMode) {
         this.name = Objects.requireNonNull(name);
         this.randomizeMode = randomizeMode;
     }
@@ -49,12 +51,26 @@ public abstract class AbstractFilterParam implements FilterParam {
      * Finalizes the GUI's setup by synchronizing its state with this model.
      * Must be called by subclasses after creating the GUI.
      */
-    protected void syncWithGui() {
+    protected final <G extends JComponent & ParamGUI> G installGUI(G gui) {
+        paramGUI = gui;
         updateGUIEnabledState();
         if (toolTip != null) {
             // if a tooltip was set before the GUI was created,
             // apply that stored tooltip to the newly created GUI
-            paramGUI.setToolTip(toolTip);
+            gui.setToolTip(toolTip);
+        }
+        return gui;
+    }
+
+    @Override
+    public void guiDisposed() {
+        if (paramGUI == null) {
+            throw new IllegalStateException();
+        }
+        adjustmentListener = null;
+        paramGUI = null;
+        if (sideButtonModel != null) {
+            sideButtonModel.guiDisposed();
         }
     }
 
@@ -66,14 +82,15 @@ public abstract class AbstractFilterParam implements FilterParam {
         }
     }
 
-    public FilterParam withSideButton(FilterButtonModel action) {
-        this.sideButtonModel = action;
+    public FilterParam withSideButton(FilterButtonModel button) {
+        sideButtonModel = button;
 
         if (adjustmentListener != null) {
-            sideButtonModel.setAdjustmentListener(adjustmentListener);
+            button.setAdjustmentListener(adjustmentListener);
         }
-
-        sideButtonModel.setEnabled(isEnabled(), EnabledReason.PARENT_PARAM);
+        button.setEnabled(enabledByFilterLogic, EnabledReason.FILTER_LOGIC);
+        button.setEnabled(enabledByAnimation, EnabledReason.ANIMATION_ENDING_STATE);
+        button.setEnabled(enabledByParent, EnabledReason.PARENT_PARAM);
 
         return this;
     }
@@ -98,6 +115,11 @@ public abstract class AbstractFilterParam implements FilterParam {
         return getName();
     }
 
+    @Override
+    public String getLegacyPresetKey() {
+        return legacyPresetKey;
+    }
+
     public void setPresetKey(String presetKey) {
         this.presetKey = presetKey;
     }
@@ -107,16 +129,20 @@ public abstract class AbstractFilterParam implements FilterParam {
         return this;
     }
 
+    public FilterParam withLegacyPresetKey(String presetKey) {
+        this.legacyPresetKey = presetKey;
+        return this;
+    }
+
     @Override
     public void setEnabled(boolean enabled, EnabledReason reason) {
         switch (reason) {
             case FILTER_LOGIC -> enabledByFilterLogic = enabled;
             case ANIMATION_ENDING_STATE -> {
                 // animation ending mode only affects non-animatable parameters
-                if (isAnimatable()) {
-                    return;
+                if (!isAnimatable()) {
+                    enabledByAnimation = enabled;
                 }
-                enabledByAnimation = enabled;
             }
             case PARENT_PARAM -> enabledByParent = enabled;
         }
@@ -125,12 +151,28 @@ public abstract class AbstractFilterParam implements FilterParam {
             updateGUIEnabledState();
         }
         if (sideButtonModel != null) {
-            sideButtonModel.setEnabled(isEnabled(), reason);
+            sideButtonModel.setEnabled(enabled, reason);
         }
     }
 
     private void updateGUIEnabledState() {
         paramGUI.setEnabled(isEnabled());
+    }
+
+    /**
+     * Notifies the adjustment listener (if there is one), which
+     * restarts the filter preview.
+     */
+    public void triggerFilter() {
+        if (adjustmentListener != null) {
+            adjustmentListener.paramAdjusted();
+        }
+    }
+
+    public void updateGUI() {
+        if (paramGUI != null) {
+            paramGUI.updateGUI();
+        }
     }
 
     @Override
@@ -168,11 +210,9 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public void setToolTip(String tip) {
+        toolTip = tip; // always remember, so re-created GUIs get it too
         if (paramGUI != null) {
             paramGUI.setToolTip(tip);
-        } else {
-            // store for later if the GUI is not created yet
-            toolTip = tip;
         }
     }
 

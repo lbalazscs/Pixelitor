@@ -81,9 +81,7 @@ public class GridParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        paramGUI = new GridParamGUI(this);
-        syncWithGui();
-        return (JComponent) paramGUI;
+        return installGUI(new GridParamGUI(this));
     }
 
     @Override
@@ -116,7 +114,7 @@ public class GridParam extends AbstractFilterParam {
     }
 
     @Override
-    public boolean isComplex() {
+    public boolean requiresPresetSupport() {
         return true;
     }
 
@@ -163,17 +161,13 @@ public class GridParam extends AbstractFilterParam {
             }
             // update the GUI, but do not trigger the filter
             internalSetData(newData, true);
-            if (paramGUI != null) {
-                paramGUI.updateGUI();
-            }
+            updateGUI();
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             // recovery for legacy (4.3.0) Weave saved values
             for (Preset preset : JHWeave.WEAVE_PRESETS) {
                 if (preset.name().equals(savedValue)) {
                     internalSetData(preset.data(), true);
-                    if (paramGUI != null) {
-                        paramGUI.updateGUI();
-                    }
+                    updateGUI();
                     return;
                 }
             }
@@ -204,17 +198,9 @@ public class GridParam extends AbstractFilterParam {
      * Notifies the GUI and adjustment listener of a change in the parameter's state.
      */
     private void notifyChange(boolean triggerListener) {
-        if (paramGUI != null) {
-            paramGUI.updateGUI();
-        }
+        updateGUI();
         if (triggerListener) {
-            trigger();
-        }
-    }
-
-    public void trigger() {
-        if (adjustmentListener != null) {
-            adjustmentListener.paramAdjusted();
+            triggerFilter();
         }
     }
 

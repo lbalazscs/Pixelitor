@@ -23,25 +23,25 @@ import pixelitor.utils.Geometry;
 import pixelitor.utils.Rnd;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.EventListenerList;
 import java.io.Serial;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
  * A filter parameter for selecting an angle.
  */
 public class AngleParam extends AbstractFilterParam {
-    // the angles are stored internally in radians
-    // between -π and π, as returned from Math.atan2
+    // The angles are stored internally in radians.
+    // Depending on how the value was set, it can be in [-π, π]
+    // (e.g. as returned from Math.atan2 in AngleSelector)
+    // or in [0, 2π) (e.g. from normalize() or setValueInDegrees()).
     private double angle;
     private final double defaultAngle;
 
     private boolean hasBorder = true;
 
-    private ChangeEvent changeEvent = null;
-    private final EventListenerList listenerList = new EventListenerList();
+    private List<Runnable> changeListeners;
 
     public AngleParam(String name, double def, AngleUnit unit) {
         this(name, unit.toRadians(def));
@@ -50,14 +50,12 @@ public class AngleParam extends AbstractFilterParam {
     public AngleParam(String name, double def) {
         super(name, RandomizeMode.ALLOW);
         this.defaultAngle = normalize(def);
-        setValue(this.defaultAngle, false);
+        angle = defaultAngle;
     }
 
     @Override
     public JComponent createGUI() {
-        paramGUI = new AngleParamGUI(this);
-        syncWithGui();
-        return (JComponent) paramGUI;
+        return installGUI(new AngleParamGUI(this));
     }
 
     public void setValueInDegrees(double degrees, boolean trigger) {
@@ -68,13 +66,14 @@ public class AngleParam extends AbstractFilterParam {
     public void setValue(double a, boolean trigger) {
         if (angle != a) {
             angle = a;
-            fireStateChanged();
+            notifyChangeListeners();
         }
-        if (trigger && adjustmentListener != null) {
+
+        if (trigger) {
             // trigger even if the angle didn't change, because
             // after non-triggering drag events, we can have a
             // triggering mouse up that didn't change the angle
-            adjustmentListener.paramAdjusted();
+            triggerFilter();
         }
     }
 
@@ -87,7 +86,8 @@ public class AngleParam extends AbstractFilterParam {
     }
 
     /**
-     * Returns the "Math.atan2" radians: the value between -π and π.
+     * Returns the angle in radians. Depending on how the value was set,
+     * it can be in [-π, π] or [0, 2π).
      */
     public double getValueInRadians() {
         return angle;
@@ -102,7 +102,8 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public boolean isAtDefault() {
-        return normalize(angle) == defaultAngle;
+        double diff = Math.abs(normalize(angle) - defaultAngle);
+        return diff < 1e-6 || Math.TAU - diff < 1e-6;
     }
 
     @Override
@@ -116,25 +117,28 @@ public class AngleParam extends AbstractFilterParam {
         return hasBorder;
     }
 
-    private void fireStateChanged() {
-        Object[] listeners = listenerList.getListenerList();
-        for (int i = listeners.length - 2; i >= 0; i -= 2) {
-            if (listeners[i] == ChangeListener.class) {
-                if (changeEvent == null) {
-                    changeEvent = new ChangeEvent(this);
-                }
-                ((ChangeListener) listeners[i + 1]).stateChanged(changeEvent);
-            }
+    private void notifyChangeListeners() {
+        if (changeListeners != null) {
+            changeListeners.forEach(Runnable::run);
         }
     }
 
-    public void addChangeListener(ChangeListener x) {
-        listenerList.add(ChangeListener.class, x);
+    /**
+     * Listeners added through this method are discarded when the
+     * GUI is disposed. Therefore, this method should not be used
+     * to establish permanent dependencies between filter parameters.
+     */
+    public void addUIChangeListener(Runnable listener) {
+        if (changeListeners == null) {
+            changeListeners = new ArrayList<>(2);
+        }
+        changeListeners.add(listener);
     }
 
-    @SuppressWarnings("unused")
-    public void removeChangeListener(ChangeListener x) {
-        listenerList.remove(ChangeListener.class, x);
+    @Override
+    public void guiDisposed() {
+        super.guiDisposed();
+        changeListeners = null;
     }
 
     @Override
@@ -184,7 +188,14 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
-        setValueInDegrees(((AngleParamState) state).angle, false);
+        double degrees = ((AngleParamState) state).angle;
+        double radians = AngleUnit.INTUITIVE_DEGREES.toRadians(degrees);
+
+        if (updateGUI) {
+            setValue(radians, false);
+        } else {
+            angle = radians;
+        }
     }
 
     @Override
@@ -194,16 +205,23 @@ public class AngleParam extends AbstractFilterParam {
 
     @Override
     public String getValueAsString() {
-        return String.format("%.2f", normalize(angle));
+        return String.format(Locale.ROOT, "%.2f", normalize(angle));
     }
 
-    private static double normalize(double angle) {
-        return angle < 0 ? angle + Math.TAU : angle;
+    private static double normalize(double a) {
+        double r = a % Math.TAU;
+        if (r < 0) {
+            r += Math.TAU;
+        }
+        if (r >= Math.TAU || r == 0.0) {
+            return 0.0;
+        }
+        return r;
     }
 
     @Override
     public String toString() {
-        return String.format("%s[name = '%s', angle = %.2f]",
+        return String.format(Locale.ROOT, "%s[name = '%s', angle = %.2f]",
             getClass().getSimpleName(), getName(), angle);
     }
 

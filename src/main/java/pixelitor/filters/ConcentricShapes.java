@@ -54,7 +54,7 @@ public class ConcentricShapes extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private enum Arrangement {
+    private enum Arrangement implements EnumChoice {
         NESTED("Nested"), RINGED("Ringed");
 
         private final String displayName;
@@ -69,7 +69,7 @@ public class ConcentricShapes extends ParametrizedFilter {
         }
     }
 
-    private enum ConcentricShapeType {
+    private enum ConcentricShapeType implements EnumChoice {
         CIRCLES("Circles", false, false, 1.0, 1.0) {
             @Override
             Shape createShape(double cx, double cy, double r, int n, double tuning) {
@@ -165,7 +165,8 @@ public class ConcentricShapes extends ParametrizedFilter {
         initParams(
             arrangementParam,
             shapeTypeParam,
-            sides,
+            // sept 2023: 4.3.0 => 4.3.1 migration
+            sides.withLegacyPresetKey("Polygon Sides"),
             tuning,
             distanceParam,
             colorsParam,

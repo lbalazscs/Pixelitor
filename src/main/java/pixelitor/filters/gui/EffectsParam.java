@@ -48,12 +48,8 @@ public class EffectsParam extends AbstractFilterParam {
         var resetButton = new ResetButton(effectsPanel);
         effectsPanel.setResetButton(resetButton);
 
-        var launcherGUI = new DialogLauncherGUI(
-            this::configureDialog, resetButton);
-
-        paramGUI = launcherGUI;
-        syncWithGui();
-        return launcherGUI;
+        return installGUI(new DialogLauncherGUI(
+            this::configureDialog, resetButton));
     }
 
     /**

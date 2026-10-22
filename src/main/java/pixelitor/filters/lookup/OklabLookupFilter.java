@@ -15,17 +15,17 @@
  * along with Pixelitor. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pixelitor.filters.curves;
+package pixelitor.filters.lookup;
 
-import com.jhlabs.image.Curve;
-import com.jhlabs.image.ImageMath;
 import com.jhlabs.image.PointFilter;
 import pixelitor.colors.ColorSpaces;
 
+import java.util.Objects;
+
 /**
- * A PointFilter that applies curves in the Oklab color space.
+ * A {@link PointFilter} that applies lookup-table adjustments in the Oklab color space.
  */
-public class OklabCurvesFilter extends PointFilter {
+public class OklabLookupFilter extends PointFilter {
     /**
      * Domain for the 'a' and 'b' channels of Oklab that comfortably covers the sRGB gamut.
      */
@@ -33,19 +33,23 @@ public class OklabCurvesFilter extends PointFilter {
     private static final float AB_CHANNEL_MAX = 0.5f;
     private static final float AB_CHANNEL_RANGE = AB_CHANNEL_MAX - AB_CHANNEL_MIN;
 
-    private final int[] lTable;
-    private final int[] aTable;
-    private final int[] bTable;
+    private final short[] lTable;
+    private final short[] aTable;
+    private final short[] bTable;
 
-    public OklabCurvesFilter(Curve lCurve, Curve aCurve, Curve bCurve) {
-        super("Oklab Curves");
-        this.lTable = lCurve.makeTable();
-        this.aTable = aCurve.makeTable();
-        this.bTable = bCurve.makeTable();
+    public OklabLookupFilter(ChannelLookup l, ChannelLookup a, ChannelLookup b) {
+        super("Oklab Lookup");
+        Objects.requireNonNull(l, "l must not be null");
+        Objects.requireNonNull(a, "a must not be null");
+        Objects.requireNonNull(b, "b must not be null");
+        this.lTable = l.getTable();
+        this.aTable = a.getTable();
+        this.bTable = b.getTable();
     }
 
     @Override
     public int processPixel(int x, int y, int rgb) {
+        // note: processPixel receives raw (possibly premultiplied) values for TYPE_INT_ARGB_PRE images
         int alpha = rgb & 0xFF_00_00_00;
         if (alpha == 0) {
             return rgb; // fully transparent: nothing visible to adjust
@@ -57,32 +61,28 @@ public class OklabCurvesFilter extends PointFilter {
         float a = oklab[1];
         float b = oklab[2];
 
-        // apply curves via lookup tables
+        // apply lookup tables
         // the L channel is already in [0, 1]; scale it to a table index
-        int lIndex = ImageMath.clamp((int) (l * 255.0f + 0.5f), 0, 255);
+        int lIndex = Math.clamp((int) (l * 255.0f + 0.5f), 0, 255);
         float newL = lTable[lIndex] / 255.0f;
 
         // a and b channels are normalized from their specific range
-        float newA = applyAbCurve(a, aTable);
-        float newB = applyAbCurve(b, bTable);
+        float newA = applyAbLookup(a, aTable);
+        float newB = applyAbLookup(b, bTable);
 
-        // convert back to sRGB
-        oklab[0] = newL;
-        oklab[1] = newA;
-        oklab[2] = newB;
-
+        // convert back to sRGB while preserving original alpha
         return alpha | (ColorSpaces.oklabToSrgb(newL, newA, newB) & 0x00_FF_FF_FF);
     }
 
     /**
-     * Applies a curve to an Oklab 'a' or 'b' channel value.
+     * Applies lookup table adjustments to an Oklab 'a' or 'b' channel value.
      */
-    private static float applyAbCurve(float channelValue, int[] table) {
+    private static float applyAbLookup(float channelValue, short[] table) {
         // normalize the value from its domain to [0, 1] for LUT lookup
         float normalized = (channelValue - AB_CHANNEL_MIN) / AB_CHANNEL_RANGE;
-        int index = ImageMath.clamp((int) (normalized * 255.0f + 0.5f), 0, 255);
+        int index = Math.clamp((int) (normalized * 255.0f + 0.5f), 0, 255);
 
-        // get the transformed value from the LUT and scale it to [0, 1]
+        // get the transformed value from the LUT and scale it back to [0, 1]
         float transformedNormalized = table[index] / 255.0f;
 
         // denormalize the value back to the original domain

@@ -20,7 +20,6 @@ package pixelitor.filters.gui;
 import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.VerticalLayout;
 import pixelitor.colors.Colors;
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.SliderSpinner;
 
 import javax.swing.*;
@@ -31,7 +30,6 @@ import java.util.List;
 
 import static java.awt.FlowLayout.LEFT;
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.filters.gui.ColorParamGUI.BUTTON_SIZE;
 import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
 
 /**
@@ -82,13 +80,11 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
     }
 
     private void createAndAddSwatch(Color color, int index) {
-        ColorSwatch swatch = new ColorSwatch(color, BUTTON_SIZE);
+        ColorSwatch swatch = Colors.createFilterSwatch(this, color, model.getName(),
+            () -> model.getColor(index), false,
+            c -> model.setColor(index, c, true));
         swatches.add(swatch);
         colorsPanel.add(swatch);
-
-        GUIUtils.addClickAction(swatch, () -> showColorDialog(index));
-        Colors.setupFilterColorPopupMenu(this, swatch,
-            () -> model.getColor(index), c -> updateColor(index, c));
     }
 
     private void numColorsChanged(int newNumColors) {
@@ -128,22 +124,6 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
             newColors[i] = swatches.get(i).getForeground();
         }
         model.setColors(newColors, sliderMovedByUser);
-    }
-
-    private void showColorDialog(int index) {
-        Colors.selectColorWithDialog(this, model.getName(),
-            model.getColor(index), false,
-            color -> updateColor(index, color));
-    }
-
-    private void updateColor(int index, Color color) {
-        ColorSwatch swatch = swatches.get(index);
-        swatch.setForeground(color);
-
-        // swatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
-        swatch.repaint();
-
-        model.setColor(index, color, true);
     }
 
     @Override

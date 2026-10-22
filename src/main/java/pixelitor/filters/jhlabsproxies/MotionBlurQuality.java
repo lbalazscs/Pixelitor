@@ -20,6 +20,7 @@ package pixelitor.filters.jhlabsproxies;
 import com.jhlabs.image.MotionBlur;
 import com.jhlabs.image.MotionBlurFilter;
 import com.jhlabs.image.MotionBlurOp;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
@@ -27,7 +28,7 @@ import java.awt.image.BufferedImage;
 /**
  * Determines which motion blur implementation to use based on the desired quality.
  */
-enum MotionBlurQuality {
+enum MotionBlurQuality implements EnumChoice {
     FASTER("Faster") {
         @Override
         public MotionBlur createFilter(String filterName, BufferedImage src) {

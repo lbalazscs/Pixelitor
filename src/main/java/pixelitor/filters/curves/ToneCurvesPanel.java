@@ -17,8 +17,6 @@
 
 package pixelitor.filters.curves;
 
-import pixelitor.filters.util.Channel;
-
 import javax.swing.*;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -44,7 +42,6 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
 
     private int draggedKnotIndex = -1; // index of the knot being dragged
     private int deletedKnotIndex = -1; // index of a knot deleted by dragging it out of bounds
-    private Runnable onChange;
 
     public ToneCurvesPanel(ToneCurves toneCurves) {
         this.toneCurves = toneCurves;
@@ -54,10 +51,6 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
 
         addMouseListener(this);
         addMouseMotionListener(this);
-    }
-
-    public void setChangeListener(Runnable onChange) {
-        this.onChange = onChange;
     }
 
     @Override
@@ -72,37 +65,13 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
         }
     }
 
-    public void modelChanged() {
+    private void onUserEdit() {
         repaint();
-        if (onChange != null) {
-            onChange.run();
-        }
+        toneCurves.fireAdjustmentChanged();
     }
 
     private Point2D.Float normalizeMousePos(MouseEvent e) {
         return ToneCurves.toCurveSpace(e.getX() - getDrawingOffsetX(), e.getY() - getDrawingOffsetY());
-    }
-
-    public void setActiveChannel(Channel channel) {
-        // prevent duplicate filter executions when changing the color space
-        if (toneCurves.setActiveChannel(channel)) {
-            modelChanged();
-        }
-    }
-
-    public void resetActiveCurve() {
-        toneCurves.getActiveCurve().reset();
-        modelChanged();
-    }
-
-    public void randomize() {
-        toneCurves.randomize();
-        modelChanged();
-    }
-
-    public void resetAllCurves() {
-        toneCurves.reset();
-        modelChanged();
     }
 
     private static boolean isMovableKnot(ToneCurve curve, int index) {
@@ -123,7 +92,7 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
             return;
         }
 
-        ToneCurve activeCurve = toneCurves.getActiveCurve();
+        ToneCurve activeCurve = toneCurves.getActiveAdjustment();
         if (draggedKnotIndex >= 0) {  // a knot is being dragged
             Point2D.Float mousePos = normalizeMousePos(e);
             if (activeCurve.isDraggedOutOfRange(draggedKnotIndex, mousePos.x, mousePos.y)) {
@@ -131,11 +100,11 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
                 activeCurve.deleteKnot(draggedKnotIndex);
                 deletedKnotIndex = draggedKnotIndex;
                 draggedKnotIndex = -1;
-                modelChanged();
+                onUserEdit();
             } else if (isMovableKnot(activeCurve, draggedKnotIndex)) {
                 // move the dragged knot
                 activeCurve.setKnotPosition(draggedKnotIndex, mousePos.x, mousePos.y);
-                modelChanged();
+                onUserEdit();
             }
         } else if (deletedKnotIndex >= 0) { // a knot was just deleted by dragging
             Point2D.Float mousePos = normalizeMousePos(e);
@@ -143,14 +112,14 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
                 // restore the recently deleted knot if dragged back into range
                 draggedKnotIndex = activeCurve.addKnot(mousePos.x, mousePos.y, false);
                 deletedKnotIndex = -1;
-                modelChanged();
+                onUserEdit();
             }
         }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        ToneCurve activeCurve = toneCurves.getActiveCurve();
+        ToneCurve activeCurve = toneCurves.getActiveAdjustment();
         Point2D.Float mousePos = normalizeMousePos(e);
         if (activeCurve.isOverKnot(mousePos)) {
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -167,7 +136,7 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
             return;
         }
 
-        ToneCurve activeCurve = toneCurves.getActiveCurve();
+        ToneCurve activeCurve = toneCurves.getActiveAdjustment();
         // pressing the mouse either selects an existing knot for dragging...
         Point2D.Float mousePos = normalizeMousePos(e);
         draggedKnotIndex = activeCurve.getKnotIndexAt(mousePos);
@@ -176,7 +145,7 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
             // ...or adds a new knot if clicking on an empty area
             draggedKnotIndex = activeCurve.addKnot(mousePos.x, mousePos.y, true);
             if (draggedKnotIndex >= 0) {
-                modelChanged();
+                onUserEdit();
             }
         }
     }
@@ -187,13 +156,13 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
             return;
         }
 
-        ToneCurve activeCurve = toneCurves.getActiveCurve();
+        ToneCurve activeCurve = toneCurves.getActiveAdjustment();
         // delete a knot by dropping it on top of another one
         if (draggedKnotIndex >= 0
             && isMovableKnot(activeCurve, draggedKnotIndex)
             && activeCurve.overlapsOtherKnot(draggedKnotIndex)) {
             activeCurve.deleteKnot(draggedKnotIndex);
-            modelChanged();
+            onUserEdit();
         }
         // reset dragging state at the end of the gesture
         draggedKnotIndex = -1;
@@ -206,14 +175,14 @@ public class ToneCurvesPanel extends JPanel implements MouseListener, MouseMotio
             return;
         }
 
-        ToneCurve activeCurve = toneCurves.getActiveCurve();
+        ToneCurve activeCurve = toneCurves.getActiveAdjustment();
         // re-check knot index on double-click to ensure we are on a knot
         Point2D.Float mousePos = normalizeMousePos(e);
         int knotIndex = activeCurve.getKnotIndexAt(mousePos);
         if (isMovableKnot(activeCurve, knotIndex)) {
             // double-clicking on a knot deletes it
             activeCurve.deleteKnot(knotIndex);
-            modelChanged();
+            onUserEdit();
         }
     }
 

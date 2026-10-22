@@ -66,7 +66,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
         this.defaultColors = colors;
 
         this.linkedModel = linkable ? new JToggleButton.ToggleButtonModel() : null;
-        this.linkedByDefault = linked;
+        this.linkedByDefault = linkable && linked;
         setLinked(linked);
 
         // if linked, the default colors must be the same
@@ -75,11 +75,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
 
     @Override
     public JComponent createGUI() {
-        var gui = new GroupedColorsParamGUI(this);
-        paramGUI = gui;
-        syncWithGui();
-
-        return gui;
+        return installGUI(new GroupedColorsParamGUI(this));
     }
 
     public int getNumColors() {
@@ -97,7 +93,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
         return Colors.formatGmic(colors[index]);
     }
 
-    public String getName(int index) {
+    public String getColorName(int index) {
         return names[index];
     }
 
@@ -123,12 +119,9 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
         }
         colors = newColors;
 
-        if (paramGUI != null) {
-            paramGUI.updateGUI();
-        }
-
-        if (trigger && adjustmentListener != null) {
-            adjustmentListener.paramAdjusted();
+        updateGUI();
+        if (trigger) {
+            triggerFilter();
         }
     }
 
@@ -138,7 +131,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
     }
 
     @Override
-    public String createLinkedToolTip() {
+    public String getLinkedToolTip() {
         if (names.length == 2) {
             return "<html>Whether the <b>%s</b> and <b>%s</b> colors are linked"
                 .formatted(names[0], names[1]);
@@ -193,7 +186,8 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
 
     @Override
     public boolean isAtDefault() {
-        return Arrays.equals(colors, defaultColors);
+        return isLinked() == linkedByDefault
+            && Arrays.equals(colors, defaultColors);
     }
 
     @Override

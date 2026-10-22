@@ -21,7 +21,6 @@ import com.bric.swing.ColorSwatch;
 import org.jdesktop.swingx.combobox.EnumComboBoxModel;
 import pixelitor.Features;
 import pixelitor.colors.ColorPickerHelper;
-import pixelitor.filters.gui.ChoiceParam;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.utils.*;
@@ -40,6 +39,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagLayout;
+import java.awt.event.ItemEvent;
 
 import static java.lang.Integer.parseInt;
 import static pixelitor.gui.GUIText.CLOSE_DIALOG;
@@ -180,12 +180,13 @@ public class PreferencesPanel extends JTabbedPane {
         String currentName = AppPreferences.loadUIFontName();
         String initialChoice = currentName.isEmpty() ? "Default" : currentName;
 
-        ChoiceParam<String> fontName = new ChoiceParam<>("Font Name", fontChoices, initialChoice);
-        gbh.addParam(fontName);
+        JComboBox<String> fontNameChooser = new JComboBox<>(fontChoices);
+        fontNameChooser.setSelectedItem(initialChoice);
+        gbh.addLabelAndControl("Font Name:", fontNameChooser);
 
         // a single callback for both listeners
         Runnable updateFont = () -> {
-            String selectedName = fontName.getSelected();
+            String selectedName = (String) fontNameChooser.getSelectedItem();
             int newSize = fontSize.getValue();
 
             // map the "Default" UI selection to an empty string internally
@@ -208,7 +209,11 @@ public class PreferencesPanel extends JTabbedPane {
         };
 
         fontSize.setAdjustmentListener(updateFont::run);
-        fontName.setAdjustmentListener(updateFont::run);
+        fontNameChooser.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                updateFont.run();
+            }
+        });
     }
 
     private void changeFont(Font newFont) {

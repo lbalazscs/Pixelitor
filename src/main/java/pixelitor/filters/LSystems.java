@@ -21,6 +21,7 @@ import net.jafama.FastMath;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.Shapes;
 
 import java.awt.Shape;
@@ -40,7 +41,7 @@ public class LSystems extends CurveFilter {
     private final EnumParam<Type> type = new EnumParam<>("Type", Type.class);
     private final RangeParam iterations = new RangeParam("Iterations", 1, 3, 7);
 
-    private enum Type {
+    private enum Type implements EnumChoice {
         BORDER("Border", "XYXYXYX+XYXYXYX+XYXYXYX+XYXYXYX", false, 0, 90) {
             private static final int[] START_ANGLES = {-27, 37, 10, -16, 47, 21, -6};
 
@@ -213,7 +214,7 @@ public class LSystems extends CurveFilter {
     }
 
     public LSystems() {
-        type.limitOtherMaxWhen(iterations, selected -> 3);
+        type.capOtherValueWhen(iterations, selected -> 3);
 
         addParamsToFront(
             type,

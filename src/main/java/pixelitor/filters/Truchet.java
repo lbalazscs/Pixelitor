@@ -20,6 +20,7 @@ package pixelitor.filters;
 import pixelitor.compactions.QuadrantAngle;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
+import pixelitor.utils.EnumChoice;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.BasicStroke;
@@ -33,7 +34,6 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import static java.awt.Color.BLACK;
@@ -82,31 +82,6 @@ public class Truchet extends ParametrizedFilter {
     private static final int PATTERN_26 = 26;
     private static final int PATTERN_27 = 27;
     private static final int PATTERN_28 = 28;
-
-
-    public static final Map<String, String> migration_helper = Map.ofEntries(
-        Map.entry("Un", "Aquamarine"),
-        Map.entry("Deux", "Baryte"),
-        Map.entry("Trois", "Citrine"),
-        Map.entry("Quatre", "Diamond"),
-        Map.entry("Cinq", "Emerald"),
-        Map.entry("Six", "Friedelite"),
-        Map.entry("Sept", "Garnet"),
-        Map.entry("Huit", "Hambergite"),
-        Map.entry("Neuf", "Iolite"),
-        Map.entry("Dix", "Jade"),
-        Map.entry("Onze", "Kyanite"),
-        Map.entry("Douze", "Lapis"),
-        Map.entry("Treize", "Moonstone"),
-        Map.entry("Quatorze", "Neptunite"),
-        Map.entry("Quinze", "Opal"),
-        Map.entry("Seize", "Pearl"),
-        Map.entry("Dix-sept", "Quartz"),
-        Map.entry("Dix-huit", "Ruby"),
-        Map.entry("Dix-neuf", "Sapphire"),
-        Map.entry("Vingt", "Turquoise"),
-        Map.entry("Vingt et un", "Uvite")
-    );
 
     private final EnumParam<TileType> typeParam = new EnumParam<>("Type", TileType.class);
     private final IntChoiceParam patternParam = new IntChoiceParam("Pattern", new Item[]{
@@ -492,7 +467,7 @@ public class Truchet extends ParametrizedFilter {
         return false;
     }
 
-    enum TileType {
+    enum TileType implements EnumChoice {
         TRIANGLES("Triangles") {
             @Override
             public Shape createFilledArea(int tileSize, int lineWidth) {

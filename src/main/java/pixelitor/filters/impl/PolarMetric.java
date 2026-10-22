@@ -19,6 +19,7 @@ package pixelitor.filters.impl;
 
 import com.jhlabs.image.ImageMath;
 import pixelitor.filters.gui.EnumParam;
+import pixelitor.utils.EnumChoice;
 
 import java.util.function.DoubleBinaryOperator;
 
@@ -27,7 +28,7 @@ import static com.jhlabs.image.ImageMath.SQRT_2;
 /**
  * A distance metric that gives the concentric patterns of radial filters a non-circular shape.
  */
-public enum PolarMetric {
+public enum PolarMetric implements EnumChoice {
     CIRCLE("Circle", ImageMath::hypot, 1.0),
     SQUIRCLE("Squircle", PolarMetric::calcSquircle, 1.0),
     SQUARE("Square", PolarMetric::calcSquare, 1.0),

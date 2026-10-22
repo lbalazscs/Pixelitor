@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters.gui;
 
 import pixelitor.gui.utils.GUIUtils;
+import pixelitor.utils.Choice;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -28,15 +29,15 @@ import static javax.swing.BoxLayout.X_AXIS;
 /**
  * The GUI for a {@link ChoiceParam}, consisting of a combo box and a reset button.
  */
-public class ChoiceParamGUI<E> extends JPanel implements ParamGUI {
+public class ChoiceParamGUI<E extends Choice> extends JPanel implements ParamGUI {
     private final JComboBox<E> comboBox;
     private final ResetButton resetButton;
 
-    public ChoiceParamGUI(ChoiceParam<E> model, FilterButtonModel action) {
+    public ChoiceParamGUI(ChoiceParam<E> model, FilterButtonModel sideButtonModel) {
         resetButton = new ResetButton(model);
         comboBox = GUIUtils.createComboBox(model, e -> resetButton.updateState());
 
-        if (action != null) {
+        if (sideButtonModel != null) {
             JPanel left = new JPanel(new FlowLayout(LEFT));
             left.add(comboBox);
             left.add(resetButton);
@@ -44,7 +45,7 @@ public class ChoiceParamGUI<E> extends JPanel implements ParamGUI {
             setLayout(new BoxLayout(this, X_AXIS));
             add(left);
             add(Box.createGlue());
-            add(action.createGUI());
+            add(sideButtonModel.createGUI());
         } else {
             setLayout(new FlowLayout(LEFT));
             add(comboBox);

@@ -110,7 +110,7 @@ public final class FilterButtonModel implements FilterSetting {
         button = new JButton(buttonText, icon);
         button.addActionListener(_ -> {
             action.run();
-            if (shouldTriggerFilter) {
+            if (shouldTriggerFilter && adjustmentListener != null) {
                 adjustmentListener.paramAdjusted();
             }
         });
@@ -153,22 +153,18 @@ public final class FilterButtonModel implements FilterSetting {
     }
 
     @Override
-    public String getName() {
-        return buttonText;
-    }
-
-    @Override
-    public void setName(String displayName) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean isEnabled() {
         return enabledByFilterLogic && enabledByAnimationSetting && enabledByParent;
     }
 
     @Override
+    public void guiDisposed() {
+        adjustmentListener = null;
+        button = null;
+    }
+
+    @Override
     public String toString() {
-        return format("%s[name = '%s']", getClass().getSimpleName(), getName());
+        return format("%s[text = '%s']", getClass().getSimpleName(), buttonText);
     }
 }

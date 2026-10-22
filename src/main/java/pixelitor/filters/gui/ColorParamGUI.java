@@ -19,10 +19,8 @@ package pixelitor.filters.gui;
 
 import com.bric.swing.ColorSwatch;
 import pixelitor.colors.Colors;
-import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.FlowLayout;
 
 import static java.awt.FlowLayout.LEFT;
@@ -31,8 +29,6 @@ import static java.awt.FlowLayout.LEFT;
  * GUI component for interacting with a {@link ColorParam}.
  */
 public class ColorParamGUI extends JPanel implements ParamGUI {
-    public static final int BUTTON_SIZE = 30;
-
     private final ColorParam model;
     private final ColorSwatch colorSwatch;
     private ResetButton resetButton;
@@ -42,14 +38,10 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
 
         this.model = model;
 
-        Color color = model.getColor();
-        colorSwatch = new ColorSwatch(color, BUTTON_SIZE);
+        colorSwatch = Colors.createFilterSwatch(this, model.getColor(), model.getName(),
+            model::getColor, model.isTransparencyAllowed(),
+            c -> model.setColor(c, true));
         add(colorSwatch);
-
-        GUIUtils.addClickAction(colorSwatch, this::showColorDialog);
-
-        Colors.setupFilterColorPopupMenu(this, colorSwatch,
-            model::getColor, this::applySelectedColor);
 
         if (sideButtonModel != null) {
             add(sideButtonModel.createGUI());
@@ -59,19 +51,6 @@ public class ColorParamGUI extends JPanel implements ParamGUI {
             resetButton = new ResetButton(model);
             add(resetButton);
         }
-    }
-
-    private void showColorDialog() {
-        Colors.selectColorWithDialog(this, model.getName(),
-            model.getColor(), model.isTransparencyAllowed(), this::applySelectedColor);
-    }
-
-    // updates the swatch and the model with the new selected color
-    private void applySelectedColor(Color color) {
-        colorSwatch.setForeground(color);
-        colorSwatch.paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
-
-        model.setColor(color, true);
     }
 
     @Override

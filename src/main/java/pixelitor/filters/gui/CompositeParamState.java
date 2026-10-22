@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * Allows treating multiple {@link ParamState} objects as a single
  * {@link ParamState} ("Composite design pattern").
@@ -46,10 +44,11 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
      * Creates a composite state by copying the state of all animatable parameters.
      */
     public CompositeParamState(FilterParam[] params) {
+        // <ParamState<?>> type witness added to work around IntelliJ bug
         children = Arrays.stream(params)
             .filter(FilterParam::isAnimatable)
-            .map(FilterParam::copyState)
-            .collect(toList());
+            .<ParamState<?>>map(FilterParam::copyState)
+            .toList();
     }
 
     @Override

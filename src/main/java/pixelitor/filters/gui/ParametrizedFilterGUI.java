@@ -139,8 +139,7 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
 
     @Override
     public void dispose() {
-        // prevents a memory leak, because the Filter object lives indefinitely
-        paramSet.setAdjustmentListener(null);
+        paramSet.guiDisposed();
     }
 
     /**

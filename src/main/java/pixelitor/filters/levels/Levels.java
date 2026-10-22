@@ -17,12 +17,10 @@
 
 package pixelitor.filters.levels;
 
+import pixelitor.filters.channels.ChannelAdjustmentFilter;
 import pixelitor.filters.gui.FilterGUI;
-import pixelitor.filters.gui.FilterWithGUI;
-import pixelitor.filters.gui.UserPreset;
 import pixelitor.layers.Filterable;
 
-import java.awt.image.BufferedImage;
 import java.io.Serial;
 
 import static pixelitor.utils.Texts.i18n;
@@ -30,48 +28,18 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * The Levels filter, adjusting the tonal range of an image.
  */
-public class Levels extends FilterWithGUI {
+public class Levels extends ChannelAdjustmentFilter<LevelsModel> {
     public static final String NAME = i18n("levels");
 
     @Serial
     private static final long serialVersionUID = 1780232770405846617L;
 
-    private final LevelsModel levelsModel;
-
     public Levels() {
-        levelsModel = new LevelsModel();
+        super(new LevelsModel());
     }
 
     @Override
-    public FilterGUI createGUI(Filterable layer, boolean resetSettings) {
-        if (resetSettings) {
-            levelsModel.resetAll();
-        }
-        return new LevelsGUI(this, layer, levelsModel);
-    }
-
-    @Override
-    public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        return levelsModel.apply(src, dest);
-    }
-
-    @Override
-    public void randomize() {
-        levelsModel.randomizeAndRun();
-    }
-
-    @Override
-    public boolean supportsGray() {
-        return false;
-    }
-
-    @Override
-    public void saveStateTo(UserPreset preset) {
-        levelsModel.saveToUserPreset(preset);
-    }
-
-    @Override
-    public void loadUserPreset(UserPreset preset) {
-        levelsModel.loadUserPreset(preset);
+    protected FilterGUI createChannelGUI(Filterable layer) {
+        return new LevelsGUI(this, layer);
     }
 }

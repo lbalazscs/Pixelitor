@@ -120,7 +120,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     public boolean shouldHaveUserPresetsMenu() {
         // trivial filters don't have a "Save Preset" menu
         // option, but they still might be smart filters
-        return paramSet.isComplex();
+        return paramSet.requiresPresetSupport();
     }
 
     @Override
@@ -143,10 +143,6 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
         UserPreset tmpPreset = new UserPreset(getName(), "Debug");
         paramSet.saveStateTo(tmpPreset);
         return tmpPreset.toString();
-    }
-
-    public void setParamValue(String paramName, String value) {
-        paramSet.set(paramName, value);
     }
 
     @Override

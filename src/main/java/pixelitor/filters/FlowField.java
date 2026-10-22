@@ -96,7 +96,7 @@ public class FlowField extends ParametrizedFilter {
     /**
      * Force modes define how the forces affect a particle's movement.
      */
-    private enum ForceMode {
+    private enum ForceMode implements EnumChoice {
         VELOCITY("No Mass") {
             @Override
             public void modify(Particle particle) {
@@ -144,7 +144,7 @@ public class FlowField extends ParametrizedFilter {
         }
     }
 
-    private enum ColorSource {
+    private enum ColorSource implements EnumChoice {
         DEFAULT("Default", false) {
             @Override
             Color getColor(Particle particle) {

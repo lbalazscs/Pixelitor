@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,8 +21,6 @@ package pixelitor.filters.gui;
  * that can be reset to this default (typically by clicking a {@link ResetButton}).
  */
 public interface Resettable {
-    String RESET_ALL_TOOLTIP = "Reset all settings to their default values.";
-
     /**
      * Checks if this {@link Resettable} is currently set to its default value.
      */
@@ -37,7 +35,8 @@ public interface Resettable {
     void reset(boolean trigger);
 
     /**
-     * Returns a tooltip for the UI component (like a {@link ResetButton}) that triggers the reset action.
+     * Returns a tooltip for the UI component (like a
+     * {@link ResetButton}) that triggers the reset action.
      */
     String getResetToolTip();
 }

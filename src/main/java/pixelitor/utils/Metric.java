@@ -22,7 +22,7 @@ import net.jafama.FastMath;
 /**
  * Different distance metrics for calculating distances between two points.
  */
-public enum Metric {
+public enum Metric implements EnumChoice {
     /**
      * Squared Euclidean distance: (x₁-x₂)² + (y₁-y₂)².
      * Without the square root for better performance.

@@ -49,8 +49,10 @@
 
 package pd.fastnoise;
 
+import pixelitor.utils.EnumChoice;
+
 public class FastNoiseLite {
-    public enum NoiseType {
+    public enum NoiseType implements EnumChoice {
         CELLULAR("Cellular"),
         OPEN_SIMPLEX_2("OpenSimplex 2"),
         OPEN_SIMPLEX_2S("OpenSimplex 2S"),
@@ -87,7 +89,7 @@ public class FastNoiseLite {
         }
     }
 
-    public enum FractalType {
+    public enum FractalType implements EnumChoice {
         NONE("None"),
         FBM("Fractal Brownian Motion"),
         RIDGED("Ridged"),
@@ -105,7 +107,7 @@ public class FastNoiseLite {
         }
     }
 
-    public enum DomainWarpFractalType {
+    public enum DomainWarpFractalType implements EnumChoice {
         NONE("None"),
         PROGRESSIVE("Progressive"),
         INDEPENDENT("Independent");
@@ -122,7 +124,7 @@ public class FastNoiseLite {
         }
     }
 
-    public enum CellularDistanceFunction {
+    public enum CellularDistanceFunction implements EnumChoice {
         EUCLIDEAN("Euclidean"),
         EUCLIDEAN_SQ("Euclidean Squared"),
         MANHATTAN("Manhattan"),
@@ -140,7 +142,7 @@ public class FastNoiseLite {
         }
     }
 
-    public enum CellularReturnType {
+    public enum CellularReturnType implements EnumChoice {
         CELL_VALUE("Cell Value"),
         DISTANCE("Distance"),
         DISTANCE_2("Distance 2"),
@@ -161,7 +163,7 @@ public class FastNoiseLite {
         }
     }
 
-    public enum DomainWarpType {
+    public enum DomainWarpType implements EnumChoice {
         NONE("None"),
         OPEN_SIMPLEX_2("OpenSimplex 2"),
         OPEN_SIMPLEX_2_REDUCED("OpenSimplex 2 Reduced"),

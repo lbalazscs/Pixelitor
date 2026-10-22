@@ -18,13 +18,14 @@
 package pixelitor.filters.gui;
 
 import com.jhlabs.image.CellSearchFilter;
+import pixelitor.utils.Choice;
 
 import java.util.List;
 
 /**
  * A {@link ChoiceParam} for choosing a value from an enum.
  */
-public class EnumParam<E extends Enum<E>> extends ChoiceParam<E> {
+public class EnumParam<E extends Enum<E> & Choice> extends ChoiceParam<E> {
     public EnumParam(String name, Class<E> enumClass) {
         super(name, enumClass.getEnumConstants(), RandomizeMode.ALLOW);
     }

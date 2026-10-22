@@ -22,6 +22,7 @@ import pd.OpenSimplex2F;
 import pixelitor.filters.Filter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gmic.GMICFilter;
+import pixelitor.gui.GUIText;
 import pixelitor.layers.Filterable;
 import pixelitor.utils.CachedFloatRandom;
 import pixelitor.utils.Icons;
@@ -41,8 +42,6 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING
  * The GUI of the filter can be built automatically based on the contents of this class.
  */
 public class ParamSet implements Debuggable {
-    public static final String RANDOMIZE_BUTTON_TOOLTIP = "Randomize the settings for this filter.";
-
     private final List<FilterParam> params = new ArrayList<>();
     private final List<FilterButtonModel> actions = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
@@ -117,7 +116,7 @@ public class ParamSet implements Debuggable {
         var randomizeAction = new FilterButtonModel("Randomize Settings",
             this::randomize,
             Icons.getRandomizeIcon(),
-            RANDOMIZE_BUTTON_TOOLTIP,
+            GUIText.RANDOMIZE_BUTTON_TOOLTIP,
             "randomize");
         actions.add(randomizeAction);
     }
@@ -129,7 +128,7 @@ public class ParamSet implements Debuggable {
         var resetAllAction = new FilterButtonModel("Reset All",
             this::reset,
             Icons.getResetIcon(),
-            Resettable.RESET_ALL_TOOLTIP,
+            GUIText.RESET_ALL_TOOLTIP,
             "resetAll");
         actions.add(resetAllAction);
     }
@@ -186,6 +185,15 @@ public class ParamSet implements Debuggable {
         }
         for (FilterButtonModel action : actions) {
             action.setAdjustmentListener(listener);
+        }
+    }
+
+    public void guiDisposed() {
+        for (FilterParam param : params) {
+            param.guiDisposed();
+        }
+        for (FilterButtonModel action : actions) {
+            action.guiDisposed();
         }
     }
 
@@ -330,6 +338,9 @@ public class ParamSet implements Debuggable {
         if (modified == null) {
             throw new IllegalStateException("No param called " + paramName);
         }
+        if (value == null) {
+            throw new IllegalArgumentException();
+        }
         modified.loadStateFrom(value);
     }
 
@@ -348,15 +359,14 @@ public class ParamSet implements Debuggable {
     /**
      * Returns true if the filter is considered "complex", which means
      * it has multiple parameters or a single, complex parameter.
-     * This affects whether user presets are enabled.
      */
-    public boolean isComplex() {
+    public boolean requiresPresetSupport() {
         assert !params.isEmpty();
         if (params.size() > 1) {
             return true;
         }
         FilterParam singleParam = params.getFirst();
-        return singleParam.isComplex();
+        return singleParam.requiresPresetSupport();
     }
 
     // reseed support methods from here

@@ -154,6 +154,10 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     @Serial
     private void writeObject(ObjectOutputStream out) throws IOException {
         assert checkInvariants();
+
+        // TODO ParamState has to be serializable so that this
+        //   doesn't throw NotSerializableException.
+        //   Instead of this, its toPresetString should be used
         out.defaultWriteObject();
     }
 

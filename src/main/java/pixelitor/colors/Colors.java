@@ -24,6 +24,7 @@ import pixelitor.colors.palette.ColorSwatchClickHandler;
 import pixelitor.colors.palette.PalettePanel;
 import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.utils.Dialogs;
+import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Lazy;
@@ -66,6 +67,8 @@ public class Colors {
     public static final Color OK_RED = new Color(213, 63, 63);
     public static final Color OK_BLUE = new Color(66, 0, 254);
     public static final Color OK_YELLOW = new Color(254, 157, 0);
+
+    private static final int SWATCH_BUTTON_SIZE = 30;
 
     private Colors() {
     }
@@ -154,8 +157,10 @@ public class Colors {
                 parseInt(text.substring(2, 4), 16),
                 parseInt(text.substring(4, 6), 16),
                 parseInt(text.substring(6, 8), 16));
+        } catch (IllegalArgumentException e) { // includes NumberFormatException
+            throw e;
         } catch (Exception e) {
-            return null;
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -168,8 +173,10 @@ public class Colors {
                 parseInt(text.substring(0, 2), 16),
                 parseInt(text.substring(2, 4), 16),
                 parseInt(text.substring(4, 6), 16));
+        } catch (IllegalArgumentException e) { // includes NumberFormatException
+            throw e;
         } catch (Exception e) {
-            return null;
+            throw new IllegalArgumentException(e);
         }
     }
 
@@ -210,6 +217,7 @@ public class Colors {
         Utils.copyStringToClipboard(toHtmlHex(c));
     }
 
+    // on error it throws IllegalArgumentException or returns null
     private static Color getColorFromClipboard() {
         String text;
         try {
@@ -241,8 +249,10 @@ public class Colors {
                         parseInt(components[1].trim()),
                         parseInt(components[2].trim()));
                 }
+            } catch (IllegalArgumentException e) { // includes NumberFormatException
+                throw e;
             } catch (Exception e) {
-                return null;
+                throw new IllegalArgumentException(e);
             }
         }
 
@@ -320,7 +330,13 @@ public class Colors {
 
     public static Action createPasteColorAction(Window owner, Consumer<Color> colorSetter) {
         return new TaskAction("Paste Color", () -> {
-            Color color = getColorFromClipboard();
+            Color color;
+            try {
+                color = getColorFromClipboard();
+            } catch (IllegalArgumentException e) {
+                Dialogs.showClipboardNotColorWarning(owner);
+                return;
+            }
             if (color == null) {
                 Dialogs.showClipboardNotColorWarning(owner);
             } else {
@@ -430,5 +446,20 @@ public class Colors {
             return Color.GRAY;
         }
         return c;
+    }
+
+    public static ColorSwatch createFilterSwatch(JComponent owner, Color initial, String title,
+                                                 Supplier<Color> getter, boolean allowAlpha,
+                                                 Consumer<Color> modelSetter) {
+        ColorSwatch swatch = new ColorSwatch(initial, SWATCH_BUTTON_SIZE);
+        Consumer<Color> apply = c -> {
+            swatch.setForeground(c);
+            swatch.paintImmediately(0, 0, SWATCH_BUTTON_SIZE, SWATCH_BUTTON_SIZE);
+            modelSetter.accept(c);
+        };
+        GUIUtils.addClickAction(swatch, () ->
+            selectColorWithDialog(owner, title, getter.get(), allowAlpha, apply));
+        setupFilterColorPopupMenu(owner, swatch, getter, apply);
+        return swatch;
     }
 }

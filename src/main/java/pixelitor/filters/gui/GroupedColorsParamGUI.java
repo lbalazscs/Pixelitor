@@ -22,11 +22,9 @@ import pixelitor.colors.Colors;
 import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
-import java.awt.Color;
 import java.awt.FlowLayout;
 
 import static javax.swing.BorderFactory.createTitledBorder;
-import static pixelitor.filters.gui.ColorParamGUI.BUTTON_SIZE;
 import static pixelitor.utils.Texts.i18n;
 
 /**
@@ -36,6 +34,7 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
     private final GroupedColorsParam model;
     private final ResetButton resetButton;
     private final ColorSwatch[] swatches;
+    private final JCheckBox linkedCB;
 
     public GroupedColorsParamGUI(GroupedColorsParam model) {
         super(new FlowLayout(FlowLayout.LEFT));
@@ -51,7 +50,11 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
         }
 
         if (model.isLinkable()) {
-            addLinkedCheckBox();
+            add(new JLabel(i18n("linked") + ":"));
+            linkedCB = GUIUtils.createLinkCheckBox(this.model);
+            add(linkedCB);
+        } else {
+            linkedCB = null;
         }
 
         resetButton = new ResetButton(model);
@@ -59,34 +62,11 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
     }
 
     private void createAndAddSwatch(int index) {
-        add(new JLabel(model.getName(index) + ":"));
-        swatches[index] = new ColorSwatch(model.getColor(index), BUTTON_SIZE);
-
-        GUIUtils.addClickAction(swatches[index], () -> showColorDialog(index));
-        Colors.setupFilterColorPopupMenu(this, swatches[index],
-            () -> model.getColor(index),
-            newColor -> updateColor(index, newColor));
-
+        add(new JLabel(model.getColorName(index) + ":"));
+        swatches[index] = Colors.createFilterSwatch(this, model.getColor(index), model.getName(),
+            () -> model.getColor(index), model.isTransparencyAllowed(),
+            c -> model.setColor(index, c, true));
         add(swatches[index]);
-    }
-
-    /**
-     * Shows the color chooser dialog for a specific color swatch.
-     */
-    private void showColorDialog(int index) {
-        Colors.selectColorWithDialog(this, model.getName(),
-            model.getColor(index), model.isTransparencyAllowed(),
-            color -> updateColor(index, color));
-    }
-
-    /**
-     * Updates a color in the model and GUI after a user change.
-     */
-    private void updateColor(int index, Color color) {
-        swatches[index].setForeground(color);
-        swatches[index].paintImmediately(0, 0, BUTTON_SIZE, BUTTON_SIZE);
-
-        model.setColor(index, color, true);
     }
 
     @Override
@@ -96,11 +76,6 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
             swatches[i].setForeground(model.getColor(i));
         }
         resetButton.updateState();
-    }
-
-    private void addLinkedCheckBox() {
-        add(new JLabel(i18n("linked") + ":"));
-        add(GUIUtils.createLinkCheckBox(model));
     }
 
     @Override
@@ -121,5 +96,8 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
             swatch.setEnabled(enabled);
         }
         resetButton.setEnabled(enabled);
+        if (linkedCB != null) {
+            linkedCB.setEnabled(enabled);
+        }
     }
 }

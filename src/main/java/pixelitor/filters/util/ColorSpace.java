@@ -19,13 +19,14 @@ package pixelitor.filters.util;
 
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.gui.GUIText;
+import pixelitor.utils.EnumChoice;
 
 import java.util.List;
 
 /**
  * Represents a supported, non-cylindrical color space.
  */
-public enum ColorSpace {
+public enum ColorSpace implements EnumChoice {
     SRGB("sRGB (Faster)"),
     OKLAB("Oklab (Better)");
 

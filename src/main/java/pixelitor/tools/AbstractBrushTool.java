@@ -53,7 +53,7 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.WEST;
 /**
  * Abstract base class for tools that draw using {@link Brush} objects.
  */
-public abstract class AbstractBrushTool extends Tool {
+public abstract class AbstractBrushTool extends Tool implements pixelitor.utils.Choice {
     private static final int MIN_BRUSH_RADIUS = 1;
     public static final int MAX_BRUSH_RADIUS = 500;
     public static final int DEFAULT_BRUSH_RADIUS = 10;
@@ -737,6 +737,11 @@ public abstract class AbstractBrushTool extends Tool {
         lazyMouseEnabled.loadStateFrom(preset);
         lazyMouseDist.loadStateFrom(preset);
         updateActiveBrush();
+    }
+
+    @Override
+    public String presetId() {
+        return getShortName();
     }
 
     @Override

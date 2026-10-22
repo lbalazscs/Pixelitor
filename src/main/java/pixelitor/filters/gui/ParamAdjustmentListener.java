@@ -20,6 +20,7 @@ package pixelitor.filters.gui;
 /**
  * A listener for events in the GUI of a {@link FilterSetting}.
  */
+@FunctionalInterface
 public interface ParamAdjustmentListener {
     /**
      * Called when a parameter is adjusted in the GUI.
