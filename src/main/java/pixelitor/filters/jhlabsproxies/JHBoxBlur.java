@@ -57,7 +57,7 @@ public class JHBoxBlur extends ParametrizedFilter {
         float vRadius = radius.getValueAsFloat(1);
 
         if (hRadius == 0.0f && vRadius == 0.0f) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         BoxBlurFilter filter = new BoxBlurFilter(NAME, hRadius, vRadius, numIterations.getValue());

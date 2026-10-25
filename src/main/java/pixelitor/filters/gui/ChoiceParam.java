@@ -57,7 +57,6 @@ public class ChoiceParam<E extends Choice> extends AbstractFilterParam implement
                        RandomizeMode randomizeMode) {
         super(name, randomizeMode);
 
-        assert idsAreUnique(choices);
         this.choices = choices;
         this.defaultValue = defaultValue;
         this.selectedValue = defaultValue;
@@ -108,7 +107,6 @@ public class ChoiceParam<E extends Choice> extends AbstractFilterParam implement
 
     public void setChoices(List<E> newChoices, boolean keepSelection) {
         assert newChoices != null && !newChoices.isEmpty();
-        assert idsAreUnique(newChoices);
 
         E oldSelection = selectedValue;
         this.choices = List.copyOf(newChoices);
@@ -219,10 +217,6 @@ public class ChoiceParam<E extends Choice> extends AbstractFilterParam implement
             }
         }
         return null;
-    }
-
-    private static boolean idsAreUnique(List<? extends Choice> choices) {
-        return choices.stream().map(Choice::presetId).distinct().count() == choices.size();
     }
 
     /**

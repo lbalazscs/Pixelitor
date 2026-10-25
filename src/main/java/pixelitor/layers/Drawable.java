@@ -98,11 +98,12 @@ public interface Drawable extends Filterable {
 
             BufferedImage dest = filter.transformImage(src);
             assert dest != null;
+            assert src != dest;
 
             if (context.isPreview()) {
                 changePreviewImage(dest, filter.getName(), context);
             } else {
-                filterWithoutDialogFinished(dest, context, filter.getName());
+                filterWithoutDialogFinished(src, dest, context, filter.getName());
             }
         } catch (OutOfMemoryError e) {
             Dialogs.showOutOfMemoryError(e);

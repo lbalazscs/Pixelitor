@@ -27,7 +27,7 @@ public class ImageMath {
     public static final float TAU_F = (float) TAU; // 2π as a float
 
     public static final double HALF_PI = PI / 2.0;  // π/2
-    public static final double QUARTER_PI = PI / 4.0;  // π/2
+    public static final double QUARTER_PI = PI / 4.0;  // π/4
     public static final double INV_PI = 1.0 / PI;   // 1/π
     public static final double INV_TAU = 1.0 / TAU; // 1/2π
 
@@ -200,9 +200,9 @@ public class ImageMath {
     /**
      * Clamp a value to an interval.
      *
+     * @param input the input parameter
      * @param min   the lower clamp threshold
      * @param max   the upper clamp threshold
-     * @param input the input parameter
      * @return the clamped value
      */
     public static float clamp(float input, float min, float max) {
@@ -224,9 +224,9 @@ public class ImageMath {
     /**
      * Clamp a value to an interval.
      *
+     * @param input the input parameter
      * @param min   the lower clamp threshold
      * @param max   the upper clamp threshold
-     * @param input the input parameter
      * @return the clamped input
      */
     public static int clamp(int input, int min, int max) {
@@ -275,7 +275,7 @@ public class ImageMath {
     }
 
     /**
-     * Returns a repeating triangle with range 0..width and with wavelength 2*width
+     * Returns a repeating triangle with range 0..width-1 and with wavelength 2*width
      * Intended to be used as the "reflect" edge action in transform filters.
      */
     public static int reflectTriangle(int x, int width) {
@@ -386,7 +386,8 @@ public class ImageMath {
         return mixColors((float) t, rgb1, rgb2);
     }
 
-    // a performance-optimized version, usable if one of the colors and the mix ratio is always the same
+    // a performance-optimized version, usable if one of the colors and the
+    // mix ratio is always the same (contract: mixInt + invMixInt == 256)
     static int mixColors(int rgb1, int a2, int r2, int g2, int b2, int mixInt, int invMixInt) {
         int a1 = rgb1 >>> 24;
         int r1 = (rgb1 >> 16) & 0xFF;
@@ -553,8 +554,8 @@ public class ImageMath {
      * Premultiply a block of pixels.
      */
     public static void premultiply(int[] p, int offset, int length) {
-        length += offset;
-        for (int i = offset; i < length; i++) {
+        int end = offset + length;
+        for (int i = offset; i < end; i++) {
             int rgb = p[i];
             int a = rgb >>> 24;
             if (a == 255) {
@@ -568,9 +569,14 @@ public class ImageMath {
             int g = (rgb >> 8) & 0xFF;
             int b = rgb & 0xFF;
 
-            r = (r * a) / 255;
-            g = (g * a) / 255;
-            b = (b * a) / 255;
+            // exact fast equivalent of (c * a + 127) / 255 for c, a in [0..255]
+            int tr = r * a + 128;
+            int tg = g * a + 128;
+            int tb = b * a + 128;
+            r = (tr + (tr >> 8)) >> 8;
+            g = (tg + (tg >> 8)) >> 8;
+            b = (tb + (tb >> 8)) >> 8;
+
             p[i] = (a << 24) | (r << 16) | (g << 8) | b;
         }
     }
@@ -583,28 +589,20 @@ public class ImageMath {
      * Unpremultiply a block of pixels.
      */
     public static void unpremultiply(int[] p, int offset, int length) {
-        length += offset;
-        for (int i = offset; i < length; i++) {
+        int end = offset + length;
+        for (int i = offset; i < end; i++) {
             int rgb = p[i];
-            int a = (rgb >>> 24);
+            int a = rgb >>> 24;
             if (a != 0 && a != 255) {
                 int r = (rgb >> 16) & 0xFF;
                 int g = (rgb >> 8) & 0xFF;
                 int b = rgb & 0xFF;
 
-                r = (r * 255) / a;
-                g = (g * 255) / a;
-                b = (b * 255) / a;
+                int halfA = a >> 1;
+                r = Math.min(255, (r * 255 + halfA) / a);
+                g = Math.min(255, (g * 255 + halfA) / a);
+                b = Math.min(255, (b * 255 + halfA) / a);
 
-                if (r > 255) {
-                    r = 255;
-                }
-                if (g > 255) {
-                    g = 255;
-                }
-                if (b > 255) {
-                    b = 255;
-                }
                 p[i] = (a << 24) | (r << 16) | (g << 8) | b;
             }
         }

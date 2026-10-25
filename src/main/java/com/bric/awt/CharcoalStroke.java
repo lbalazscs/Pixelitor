@@ -1,8 +1,6 @@
 /*
  * @(#)CharcoalStroke.java
  *
- * $Date: 2014-06-06 20:04:49 +0200 (P, 06 jún. 2014) $
- *
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
@@ -17,14 +15,12 @@
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
-package com.bric.awt;
 
-import com.bric.geom.GeneralPathWriter;
+package com.bric.awt;
 
 import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.geom.GeneralPath;
 
 import static java.lang.Math.PI;
 
@@ -73,20 +69,6 @@ public class CharcoalStroke implements Stroke {
     }
 
     /**
-     * @return the random seed this object uses.
-     */
-    public int getRandomSeed() {
-        return randomSeed;
-    }
-
-    /**
-     * @return the angle (in radians) this effect uses.
-     */
-    public float getAngle() {
-        return angle;
-    }
-
-    /**
      * This creates a <code>CharcoalStroke</code> on top of a
      * simple <code>BasicStroke</code>, with a fixed angle of 45 degrees.
      *
@@ -113,7 +95,7 @@ public class CharcoalStroke implements Stroke {
      * redefined.
      *
      * @param newStroke the new underlying Stroke.  This could be
-     *                  a <code>BasicShape</code>, or your own stroke.  It is not
+     *                  a <code>BasicStroke</code>, or your own stroke.  It is not
      *                  recommended to layer a <code>CharcoalStroke</code> on top
      *                  of another <code>CharcoalStroke</code>, because they are very
      *                  complex.
@@ -128,21 +110,22 @@ public class CharcoalStroke implements Stroke {
         if (crackSize == 0) {
             return shape;
         }
+        float maxDepth = stroke instanceof BasicStroke bs ? bs.getLineWidth() * 2 : Float.MAX_VALUE;
+        return CharcoalEffect.filter(shape, crackSize, angle, randomSeed, maxDepth);
+    }
 
-        GeneralPath newShape = new GeneralPath(
-                shape.getPathIterator(null).getWindingRule());
-        GeneralPathWriter writer = new GeneralPathWriter(newShape);
+    /**
+     * @return the random seed this object uses.
+     */
+    public int getRandomSeed() {
+        return randomSeed;
+    }
 
-        float maxDepth = Float.MAX_VALUE;
-        if (stroke instanceof BasicStroke basicStroke) {
-            maxDepth = basicStroke.getLineWidth() * 2;
-        }
-
-        CharcoalEffect charcoal = new CharcoalEffect(writer, crackSize, angle, randomSeed, maxDepth);
-
-        charcoal.write(shape);
-
-        return newShape;
+    /**
+     * @return the angle (in radians) this effect uses.
+     */
+    public float getAngle() {
+        return angle;
     }
 
     /**

@@ -20,6 +20,7 @@ package pixelitor.guitest.main;
 import org.assertj.swing.fixture.DialogFixture;
 import org.assertj.swing.fixture.JButtonFixture;
 import pixelitor.filters.*;
+import pixelitor.filters.gmic.GMICFilter;
 import pixelitor.filters.jhlabsproxies.JHKaleidoscope;
 import pixelitor.filters.jhlabsproxies.JHPolarCoordinates;
 import pixelitor.filters.levels.Levels;
@@ -89,7 +90,11 @@ public class FilterTests {
         testDisplaceFilters();
         testDistortFilters();
         testFindEdgesFilters();
-        testGMICFilters();
+
+        if (EDT.call(() -> GMICFilter.GMIC_PATH != null)) {
+            testGMICFilters();
+        }
+
         testLightFilters();
         testNoiseFilters();
         testOtherFilters();
@@ -312,14 +317,14 @@ public class FilterTests {
     }
 
     private void testConvolution() {
-        testFilterWithDialog("Custom 3x3 Convolution", FilterOptions.NONE, "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
+        testFilterWithDialog("Custom 3x3 Convolution", FilterOptions.RENDERING,
+            "Corner Blur", "\"Gaussian\" Blur", "Mean Blur", "Sharpen",
             "Edge Detection", "Edge Detection 2", "Horizontal Edge Detection",
-            "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss",
-            "Reset All", "Randomize");
-        testFilterWithDialog("Custom 5x5 Convolution", FilterOptions.NONE, "Diamond Blur", "Motion Blur",
+            "Vertical Edge Detection", "Emboss", "Emboss 2", "Color Emboss");
+        testFilterWithDialog("Custom 5x5 Convolution", FilterOptions.RENDERING,
+            "Diamond Blur", "Motion Blur",
             "Find Horizontal Edges", "Find Vertical Edges",
-            "Find / Edges", "Find \\ Edges", "Sharpen",
-            "Reset All", "Randomize");
+            "Find / Edges", "Find \\ Edges", "Sharpen");
     }
 
     private void testTransitionsFilters() {

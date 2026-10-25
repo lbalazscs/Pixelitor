@@ -754,6 +754,9 @@ public class WorkflowTest {
             .releaseKey(VK_DOWN)
             .pressKey(VK_ENTER);
 
+//        if (ComponentVisibleQuery.isVisible(searchDialog.target())) {
+//            searchDialog.button("ok").click();
+//        }
         searchDialog.requireNotVisible();
 
         var filterDialog = app.findFilterDialog();

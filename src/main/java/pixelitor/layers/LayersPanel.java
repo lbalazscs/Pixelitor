@@ -32,7 +32,6 @@ import java.util.List;
  */
 public class LayersPanel extends JLayeredPane {
     private final List<LayerGUI> layerButtons = new ArrayList<>();
-    private final ButtonGroup buttonGroup = new ButtonGroup();
     private final DragReorderHandler dragReorderHandler;
     private LayerGUI draggedButton;
     private int dragStartIndex = -1;
@@ -82,22 +81,14 @@ public class LayersPanel extends JLayeredPane {
 
         gui.setReactToItemEvents(false);
 
-        buttonGroup.add(gui);
         layerButtons.add(index, gui);
-
         add(gui, JLayeredPane.DEFAULT_LAYER);
-
-        if (gui.getLayer().isActive()) {
-            gui.setSelected(true);
-        }
-
         gui.attachDragHandler(dragReorderHandler);
     }
 
     public void removeAllLayerGUIs() {
         for (int i = layerButtons.size() - 1; i >= 0; i--) {
             LayerGUI button = layerButtons.get(i);
-            buttonGroup.remove(button);
             remove(button);
             button.detach();
         }
@@ -109,7 +100,6 @@ public class LayersPanel extends JLayeredPane {
     }
 
     public void removeLayerGUI(LayerGUI gui) {
-        buttonGroup.remove(gui);
         layerButtons.remove(gui);
         remove(gui);
         revalidate();

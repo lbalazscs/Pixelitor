@@ -65,7 +65,7 @@ public abstract class AbstractFilterParam implements FilterParam {
     @Override
     public void guiDisposed() {
         if (paramGUI == null) {
-            throw new IllegalStateException();
+            throw new IllegalStateException("no gui in " + getName());
         }
         adjustmentListener = null;
         paramGUI = null;
@@ -182,7 +182,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public boolean shouldRandomize() {
-        return randomizeMode == RandomizeMode.ALLOW && enabledByFilterLogic;
+        return randomizeMode == RandomizeMode.ALLOW && isEnabled();
     }
 
     @Override

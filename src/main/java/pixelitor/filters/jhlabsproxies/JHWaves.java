@@ -22,6 +22,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -63,7 +64,7 @@ public class JHWaves extends ParametrizedFilter {
         int yAmplitude = amplitudeParam.getVertical();
 
         if (xAmplitude == 0 && yAmplitude == 0) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         float xWavelength = wavelengthParam.getValueAsFloat(0);

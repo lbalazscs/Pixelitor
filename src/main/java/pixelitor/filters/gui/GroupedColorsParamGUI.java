@@ -39,25 +39,25 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
     public GroupedColorsParamGUI(GroupedColorsParam model) {
         super(new FlowLayout(FlowLayout.LEFT));
         setBorder(createTitledBorder(model.getName()));
-
         this.model = model;
+
+        resetButton = new ResetButton(model);
 
         int numColors = model.getNumColors();
         swatches = new ColorSwatch[numColors];
-
         for (int i = 0; i < numColors; i++) {
             createAndAddSwatch(i);
         }
 
         if (model.isLinkable()) {
             add(new JLabel(i18n("linked") + ":"));
-            linkedCB = GUIUtils.createLinkCheckBox(this.model);
+            linkedCB = GUIUtils.createLinkCheckBox(model);
+            linkedCB.addItemListener(_ -> resetButton.updateState());
             add(linkedCB);
         } else {
             linkedCB = null;
         }
 
-        resetButton = new ResetButton(model);
         add(resetButton);
     }
 

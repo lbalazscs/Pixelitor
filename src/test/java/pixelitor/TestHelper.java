@@ -125,6 +125,7 @@ public class TestHelper {
             new Rectangle(0, 0, TEST_WIDTH, TEST_HEIGHT));
         when(comp.getCanvasWidth()).thenReturn(TEST_WIDTH);
         when(comp.getCanvasHeight()).thenReturn(TEST_HEIGHT);
+        when(comp.getMaskViewMode()).thenReturn(NORMAL);
 
         View view = createMockViewWithoutComp();
         when(view.getComp()).thenReturn(comp);
@@ -455,7 +456,7 @@ public class TestHelper {
         AppMode.setUnitTestingMode();
 
         Utils.ensureAssertionsEnabled();
-        Utils.preloadUnitTestFontNames();
+        FontNames.preloadUnitTestFontNames();
 
         Language.setActive(Language.ENGLISH);
         Messages.setHandler(new TestMessageHandler());

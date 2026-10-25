@@ -59,7 +59,7 @@ public class GMICFilterCreator {
             .toList();
         this.commandName = commandName;
         this.filterName = filterName;
-        this.className = filterName.replaceAll(" ", "");
+        this.className = filterName.replace(" ", "");
         this.reseed = reseed;
 
         sb = new StringBuilder(1000);
@@ -387,7 +387,7 @@ public class GMICFilterCreator {
             boolean hasDefaultSpecified = !choices[0].contains("\"");
             int startIndex = hasDefaultSpecified ? 1 : 0;
             for (int i = startIndex; i < choices.length; i++) {
-                String choice = choices[i].replaceAll("\"", "").trim();
+                String choice = choices[i].replace("\"", "").trim();
                 output.append(String.format("\n        new Item(\"%s\", %d),", choice, i - startIndex));
             }
             // Remove the trailing comma and close the array

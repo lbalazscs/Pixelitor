@@ -22,6 +22,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.BooleanParam;
 import pixelitor.filters.gui.GradientParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -64,7 +65,7 @@ public class JHGlint extends ParametrizedFilter {
         int length = lengthParam.getValue();
         if (length == 0) {
             // a 0 length would cause division by 0
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         GlintFilter filter = new GlintFilter(NAME,

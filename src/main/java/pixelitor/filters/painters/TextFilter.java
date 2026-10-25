@@ -17,6 +17,7 @@
 
 package pixelitor.filters.painters;
 
+import pixelitor.Views;
 import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.FilterWithGUI;
 import pixelitor.filters.gui.UserPreset;
@@ -42,14 +43,13 @@ public class TextFilter extends FilterWithGUI {
     private static final long serialVersionUID = -2525209248829018779L;
 
     public TextFilter() {
-        settings = new TextSettings();
+        settings = new TextSettings(Views.getActiveComp());
     }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
-        String text = settings.getText();
-        if (text.isEmpty()) {
-            return src;
+        if (settings.getText().isBlank()) {
+            return ImageUtils.copy(src, dest);
         }
 
         var textPainter = new TransformedTextPainter();

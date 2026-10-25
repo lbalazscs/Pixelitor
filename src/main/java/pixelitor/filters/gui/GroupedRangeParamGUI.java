@@ -45,6 +45,8 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
         numChildren = model.getNumChildren();
         sliders = new SliderSpinner[numChildren];
 
+        // unlike most other param GUIs, this one doesn't have a global
+        // reset button; usually each child has its own reset button enabled
         addSliderSpinners();
 
         if (model.isLinkable()) {

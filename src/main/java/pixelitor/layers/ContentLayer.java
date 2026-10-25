@@ -139,16 +139,23 @@ public abstract class ContentLayer extends Layer {
 
     @Override
     public void prepareMovement() {
-        dragOffsetX = 0;
-        dragOffsetY = 0;
+        setDragOffset(0, 0);
         super.prepareMovement();
     }
 
     @Override
     public void moveWhileDragging(double imDx, double imDy) {
-        dragOffsetX = (int) imDx;
-        dragOffsetY = (int) imDy;
+        setDragOffset((int) imDx, (int) imDy);
         super.moveWhileDragging(imDx, imDy);
+    }
+
+    private void setDragOffset(int dx, int dy) {
+        if (dx != dragOffsetX || dy != dragOffsetY) {
+            dragOffsetX = dx;
+            dragOffsetY = dy;
+            // getTx()/getTy() changed, and a cached masked image bakes them in
+            invalidateMaskedImageCache();
+        }
     }
 
     @Override

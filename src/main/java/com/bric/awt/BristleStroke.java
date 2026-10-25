@@ -1,8 +1,6 @@
 /*
  * @(#)BristleStroke.java
  *
- * $Date: 2014-03-13 09:15:48 +0100 (Cs, 13 márc. 2014) $
- *
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
@@ -17,10 +15,10 @@
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
+
 package com.bric.awt;
 
 import com.bric.geom.MeasuredShape;
-import net.jafama.FastMath;
 
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -28,34 +26,21 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.Random;
 
-import static java.lang.Math.PI;
-import static java.lang.Math.TAU;
-import static net.jafama.FastMath.cos;
-import static net.jafama.FastMath.sin;
+import static net.jafama.FastMath.cosQuick;
+import static net.jafama.FastMath.sinQuick;
 
 /**
- * This <code>Stroke</code> that resembles a bristle.
+ * This <code>Stroke</code> resembles a bristle.
  * <P>More specifically: this stroke splatters tiny triangles and dots over a path.
  */
 public class BristleStroke implements Stroke {
-    private static final int SHAPE_TRIANGLE = 0;
-    private static final int SHAPE_SQUARE = 1;
-    private static final int SHAPE_STAR = 2;
-    private static final int SHAPE_TRIANGLE_OR_SQUARE = 3;
-
-    /**
-     * (I experimented with a few different shapes, but
-     * decided in the end that a simple mix of squares
-     * and triangles is sufficient.)
-     */
-    private static final int shape = SHAPE_TRIANGLE_OR_SQUARE;
+    private final static int LAYERS = 20;
 
     private final float width;
     private final float thickness;
-    private final int layers;
     private final long randomSeed;
     private final float grain;
-    private final float spacing;
+    private final float density;
 
     /**
      * Creates a new BristleStroke.
@@ -78,23 +63,22 @@ public class BristleStroke implements Stroke {
      * @param randomSeed the random seed for this stroke.
      */
     public BristleStroke(float width, float thickness, long randomSeed) {
-        if (width <= 0) {
-            throw new IllegalArgumentException("the width (" + width + ") must be positive");
+        if (!(width > 0) || !Float.isFinite(width)) {
+            throw new IllegalArgumentException("the width (" + width + ") must be positive and finite");
         }
-        if (thickness < 0) {
-            throw new IllegalArgumentException("the thickness (" + thickness + ") must be greater than 0");
+        if (thickness < 0 || thickness > 1) {
+            throw new IllegalArgumentException("the thickness (" + thickness + ") must be between 0 and 1");
         }
         this.width = width;
         this.thickness = thickness;
-        this.grain = getGrain(width, thickness);
-        this.spacing = 0.5f + 0.5f * thickness;
+        this.grain = calcGrain(width, thickness);
+        this.density = 0.5f + 0.5f * thickness;
         this.randomSeed = randomSeed;
-        this.layers = 20;
     }
 
-    private static float getGrain(float width, float thickness) {
+    private static float calcGrain(float width, float thickness) {
         if (width > 1) {
-            double k = Math.pow(width, 0.5f);
+            double k = Math.sqrt(width);
             if (k > 4) {
                 k = 4;
             }
@@ -102,13 +86,6 @@ public class BristleStroke implements Stroke {
         } else {
             return Math.max(width, 0.1f);
         }
-    }
-
-    /**
-     * @return the random seed used in this stroke
-     */
-    public long getRandomSeed() {
-        return randomSeed;
     }
 
     /**
@@ -132,85 +109,42 @@ public class BristleStroke implements Stroke {
 
         MeasuredShape[] paths = MeasuredShape.getSubpaths(p);
 
-        for (int a = 0; a < layers; a++) {
-            float k1 = ((float) a) / ((float) (layers - 1));
-            float k2 = (k1 - 0.5f) * 2; //range from [-1,1]
+        float minGapDistance = (4 + 10 * thickness) / (1 + 9 * density);
+        float maxGapDistance = (40 + 10 * thickness) / (1 + 9 * density);
 
-            float k3 = thickness;
-            float minGapDistance = (4 + 10 * k3) / (1 + 9 * spacing);
-            float maxGapDistance = (40 + 10 * k3) / (1 + 9 * spacing);
-            float dd = minGapDistance * (1 + 20 * (1 - thickness) * Math.abs(k2 * k2));
+        Point2D p2 = new Point2D.Float();
+        Point2D normal = new Point2D.Float();
+        int[] segCursor = new int[1];
 
-            Point2D p2 = new Point2D.Float();
-            float x, y;
+        for (int layer = 0; layer < LAYERS; layer++) {
+            float k1 = ((float) layer) / ((float) (LAYERS - 1));
+            float k2 = (k1 - 0.5f) * 2; // range from [-1, 1]
+            float layerMinGap = minGapDistance * (1 + 20 * (1 - thickness) * (k2 * k2));
+            float offsetScale = k2 * width * 0.5f;
 
-            for (int b = 0; b < paths.length; b++) {
-                r.setSeed(randomSeed + 1000L * a + 10000L * b);
+            for (int subpathIndex = 0; subpathIndex < paths.length; subpathIndex++) {
+                r.setSeed(randomSeed + 1000L * layer + 1000L * LAYERS * subpathIndex); // 1000*LAYERS exceeds the largest 1000*layer
+                segCursor[0] = 0;
 
-                float d = r.nextFloat() * (maxGapDistance - minGapDistance)
-                        + dd;
-                while (d < paths[b].getOriginalDistance()) {
-                    float gapDistance = r.nextFloat() * (maxGapDistance - minGapDistance)
-                            + dd;
-                    paths[b].getPoint(d, p2);
-                    double angle = paths[b].getTangentSlope(d) + PI / 2.0;
-                    float dx = (float) (k2 * width * FastMath.cosQuick(angle) / 2.0);
-                    float dy = (float) (k2 * width * FastMath.sinQuick(angle) / 2.0);
+                float d = r.nextFloat() * (maxGapDistance - minGapDistance) + layerMinGap;
+                float origDist = paths[subpathIndex].getOriginalDistance();
+                while (d < origDist) {
+                    float gapDistance = r.nextFloat() * (maxGapDistance - minGapDistance) + layerMinGap;
+                    paths[subpathIndex].getPointAndNormal(d, segCursor, p2, normal);
 
-                    p2.setLocation(p2.getX() + dx, p2.getY() + dy);
+                    float x = (float) (p2.getX() + normal.getX() * offsetScale);
+                    float y = (float) (p2.getY() + normal.getY() * offsetScale);
 
-                    x = (float) p2.getX();
-                    y = (float) p2.getY();
+                    float rotation = (float) (r.nextFloat() * Math.TAU);
 
-                    float rotation = r.nextFloat() * 2 * 3.145f;
+                    float rHalf = grain * 0.5f;
+                    float ux = (float) (rHalf * cosQuick(rotation));
+                    float uy = (float) (rHalf * sinQuick(rotation));
 
-                    int thisShape = shape;
-                    if (thisShape == SHAPE_TRIANGLE_OR_SQUARE) {
-                        thisShape = r.nextInt(2);
-                    }
-
-                    switch (thisShape) {
-                        case SHAPE_TRIANGLE -> {
-                            path.moveTo((float) (x + grain / 2.0 * cos(rotation + TAU / 3)),
-                                (float) (y + grain / 2.0 * sin(rotation + TAU / 3)));
-                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + 4 * PI / 3)),
-                                (float) (y + grain / 2.0 * sin(rotation + 4 * PI / 3)));
-                            path.lineTo((float) (x + grain / 2.0 * cos(rotation)),
-                                (float) (y + grain / 2.0 * sin(rotation)));
-                            path.closePath();
-                        }
-                        case SHAPE_SQUARE -> {
-                            path.moveTo((float) (x + grain / 2.0 * cos(rotation + TAU / 4)),
-                                (float) (y + grain / 2.0 * sin(rotation + TAU / 4)));
-                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + 4 * PI / 4)),
-                                (float) (y + grain / 2.0 * sin(rotation + 4 * PI / 4)));
-                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + 6 * PI / 4)),
-                                (float) (y + grain / 2.0 * sin(rotation + 6 * PI / 4)));
-                            path.lineTo((float) (x + grain / 2.0 * cos(rotation)),
-                                (float) (y + grain / 2.0 * sin(rotation)));
-                            path.closePath();
-                        }
-                        case SHAPE_STAR -> {
-                            path.moveTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation)),
-                                (float) (y + grain / (6.0 + 2 - 2 * thickness) * sin(rotation)));
-                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + TAU / 8.0)),
-                                (float) (y + grain / 2.0 * sin(rotation + TAU / 8.0)));
-
-                            path.lineTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation + PI / 2)),
-                                (float) (y + grain / (6.0 + 2 - 2 * thickness) * sin(rotation + PI / 2)));
-                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + PI / 2 + TAU / 8.0)),
-                                (float) (y + grain / 2.0 * sin(rotation + PI / 2 + TAU / 8.0)));
-
-                            path.lineTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation + PI)),
-                                (float) (y + grain / (6.0 + 2 - 2 * thickness) * sin(rotation + PI)));
-                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + PI + TAU / 8.0)),
-                                (float) (y + grain / 2.0 * sin(rotation + PI + TAU / 8.0)));
-
-                            path.lineTo((float) (x + grain / (6.0 + 2 - 2 * thickness) * cos(rotation + 3 * PI / 2)),
-                                (float) (y + grain / (6.0 + 2 - 2 * thickness) * sin(rotation + 3 * PI / 2)));
-                            path.lineTo((float) (x + grain / 2.0 * cos(rotation + 3 * PI / 2 + TAU / 8.0)),
-                                (float) (y + grain / 2.0 * sin(rotation + 3 * PI / 2 + TAU / 8.0)));
-                        }
+                    if (r.nextInt(2) == 0) {
+                        appendTriangle(path, x, y, ux, uy);
+                    } else {
+                        appendDiamond(path, x, y, ux, uy);
                     }
 
                     d = d + gapDistance;
@@ -218,5 +152,33 @@ public class BristleStroke implements Stroke {
             }
         }
         return path;
+    }
+
+    /**
+     * Appends an equilateral triangle centered at {@code (x, y)}.
+     * The orientation is counter-clockwise so no holes appear under {@code WIND_NON_ZERO}.
+     */
+    private static void appendTriangle(GeneralPath path, float x, float y, float ux, float uy) {
+        // Triangle: cos(120°) = -0.5, sin(120°) = √3/2 ≈ 0.8660254
+        float hx = 0.8660254f * ux;
+        float hy = 0.8660254f * uy;
+
+        path.moveTo(x - 0.5f * ux - hy, y - 0.5f * uy + hx); // rotation + TAU/3
+        path.lineTo(x - 0.5f * ux + hy, y - 0.5f * uy - hx); // rotation + 4*PI/3
+        path.lineTo(x + ux, y + uy);                         // rotation
+        path.closePath();
+    }
+
+    /**
+     * Appends a diamond (rotated square) centered at {@code (x, y)}.
+     * The orientation is counter-clockwise so no holes appear under {@code WIND_NON_ZERO}.
+     */
+    private static void appendDiamond(GeneralPath path, float x, float y, float ux, float uy) {
+        // Square: 90° rotations are simply (-uy, ux)
+        path.moveTo(x - uy, y + ux); // rotation + TAU/4
+        path.lineTo(x - ux, y - uy); // rotation + PI
+        path.lineTo(x + uy, y - ux); // rotation + 3*PI/2
+        path.lineTo(x + ux, y + uy); // rotation
+        path.closePath();
     }
 }

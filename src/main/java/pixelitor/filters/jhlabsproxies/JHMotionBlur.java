@@ -58,7 +58,7 @@ public class JHMotionBlur extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int distancePixels = distance.getValue();
         if (distancePixels == 0) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         MotionBlur motionBlur = quality.getSelected().createFilter(NAME, src);

@@ -29,31 +29,37 @@ import javax.swing.undo.CannotUndoException;
  */
 public class LinkLayerMaskEdit extends PixelitorEdit {
     private final LayerMask mask;
+    private final boolean newState;
 
-    public LinkLayerMaskEdit(Composition comp, LayerMask mask) {
-        super(mask.isLinked() ? "Link Layer Mask" : "Unlink Layer Mask", comp);
+    public LinkLayerMaskEdit(Composition comp, LayerMask mask, boolean newState) {
+        super(newState ? "Link Layer Mask" : "Unlink Layer Mask", comp);
+        assert mask != null;
 
         this.mask = mask;
+        this.newState = newState;
     }
 
     @Override
     public void undo() throws CannotUndoException {
         super.undo();
 
-        mask.setLinked(!mask.isLinked(), false);
+        mask.setLinked(!newState, false);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
-        mask.setLinked(!mask.isLinked(), false);
+        mask.setLinked(newState, false);
     }
 
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
+
         node.add(mask.createDebugNode());
+        node.addBoolean("newState", newState);
+
         return node;
     }
 }

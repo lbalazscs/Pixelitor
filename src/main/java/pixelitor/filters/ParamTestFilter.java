@@ -22,6 +22,8 @@ import pixelitor.colors.Colors;
 import pixelitor.filters.gui.*;
 import pixelitor.filters.gui.IntChoiceParam.Item;
 import pixelitor.filters.jhlabsproxies.JHWeave;
+import pixelitor.filters.util.Complex;
+import pixelitor.filters.util.ComplexBounds;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.test.RandomGuiTest;
 
@@ -39,7 +41,7 @@ import static java.awt.RenderingHints.*;
 import static pixelitor.filters.gui.TransparencyMode.RANDOMIZED_ALPHA;
 
 /**
- * A test {@link ParametrizedFilter} with all {@link FilterParam} objects
+ * A test {@link ParametrizedFilter} with all {@link FilterParam} objects.
  */
 public class ParamTestFilter extends ParametrizedFilter {
     public static final String NAME = "Param Test";
@@ -115,20 +117,30 @@ public class ParamTestFilter extends ParametrizedFilter {
             new Item("Enable All", 1),
             new Item("Disable \"GroupedColorsParam\"", 2),
             new Item("Disable \"Linked Group\"", 3),
+            new Item("Disable \"ColorListParam\"", 4),
+            new Item("Disable \"ComplexNumberParam\"", 5),
         });
         var normalizedRangeGroup = new GroupedRangeParam("Normalized Group", new RangeParam[]{
             rangeA, rangeB, rangeC}, false).autoNormalized();
         var linkedRangeGroup = new GroupedRangeParam("Linked Group", 0, 50, 100, true);
         var groupedColors = new GroupedColorsParam("GroupedColorsParam",
-            "A", WHITE, "B", Color.YELLOW, RANDOMIZED_ALPHA, true, false);
+            "A", WHITE, "B", YELLOW, RANDOMIZED_ALPHA, true, false);
+        var colorList = new ColorListParam("ColorListParam", 3, 2,
+            RED, BLUE, WHITE, YELLOW, MAGENTA);
+        var complex = new ComplexNumberParam("ComplexNumberParam",
+            new Complex(0, 0), new ComplexBounds(-1, 1, -1, 1));
 
         intChoice.disableOtherWhen(groupedColors, item -> item.hasValue(2));
         intChoice.disableOtherWhen(linkedRangeGroup, item -> item.hasValue(3));
+        intChoice.disableOtherWhen(colorList, item -> item.hasValue(4));
+        intChoice.disableOtherWhen(complex, item -> item.hasValue(5));
 
-        return new FilterParam[]{
+        FilterParam[] params = {
             intChoice,
+            complex,
             groupedColors,
             linkedRangeGroup,
+            colorList,
             new GradientParam("Colors", defaultThumbPositions, defaultValues),
             new RangeParam("RangeParam", 0, 50, 100),
             normalizedRangeGroup,
@@ -142,5 +154,10 @@ public class ParamTestFilter extends ParametrizedFilter {
             new LogZoomParam("Zoom", 200, 200, 1000),
             new GridParam("Grid", JHWeave.WEAVE_PRESETS, GridCellPainter.createForWeave()),
         };
+        for (FilterParam param : params) {
+            param.setToolTip(param.getName() + " ToolTip");
+        }
+
+        return params;
     }
 }

@@ -25,9 +25,6 @@ import javax.swing.*;
 import java.awt.Color;
 import java.io.Serial;
 import java.util.Arrays;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
 
 /**
  * A filter parameter for selecting a list of colors.
@@ -51,7 +48,7 @@ public class ColorListParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        return installGUI(new ColorListParamGUI(this, candidateColors, minNumColors));
+        return installGUI(new ColorListParamGUI(this));
     }
 
     /**
@@ -72,6 +69,18 @@ public class ColorListParam extends AbstractFilterParam {
      */
     public Color getColor(int index) {
         return colors[index];
+    }
+
+    public int getMinNumColors() {
+        return minNumColors;
+    }
+
+    public int getMaxNumColors() {
+        return candidateColors.length;
+    }
+
+    public Color getCandidateColor(int index) {
+        return candidateColors[index];
     }
 
     /**
@@ -135,12 +144,12 @@ public class ColorListParam extends AbstractFilterParam {
 
     @Override
     public void loadStateFrom(String savedValue) {
-        String[] colorStrings = savedValue.split(",");
-        Color[] newColors = new Color[colorStrings.length];
-        for (int i = 0; i < newColors.length; i++) {
-            newColors[i] = Colors.fromHtmlHexRgba(colorStrings[i]);
+        try {
+            Color[] newColors = Colors.parseHtmlHexList(savedValue);
+            setColors(newColors, false);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Could not parse " + savedValue, e);
         }
-        setColors(newColors, false);
     }
 
     @Override
@@ -177,9 +186,7 @@ public class ColorListParam extends AbstractFilterParam {
 
         @Override
         public String toPresetString() {
-            return Stream.of(colors)
-                .map(c -> Colors.toHtmlHex(c, true))
-                .collect(joining(","));
+            return Colors.toHtmlHexList(colors);
         }
     }
 }

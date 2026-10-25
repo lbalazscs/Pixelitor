@@ -1,8 +1,6 @@
 /*
  * @(#)SerializedPathIterator.java
  *
- * $Date: 2014-03-13 09:15:48 +0100 (Cs, 13 márc. 2014) $
- *
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
@@ -17,27 +15,41 @@
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
+
 package com.bric.geom;
 
 import java.awt.geom.PathIterator;
-import java.io.Serial;
 
 /**
- * A PathIterator that parses serialized shape info.
+ * A {@link PathIterator} that parses serialized shape info.
+ * <p>
+ * The serialized format describes path segments as a sequence of whitespace-separated terms:
+ * <ul>
+ *   <li><code>m</code> or <code>M</code> (moveto) followed by 2 coordinates: <i>x</i>, <i>y</i></li>
+ *   <li><code>l</code> or <code>L</code> (lineto) followed by 2 coordinates: <i>x</i>, <i>y</i></li>
+ *   <li><code>q</code> or <code>Q</code> (quadto) followed by 4 coordinates: <i>cx</i>, <i>cy</i>, <i>x</i>, <i>y</i></li>
+ *   <li><code>c</code> or <code>C</code> (cubicto) followed by 6 coordinates: <i>cx1</i>, <i>cy1</i>, <i>cx2</i>, <i>cy2</i>, <i>x</i>, <i>y</i></li>
+ *   <li><code>z</code> or <code>Z</code> (close) followed by 0 coordinates</li>
+ * </ul>
+ * <p>
+ * Both lowercase and uppercase command letters are accepted. All coordinates are absolute;
+ * unlike SVG path data, lowercase letters do not designate relative coordinates.
+ * All terms (command letters and coordinate numbers) must be separated by whitespace.
  */
 class SerializedPathIterator implements PathIterator {
-    private final char[] c;
+    private final String s;
     private int ctr = 0;
     private final double[] data = new double[6];
     private int currentSegment = -1;
     private final int windingRule;
+    private boolean done = false;
 
     public SerializedPathIterator(String s, int windingRule) {
         if (!(windingRule == WIND_EVEN_ODD || windingRule == WIND_NON_ZERO)) {
             throw new IllegalArgumentException("The winding rule must be PathIterator.WIND_NON_ZERO or PathIterator.WIND_EVEN_ODD");
         }
 
-        c = s.toCharArray();
+        this.s = s;
         this.windingRule = windingRule;
         next();
     }
@@ -47,43 +59,35 @@ class SerializedPathIterator implements PathIterator {
         return windingRule;
     }
 
-    protected void consumeWhiteSpace(boolean expectingWhiteSpace) {
-        if (ctr >= c.length) {
-            ctr = c.length + 2;
-            return;
-        }
-
-        char ch = c[ctr];
-        if (!Character.isWhitespace(ch)) {
-            if (!expectingWhiteSpace) {
-                return;
-            }
-            throw new ParserException("expected whitespace", ctr, 1);
-        }
-        while (true) {
+    private void skipWhitespace() {
+        while (ctr < s.length() && Character.isWhitespace(s.charAt(ctr))) {
             ctr++;
-            if (ctr >= c.length) {
-                ctr = c.length + 2;
-                return;
-            }
+        }
+    }
 
-            ch = c[ctr];
-            if (!Character.isWhitespace(ch)) {
-                return;
+    private void requireWhitespace() {
+        if (ctr < s.length()) {
+            if (!Character.isWhitespace(s.charAt(ctr))) {
+                throw new ParserException("expected whitespace", s, ctr, 1);
             }
+            skipWhitespace();
         }
     }
 
     @Override
     public void next() {
-        consumeWhiteSpace(false);
+        if (done) {
+            return;
+        }
 
-        if (ctr >= c.length) {
-            ctr = c.length + 2;
+        skipWhitespace();
+
+        if (ctr >= s.length()) {
+            done = true;
             return;
         }
         int terms;
-        char k = c[ctr];
+        char k = s.charAt(ctr);
 
         terms = switch (k) {
             case 'm', 'M' -> {
@@ -106,81 +110,79 @@ class SerializedPathIterator implements PathIterator {
                 currentSegment = SEG_CLOSE;
                 yield 0;
             }
-            default -> throw new ParserException("Unrecognized character in shape data: '" + c[ctr] + "'", ctr, 1);
+            default -> throw new ParserException("Unrecognized character in shape data: '" + k + "'", s, ctr, 1);
         };
         ctr++;
         if (terms > 0) {
             parseTerms(terms);
         } else {
-            if (ctr < c.length) {
-                if (!Character.isWhitespace(c[ctr])) {
-                    throw new ParserException("expected whitespace after z", ctr, 1);
-                }
-            }
+            requireWhitespace();
         }
     }
 
-    class ParserException extends RuntimeException {
-        @Serial
-        private static final long serialVersionUID = 1L;
-
-        ParserException(String msg, int ptr, int length) {
-            super(msg);
-            System.err.println("\"" + new String(c) + "\"");
-            StringBuilder sb = new StringBuilder();
-            sb.repeat(" ", ptr + 1);
-            sb.repeat("^", length);
-            System.err.println(sb);
-        }
-    }
-
-    protected void parseTerms(int terms) {
+    private void parseTerms(int terms) {
         for (int a = 0; a < terms; a++) {
             data[a] = parseTerm();
         }
     }
 
-    protected double parseTerm() {
-        consumeWhiteSpace(true);
+    private double parseTerm() {
+        requireWhitespace();
+        if (ctr >= s.length()) {
+            throw new ParserException("missing coordinate", s, ctr, 1);
+        }
         int i = ctr;
-        while (i < c.length && !Character.isWhitespace(c[i])) {
+        while (i < s.length() && !Character.isWhitespace(s.charAt(i))) {
             i++;
         }
-        String string = new String(c, ctr, i - ctr);
+        String string = s.substring(ctr, i);
         try {
             return Double.parseDouble(string);
-        } catch (RuntimeException e) {
-            //just constructing this prints data to System.err:
-            throw new ParserException(e.getMessage(), ctr, i - ctr);
+        } catch (NumberFormatException e) {
+            String msg = e.getMessage();
+            throw new ParserException(msg, s, ctr, i - ctr);
         } finally {
             ctr = i;
         }
     }
 
+    // For SEG_CLOSE, the array contents are unspecified.
     @Override
     public int currentSegment(double[] d) {
-        d[0] = data[0];
-        d[1] = data[1];
-        d[2] = data[2];
-        d[3] = data[3];
-        d[4] = data[4];
-        d[5] = data[5];
+        System.arraycopy(data, 0, d, 0, 6);
         return currentSegment;
     }
 
+    // For SEG_CLOSE, the array contents are unspecified.
     @Override
     public int currentSegment(float[] f) {
-        f[0] = (float) data[0];
-        f[1] = (float) data[1];
-        f[2] = (float) data[2];
-        f[3] = (float) data[3];
-        f[4] = (float) data[4];
-        f[5] = (float) data[5];
+        for (int i = 0; i < 6; i++) {
+            f[i] = (float) data[i];
+        }
         return currentSegment;
     }
 
     @Override
     public boolean isDone() {
-        return ctr > c.length + 1;
+        return done;
+    }
+
+    static class ParserException extends IllegalArgumentException {
+        ParserException(String msg, String s, int ptr, int length) {
+            super(createMessage(msg, s, ptr, length));
+        }
+
+        private static String createMessage(String msg, String s, int ptr, int length) {
+            StringBuilder sb = new StringBuilder();
+            if (msg != null && !msg.isEmpty()) {
+                sb.append(msg).append('\n');
+            }
+            if (s != null) {
+                sb.append('"').append(s).append("\"\n");
+                sb.repeat(" ", Math.max(0, ptr) + 1);
+                sb.repeat("^", Math.max(1, length));
+            }
+            return sb.toString();
+        }
     }
 }

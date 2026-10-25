@@ -59,7 +59,7 @@ public class DrunkVision extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (drunkenness.isZero()) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         int numShiftedImages = numEyes.getValue() - 1;

@@ -159,12 +159,6 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     private void createOutputCache(BufferedImage src) {
         outputCache = filter.transformImage(src);
-
-        // if the filter returns the source image instance, a copy
-        // is created to ensure that the caches are independent
-        if (outputCache == src) {
-            outputCache = ImageUtils.copyImage(outputCache);
-        }
     }
 
     @Override
@@ -272,7 +266,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
      * blending mode, or mask) changes. These properties don't affect
      * the filter's own output cache, but they do affect the final composition.
      */
-    public void layerLevelPropertyChanged(boolean update) {
+    private void layerLevelPropertyChanged(boolean update) {
         invalidateDownstreamAndSOCaches();
         if (update) {
             holder.update();
@@ -364,7 +358,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     public void shapeDraggedOnMask() {
-        smartObject.invalidateImageCache();
+        maskContentChanged();
     }
 
     private void replaceFilter() {

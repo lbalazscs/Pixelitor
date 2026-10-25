@@ -21,6 +21,7 @@ import com.jhlabs.image.FeedbackFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -57,7 +58,7 @@ public class JHVideoFeedback extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (rotation.isZero() && zoom.isZero()) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         FeedbackFilter filter = new FeedbackFilter(NAME,

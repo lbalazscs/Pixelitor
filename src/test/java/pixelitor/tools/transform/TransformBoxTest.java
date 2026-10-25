@@ -253,7 +253,9 @@ class TransformBoxTest {
         assertThat(box.getSE()).isAt(450, 200);
 
         var at = box.calcImTransform();
-        Assertions.assertEquals(at.getType(), AffineTransform.TYPE_GENERAL_SCALE | AffineTransform.TYPE_TRANSLATION);
+        Assertions.assertEquals(
+            AffineTransform.TYPE_GENERAL_SCALE | AffineTransform.TYPE_TRANSLATION,
+            at.getType());
     }
 
     @Test

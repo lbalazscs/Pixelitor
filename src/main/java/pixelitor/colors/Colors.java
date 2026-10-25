@@ -26,7 +26,6 @@ import pixelitor.gui.GlobalEvents;
 import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.TaskAction;
-import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Lazy;
 import pixelitor.utils.Utils;
 import pixelitor.utils.test.RandomGuiTest;
@@ -151,33 +150,47 @@ public class Colors {
         if (text.length() != 8) {
             throw new IllegalArgumentException("text = " + text);
         }
-        try {
-            return new Color(
-                parseInt(text.substring(0, 2), 16),
-                parseInt(text.substring(2, 4), 16),
-                parseInt(text.substring(4, 6), 16),
-                parseInt(text.substring(6, 8), 16));
-        } catch (IllegalArgumentException e) { // includes NumberFormatException
-            throw e;
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
+        return new Color(
+            // NumberFormatException is a subclass of IllegalArgumentException
+            parseInt(text.substring(0, 2), 16),
+            parseInt(text.substring(2, 4), 16),
+            parseInt(text.substring(4, 6), 16),
+            parseInt(text.substring(6, 8), 16));
     }
 
     public static Color fromHtmlHexRgb(String text) {
         if (text.length() != 6) {
             throw new IllegalArgumentException("text = " + text);
         }
-        try {
-            return new Color(
-                parseInt(text.substring(0, 2), 16),
-                parseInt(text.substring(2, 4), 16),
-                parseInt(text.substring(4, 6), 16));
-        } catch (IllegalArgumentException e) { // includes NumberFormatException
-            throw e;
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
+        return new Color(
+            // NumberFormatException is a subclass of IllegalArgumentException
+            parseInt(text.substring(0, 2), 16),
+            parseInt(text.substring(2, 4), 16),
+            parseInt(text.substring(4, 6), 16));
+    }
+
+    /**
+     * Formats an array of colors as a comma-separated list of 8-character hex strings (RRGGBBAA).
+     */
+    public static String toHtmlHexList(Color[] colors) {
+        return Arrays.stream(colors)
+            .map(c -> toHtmlHex(c, true))
+            .collect(Collectors.joining(","));
+    }
+
+    /**
+     * Parses a comma-separated list of 8-character hex strings (RRGGBBAA) into an array of colors.
+     */
+    public static Color[] parseHtmlHexList(String text) {
+        if (text.isEmpty()) {
+            return new Color[0];
         }
+        String[] parts = text.split(",", -1);
+        Color[] colors = new Color[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            colors[i] = fromHtmlHexRgba(parts[i]);
+        }
+        return colors;
     }
 
     public static void selectColorWithDialog(JComponent component, String title,
@@ -197,10 +210,15 @@ public class Colors {
         assert colorSetter != null;
 
         Color prevColor = defaultColor;
+
         GlobalEvents.modalDialogOpened();
-        Color color = ColorPicker.showDialog(owner, title, defaultColor,
-            allowTransparency, colorSetter);
-        GlobalEvents.modalDialogClosed();
+        Color color;
+        try {
+            color = ColorPicker.showDialog(owner, title, defaultColor,
+                allowTransparency, colorSetter);
+        } finally {
+            GlobalEvents.modalDialogClosed();
+        }
 
         if (color == null) {
             // cancel was pressed, reset the previous color
@@ -217,17 +235,27 @@ public class Colors {
         Utils.copyStringToClipboard(toHtmlHex(c));
     }
 
-    // on error it throws IllegalArgumentException or returns null
+    // returns null if the clipboard doesn’t contain a valid color
     private static Color getColorFromClipboard() {
         String text;
         try {
             var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             text = (String) clipboard.getData(DataFlavor.stringFlavor);
-        } catch (UnsupportedFlavorException | IOException e) {
+        } catch (UnsupportedFlavorException | IOException | IllegalStateException e) {
             return null;
         }
 
-        text = text.trim();
+        try {
+            return parseColor(text.trim());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    // Returns null if the format isn't recognized, and throws
+    // IllegalArgumentException (including NumberFormatException)
+    // if the format is recognized but the values are invalid.
+    private static Color parseColor(String text) {
         if (text.startsWith("#")) {
             text = text.substring(1);
         }
@@ -240,22 +268,15 @@ public class Colors {
         }
 
         // try rgb(163, 69, 151) format
-        if (text.toLowerCase(Locale.ROOT).startsWith("rgb(") && text.endsWith(")")) {
-            try {
-                String[] components = text.substring(4, text.length() - 1).split("\\s*,\\s*");
-                if (components.length == 3) {
-                    return new Color(
-                        parseInt(components[0].trim()),
-                        parseInt(components[1].trim()),
-                        parseInt(components[2].trim()));
-                }
-            } catch (IllegalArgumentException e) { // includes NumberFormatException
-                throw e;
-            } catch (Exception e) {
-                throw new IllegalArgumentException(e);
+        if (text.regionMatches(true, 0, "rgb(", 0, 4) && text.endsWith(")")) {
+            String[] components = text.substring(4, text.length() - 1).split(",");
+            if (components.length == 3) {
+                return new Color(
+                    parseInt(components[0].trim()),
+                    parseInt(components[1].trim()),
+                    parseInt(components[2].trim()));
             }
         }
-
         return null;
     }
 
@@ -330,13 +351,7 @@ public class Colors {
 
     public static Action createPasteColorAction(Window owner, Consumer<Color> colorSetter) {
         return new TaskAction("Paste Color", () -> {
-            Color color;
-            try {
-                color = getColorFromClipboard();
-            } catch (IllegalArgumentException e) {
-                Dialogs.showClipboardNotColorWarning(owner);
-                return;
-            }
+            Color color = getColorFromClipboard();
             if (color == null) {
                 Dialogs.showClipboardNotColorWarning(owner);
             } else {
@@ -406,46 +421,6 @@ public class Colors {
         return Arrays.stream(colors)
             .map(Colors::formatForDebugging)
             .collect(Collectors.joining(", ", "[", "]"));
-    }
-
-    public static Color getLafBg() {
-        Color c = UIManager.getColor("Panel.background");
-        if (c == null) {
-            return Themes.getActive().isDark() ? Color.BLACK : Color.WHITE;
-        }
-        return c;
-    }
-
-    public static Color getLafDisabledBg() {
-        Color c = UIManager.getColor("Component.disabledBackground");
-        if (c == null) {
-            return Themes.getActive().isDark() ? Color.DARK_GRAY : Color.LIGHT_GRAY;
-        }
-        return c;
-    }
-
-    public static Color getLafFg() {
-        Color c = UIManager.getColor("Label.foreground");
-        if (c == null) {
-            return Themes.getActive().isDark() ? Color.WHITE : Color.BLACK;
-        }
-        return c;
-    }
-
-    public static Color getLafBorder() {
-        Color c = UIManager.getColor("Component.borderColor");
-        if (c == null) {
-            return Color.GRAY;
-        }
-        return c;
-    }
-
-    public static Color getLafDisabledBorder() {
-        Color c = UIManager.getColor("Component.disabledBorderColor");
-        if (c == null) {
-            return Color.GRAY;
-        }
-        return c;
     }
 
     public static ColorSwatch createFilterSwatch(JComponent owner, Color initial, String title,

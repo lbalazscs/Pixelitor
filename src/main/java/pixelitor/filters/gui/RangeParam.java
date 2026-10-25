@@ -41,6 +41,9 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
  * can also be used as a model of a JSlider.
  */
 public class RangeParam extends AbstractFilterParam implements BoundedRangeModel {
+    // there are max 2 decimal places in the GUI
+    public static final double EPSILON = 0.001;
+
     private int minValue;
     private int maxValue;
     private double defaultValue;
@@ -98,9 +101,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * is a "reseed randomness" button.
      */
     public void enableOtherWhenNotZero(FilterSetting other) {
-        other.setEnabled(getValue() != 0);
+        other.setEnabled(isNotZero());
         addChangeListener(_ ->
-            other.setEnabled(getValue() != 0));
+            other.setEnabled(isNotZero()));
     }
 
     /**
@@ -268,11 +271,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public boolean isZero() {
-        return getValue() == 0;
+        return Math.abs(value) < EPSILON;
     }
 
     public boolean isNotZero() {
-        return getValue() != 0;
+        return !isZero();
     }
 
     @Override
@@ -309,10 +312,11 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
             // to the canvas size, but this adjustment didn't happen yet).
             // The trigger condition is important, because when used outside
             // the filters paramGUI could be null even if a GUI was created.
+            // TODO should always clamp, smart filters should adjust before this
             v = Math.clamp(v, minValue, maxValue);
         }
 
-        if (Math.abs(v - value) > 0.001) { // there are max 2 decimal places in the GUI
+        if (Math.abs(v - value) > EPSILON) {
             value = v;
 
             if (updateGUI) {

@@ -123,7 +123,7 @@ public class Pixelitor {
         openCommandLineFilesAsync(args)
             .exceptionally(_ -> null) // recover
             .thenAcceptAsync(_ -> postStartupDevActions(), onEDT)
-            .thenRunAsync(Utils::preloadFontNames, onIOThread)
+            .thenRunAsync(FontNames::preloadFontNames, onIOThread)
             .exceptionally(Messages::showExceptionOnEDT);
     }
 

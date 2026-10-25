@@ -49,13 +49,18 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
     /**
      * Applies the core image transformation logic.
+     * <p>
+     * Implementations must never return {@code src};
+     * even a no-op transformation must return a copy.
      */
     protected abstract BufferedImage transform(BufferedImage src, BufferedImage dest);
 
     /**
      * Executes the filter, handling grayscale conversion if necessary.
+     * <p>
+     * The returned image is always a new instance, never {@code src}.
      */
-    public BufferedImage transformImage(BufferedImage src) {
+    public final BufferedImage transformImage(BufferedImage src) {
         boolean convertedToRgb = false;
 
         // handle grayscale images (in layer masks) if
@@ -72,6 +77,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
 
         // apply the filter transformation
         dest = transform(src, dest);
+        assert src != dest : getName() + " returned src";
 
         if (convertedToRgb) { // convert the result back
             dest = ImageUtils.convertToGrayscaleImage(dest);

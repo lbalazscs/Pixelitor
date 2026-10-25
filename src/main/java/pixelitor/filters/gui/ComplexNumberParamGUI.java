@@ -169,6 +169,7 @@ public class ComplexNumberParamGUI extends JPanel implements ParamGUI {
         for (Component c : spinnerPanel.getComponents()) {
             c.setEnabled(enabled);
         }
+        resetButton.setEnabled(enabled);
     }
 
     @Override

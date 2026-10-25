@@ -44,8 +44,8 @@ public class StrokeParam extends AbstractFilterParam {
     private final EnumParam<ShapeType> shapeTypeParam = ShapeType.asParam();
     private final BooleanParam dashedParam = new BooleanParam("Dashed");
 
-    private ResetButton resetButton;
     private JComponent previewer;
+    private JPanel dialogContentPanel;
 
     private final FilterParam[] childParams = {
         strokeWidthParam, strokeCapParam, strokeJoinParam,
@@ -67,9 +67,8 @@ public class StrokeParam extends AbstractFilterParam {
 
     @Override
     public JComponent createGUI() {
-        resetButton = new ResetButton(this);
         return installGUI(new DialogLauncherGUI(
-            this::configureSettingsDialog, resetButton));
+            this::configureDialog, new ResetButton(this)));
     }
 
     @Override
@@ -94,9 +93,18 @@ public class StrokeParam extends AbstractFilterParam {
     @Override
     public void guiDisposed() {
         super.guiDisposed();
+
+        if (dialogContentPanel == null) {
+            // the dialog was never opened, the children GUIs
+            // were never created, so no cleanup is necessary
+            return;
+        }
+
         for (FilterParam param : childParams) {
             param.guiDisposed();
         }
+        dialogContentPanel = null;
+        previewer = null;
     }
 
     /**
@@ -176,21 +184,18 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     @Override
-    public void loadStateFrom(UserPreset preset) {
+    public void saveStateTo(UserPreset preset) {
         for (FilterParam param : childParams) {
-            String savedString = preset.get(param.getPresetKey());
-            if (savedString != null) { // presets don't have to include everything
-                param.loadStateFrom(savedString);
-            }
+            param.saveStateTo(preset);
         }
-        updateResetButtonState();
     }
 
     @Override
-    public void saveStateTo(UserPreset preset) {
+    public void loadStateFrom(UserPreset preset) {
         for (FilterParam param : childParams) {
-            preset.put(param.getPresetKey(), param.copyState().toPresetString());
+            param.loadStateFrom(preset);
         }
+        updateResetButtonState();
     }
 
     @Override
@@ -230,16 +235,19 @@ public class StrokeParam extends AbstractFilterParam {
     }
 
     private void updateResetButtonState() {
-        if (resetButton != null) {
-            resetButton.updateState();
+        if (paramGUI != null) {
+            paramGUI.updateGUI();
         }
     }
 
-    public void configureSettingsDialog(DialogBuilder builder) {
+    public void configureDialog(DialogBuilder builder) {
+        if (dialogContentPanel == null) {
+            dialogContentPanel = new StrokeSettingsPanel(this);
+        }
         builder
             .title("Stroke Settings")
             .modeless()
-            .content(new StrokeSettingsPanel(this))
+            .content(dialogContentPanel)
             .withScrollbars()
             .noCancelButton()
             .okText(CLOSE_DIALOG);

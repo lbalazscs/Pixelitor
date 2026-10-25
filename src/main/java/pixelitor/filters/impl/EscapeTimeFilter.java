@@ -27,8 +27,9 @@ import java.awt.geom.Point2D;
  */
 public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
     private final int maxIterations;
+    private final boolean insideOut;
 
-    protected final int[] colors;
+    protected final int[] palette;
 
     protected final IterationStrategy iterator;
 
@@ -42,7 +43,8 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
      * @param zoomCenter    The relative coordinates of the center point for
      *                      zooming (in the unit square [0, 1] x [0, 1]).
      * @param maxIterations The maximum number of iterations for the escape time algorithm.
-     * @param colors        The color palette used for rendering.
+     * @param palette       The color palette used for rendering.
+     * @param insideOut     True to invert the coordinates using f(w) = 1/w, false otherwise.
      */
     protected EscapeTimeFilter(String filterName,
                                ComplexBounds bounds,
@@ -50,20 +52,49 @@ public abstract class EscapeTimeFilter extends ComplexPlaneFilter {
                                double zoom,
                                Point2D zoomCenter,
                                int maxIterations,
-                               int[] colors) {
+                               int[] palette,
+                               boolean insideOut) {
         super(filterName, bounds, zoom, zoomCenter, true);
 
         this.iterator = iterator;
         this.maxIterations = maxIterations;
-        this.colors = colors;
+        this.palette = palette;
+        this.insideOut = insideOut;
     }
+
+    @Override
+    public final int processPixel(int x, int y, int rgb) {
+        double re = xStart + x * xMultiplier;
+        double im = yStart + y * yMultiplier;
+
+        if (insideOut) {
+            double d = re * re + im * im;
+            if (d == 0) {
+                // origin inverts to infinity => escapes immediately
+                return palette[palette.length - 1];
+            }
+            re /= d;
+            im = -im / d;
+        }
+
+        return calcColor(re, im);
+    }
+
+    /**
+     * Calculates the color for a point in the complex plane.
+     *
+     * @param re the real coordinate (already inverted if insideOut is true)
+     * @param im the imaginary coordinate (already inverted if insideOut is true)
+     * @return the ARGB color for the pixel
+     */
+    protected abstract int calcColor(double re, double im);
 
     /**
      * Calculates the color for a point based on its escape time.
      */
     protected int calcIteratedColor(double zx, double zy, double cx, double cy) {
         int it = iterator.iterate(zx, zy, cx, cy, maxIterations);
-        return colors[it];
+        return palette[it];
     }
 
     /**

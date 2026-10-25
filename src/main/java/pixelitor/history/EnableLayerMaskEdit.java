@@ -31,12 +31,12 @@ public class EnableLayerMaskEdit extends PixelitorEdit {
     private final Layer layer;
     private final boolean newState;
 
-    public EnableLayerMaskEdit(Composition comp, Layer layer) {
-        super(layer.isMaskEnabled() ?
-            "Enable Layer Mask" : "Disable Layer Mask", comp);
+    public EnableLayerMaskEdit(Composition comp, Layer layer, boolean newState) {
+        super(newState ? "Enable Layer Mask" : "Disable Layer Mask", comp);
+        assert layer != null;
 
         this.layer = layer;
-        this.newState = layer.isMaskEnabled();
+        this.newState = newState;
     }
 
     @Override

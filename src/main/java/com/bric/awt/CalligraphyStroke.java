@@ -1,8 +1,6 @@
 /*
  * @(#)CalligraphyStroke.java
  *
- * $Date: 2014-03-13 09:15:48 +0100 (Cs, 13 márc. 2014) $
- *
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
@@ -17,6 +15,7 @@
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
+
 package com.bric.awt;
 
 import com.bric.geom.GeneralPathWriter;
@@ -41,7 +40,7 @@ public class CalligraphyStroke implements Stroke {
     /**
      * The angle of the pen in radians.
      */
-    private final float theta;
+    private final float angle;
 
     /**
      * Create a simple CalligraphyStroke with an angle of 3*pi/4.
@@ -60,7 +59,7 @@ public class CalligraphyStroke implements Stroke {
      */
     public CalligraphyStroke(float width, float angle) {
         this.width = width;
-        this.theta = angle;
+        this.angle = angle;
     }
 
     /**
@@ -77,8 +76,8 @@ public class CalligraphyStroke implements Stroke {
      *
      * @return the angle of the pen (in radians).
      */
-    public float getTheta() {
-        return theta;
+    public float getAngle() {
+        return angle;
     }
 
     /**
@@ -88,7 +87,7 @@ public class CalligraphyStroke implements Stroke {
     public Shape createStrokedShape(Shape p) {
         GeneralPath dest = new GeneralPath();
         GeneralPathWriter writer = new GeneralPathWriter(dest);
-        CalligraphyPathWriter cpw = new CalligraphyPathWriter(theta, width / 2, -width / 2, writer, writer);
+        CalligraphyPathWriter cpw = new CalligraphyPathWriter(angle, width / 2, -width / 2, writer, writer);
         cpw.write(p);
         cpw.flush();
         return dest;

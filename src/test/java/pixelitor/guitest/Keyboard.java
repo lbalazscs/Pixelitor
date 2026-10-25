@@ -17,7 +17,6 @@
 
 package pixelitor.guitest;
 
-import com.bric.util.JVM;
 import org.assertj.swing.core.Robot;
 import org.assertj.swing.driver.WindowDriver;
 import org.assertj.swing.fixture.AbstractWindowFixture;
@@ -45,9 +44,7 @@ import static pixelitor.utils.Threads.calledOutsideEDT;
  * Keyboard input for AssertJ-Swing based tests
  */
 public class Keyboard {
-    // on some Linux environments robot key events could be
-    // generated multiple times
-    private static final boolean USE_OS_LEVEL_EVENTS = !JVM.isLinux;
+    private static final boolean USE_OS_LEVEL_EVENTS = true;
 
     private final FrameFixture pw;
     private final Robot robot;
@@ -77,7 +74,7 @@ public class Keyboard {
             pressKeys(VK_CONTROL, VK_Z); // press Ctrl-Z
         } else {
             Utils.sleep(DEFAULT_ROBOT_DELAY, MILLISECONDS);
-            EDT.undo(editName);
+            EDT.undo();
         }
 
         robot.waitForIdle();
@@ -92,7 +89,7 @@ public class Keyboard {
             pressKeys(VK_CONTROL, VK_SHIFT, VK_Z); // press Ctrl-Shift-Z
         } else {
             Utils.sleep(DEFAULT_ROBOT_DELAY, MILLISECONDS);
-            EDT.redo(editName);
+            EDT.redo();
         }
 
         robot.waitForIdle();

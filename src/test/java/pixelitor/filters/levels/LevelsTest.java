@@ -357,7 +357,7 @@ class LevelsTest {
         @Test
         @DisplayName("ChannelLevelsModel.loadFrom with missing keys keeps defaults")
         void channelLevelsModel_loadFrom_missingKeysKeepsDefaults() {
-            var levels = new ChannelLevelsModel(Channel.RED, (Runnable) null);
+            var levels = new ChannelLevelsModel(Channel.RED, null);
 
             // empty preset has no keys for this channel: defaults must remain untouched
             var emptyPreset = new UserPreset("empty");
@@ -382,7 +382,7 @@ class LevelsTest {
         @Test
         @DisplayName("ChannelLevelsModel saveTo / loadFrom round trip")
         void channelLevelsModel_saveToLoadFrom_roundTrip() {
-            var source = new ChannelLevelsModel(Channel.GREEN, (Runnable) null);
+            var source = new ChannelLevelsModel(Channel.GREEN, null);
             source.getInputDark().setValue(25);
             source.getInputLight().setValue(220);
             source.getOutputDark().setValue(15);
@@ -391,7 +391,7 @@ class LevelsTest {
             var preset = new UserPreset("test");
             source.saveTo(preset);
 
-            var target = new ChannelLevelsModel(Channel.GREEN, (Runnable) null);
+            var target = new ChannelLevelsModel(Channel.GREEN, null);
             target.loadFrom(preset);
 
             assertThat(target.getInputDark().getValue()).isEqualTo(25);
@@ -404,7 +404,7 @@ class LevelsTest {
         @Test
         @DisplayName("ChannelLevelsModel randomize sets input dark in [0,127] and input light in [128,255]")
         void channelLevelsModel_randomize() {
-            var levels = new ChannelLevelsModel(Channel.RGB, (Runnable) null);
+            var levels = new ChannelLevelsModel(Channel.RGB, null);
             levels.reset();
 
             levels.randomize();

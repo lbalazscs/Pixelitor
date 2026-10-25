@@ -238,7 +238,7 @@ public class AdjustmentLayer extends Layer implements Filterable {
     }
 
     @Override
-    public void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName) {
+    public void filterWithoutDialogFinished(BufferedImage src, BufferedImage dest, FilterContext context, String filterName) {
         throw new IllegalStateException();
     }
 

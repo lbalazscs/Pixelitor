@@ -24,7 +24,6 @@ import pixelitor.CopyOptions;
 import pixelitor.Features;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
-import pixelitor.gui.View;
 import pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
@@ -52,12 +51,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static java.awt.AlphaComposite.DstIn;
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 import static java.lang.String.format;
 import static pixelitor.layers.MaskInitMethod.*;
-import static pixelitor.utils.Threads.calledOnEDT;
 
 /**
  * The base class for all layer classes.
@@ -97,7 +94,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
     // the UI component representing this layer in the layers panel
     // (masks share their owner layer's UI)
-    protected transient LayerUI ui;
+    private transient LayerUI ui;
 
     private transient List<LayerListener> listeners;
 
@@ -159,23 +156,18 @@ public abstract class Layer implements Serializable, Debuggable {
         ui = uiFactory.apply(this);
         updateIconImage();
         if (hasMask()) {
-            mask.ui = ui; // a mask shares its owner's UI
             mask.updateIconImage();
         }
         return ui;
     }
 
+    // overridden for layer masks to return the owner's UI
     public LayerUI getUI() {
         return ui;
     }
 
     public boolean hasUI() {
         return ui != null;
-    }
-
-    public void activateUI() {
-        assert AppMode.isUnitTesting() || calledOnEDT();
-        ui.setSelected(true);
     }
 
     // redraws the UI to reflect changes in layer activation
@@ -232,6 +224,7 @@ public abstract class Layer implements Serializable, Debuggable {
     protected void copyMaskTo(Layer target, CopyOptions options, Composition newComp) {
         if (hasMask()) {
             LayerMask newMask = mask.duplicate(target, newComp);
+            target.maskEnabled = this.maskEnabled;
             if (options.skipUIUpdates()) {
                 // this could be running outside the EDT, and direct assignment is fine
                 // as no UI interaction or history is needed for UNDO mask restoration
@@ -239,7 +232,6 @@ public abstract class Layer implements Serializable, Debuggable {
             } else {
                 target.addConfiguredMask(newMask);
             }
-            target.maskEnabled = this.maskEnabled;
         }
     }
 
@@ -374,6 +366,7 @@ public abstract class Layer implements Serializable, Debuggable {
         this.holder = holder;
     }
 
+    // overridden for layer masks to return the owner's holder
     public LayerHolder getHolder() {
         return holder;
     }
@@ -430,7 +423,7 @@ public abstract class Layer implements Serializable, Debuggable {
      * i.e. it's not in a layer group or other composite layer.
      */
     public boolean isTopLevel() {
-        return holder == comp;
+        return getHolder() == comp;
     }
 
     /**
@@ -543,9 +536,16 @@ public abstract class Layer implements Serializable, Debuggable {
      * Adds or replaces the mask image from a grayscale image.
      */
     public void addOrReplaceMaskImage(BufferedImage bwMask, String editName) {
+        assert bwMask.getWidth() == comp.getCanvasWidth();
+        assert bwMask.getHeight() == comp.getCanvasHeight();
+        assert ImageUtils.isGrayscale(bwMask);
+
         if (hasMask()) {
-            mask.setTranslation(0, 0);
-            mask.replaceImage(bwMask, editName);
+            if (mask.getTx() == 0 && mask.getTy() == 0) {
+                mask.replaceImage(bwMask, editName);
+            } else {
+                mask.replaceTranslatedImage(bwMask, editName, 0, 0);
+            }
         } else {
             addImageAsMask(bwMask, true, true,
                 editName, false);
@@ -582,10 +582,10 @@ public abstract class Layer implements Serializable, Debuggable {
      */
     public void deleteMask(boolean addToHistory) {
         assert hasMask();
+        assert isActive() || AppMode.isUnitTesting();
 
         LayerMask prevMask = mask;
-        View view = comp.getView();
-        MaskViewMode prevMode = view.getMaskViewMode();
+        MaskViewMode prevMode = comp.getMaskViewMode();
         mask = null;
 
         if (hasUI()) {
@@ -596,23 +596,17 @@ public abstract class Layer implements Serializable, Debuggable {
             LayerEvents.fireMaskDeleted(this); // notify global mask listeners
         }
 
-        // call this only after AddLayerMaskAction is notified,
-        // because in some cases it might trigger a consistency check
+        // call this only after ActiveMaskListener (via LayerEvents.fireMaskDeleted)
+        // is notified, because in some cases it might trigger a consistency check
         setMaskEditing(false);
 
         if (addToHistory) {
             History.add(new DeleteLayerMaskEdit(comp, this, prevMask, prevMode));
         }
 
-        // DeleteLayerMaskEdit assumes that it's created with
-        // an active layer (when the undo activates the MaskViewMode).
-        // If this isn't always true, then MaskViewMode activation
-        // must also be guarded in DeleteLayerMaskEdit.undo.
-        assert isActive() || AppMode.isUnitTesting();
-
         if (isActive()) {
             // switch back to normal layer editing
-            view.setMaskViewMode(MaskViewMode.NORMAL, this);
+            comp.setMaskViewMode(MaskViewMode.NORMAL, this);
         }
         maskChanged();
         holder.update();
@@ -620,6 +614,13 @@ public abstract class Layer implements Serializable, Debuggable {
 
     protected void maskChanged() {
         invalidateMaskedImageCache();
+    }
+
+    /**
+     * Called when the content of this layer's mask has changed.
+     */
+    public void maskContentChanged() {
+        maskChanged();
     }
 
     public boolean isMaskEditing() {
@@ -662,6 +663,10 @@ public abstract class Layer implements Serializable, Debuggable {
 
     public void setMaskEnabled(boolean maskEnabled, boolean addToHistory) {
         assert hasMask();
+        if (this.maskEnabled == maskEnabled) {
+            return;
+        }
+
         this.maskEnabled = maskEnabled;
 
         maskChanged();
@@ -670,7 +675,7 @@ public abstract class Layer implements Serializable, Debuggable {
         notifyListeners();
 
         if (addToHistory) {
-            History.add(new EnableLayerMaskEdit(comp, this));
+            History.add(new EnableLayerMaskEdit(comp, this, maskEnabled));
         }
     }
 
@@ -697,9 +702,6 @@ public abstract class Layer implements Serializable, Debuggable {
 
         newOwner.ui = this.ui;
         if (this.ui != null) {
-            if (newOwner.hasMask()) {
-                newOwner.mask.ui = ui;
-            }
             newOwner.ui.changeLayer(newOwner);
             this.ui = null;
         }
@@ -708,9 +710,14 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Renders this layer onto the given Graphics2D
      * or transforms the given image.
-     * Adjustment layers and watermarking text layers change the
-     * BufferedImage, while other layers just paint on the Graphics2D.
-     * Returns the new image if transformation occurs, otherwise null.
+     * <p>
+     * Adjustment layers and watermarking text layers modify or replace the
+     * composite image, while other layers paint directly onto the Graphics2D.
+     *
+     * @return for adjusting layers, the composite image to continue rendering
+     * onto (either a new image instance, {@code currentComposite} modified in
+     * place, or {@code currentComposite} unchanged if this is the first visible
+     * layer); for non-adjusting layers, {@code null}
      */
     public BufferedImage render(Graphics2D g,
                                 BufferedImage currentComposite,
@@ -747,10 +754,10 @@ public abstract class Layer implements Serializable, Debuggable {
             cachedMaskedImage = new BufferedImage(w, h, TYPE_INT_ARGB);
             Graphics2D maskG = cachedMaskedImage.createGraphics();
             paint(maskG, firstVisibleLayer);
-            maskG.setComposite(DstIn);
-            maskG.drawImage(mask.getTransparencyImage(),
-                mask.getTx(), mask.getTy(), null);
             maskG.dispose();
+
+            // takes the mask's translation into account
+            mask.applyTo(cachedMaskedImage);
         }
 
         // 2. paint the masked image onto the graphics
@@ -774,8 +781,10 @@ public abstract class Layer implements Serializable, Debuggable {
             return currentComposite; // there's nothing to transform
         }
         BufferedImage transformed = transformImage(currentComposite);
+        assert transformed != currentComposite;
         boolean useMask = usesMask();
         if (useMask) {
+            // safe to modify in-place: transformImage() never returns its argument
             mask.applyTo(transformed);
         }
         if (!useMask && isNormalAndOpaque()) {
@@ -792,6 +801,9 @@ public abstract class Layer implements Serializable, Debuggable {
     /**
      * Used by adjustment layers and watermarking text layers
      * to apply this layer's effect on the given image.
+     * <p>
+     * The returned image is always a different instance than
+     * {@code src} and may be modified freely by the caller.
      */
     protected abstract BufferedImage transformImage(BufferedImage src);
 
@@ -1029,11 +1041,11 @@ public abstract class Layer implements Serializable, Debuggable {
         // otherwise this method must be overridden
         assert hasRasterIcon();
 
-        if (ui != null) {
-            ui.updateIconImageAsync(this);
+        if (hasUI()) {
+            getUI().updateIconImageAsync(this);
         }
         if (!isTopLevel()) {
-            ((CompositeLayer) holder).updateIconImage();
+            ((CompositeLayer) getHolder()).updateIconImage();
         }
     }
 
@@ -1172,14 +1184,14 @@ public abstract class Layer implements Serializable, Debuggable {
     // this method, and this forwards it to the holder hierarchy
     public void update() {
         invalidateMaskedImageCache();
-        holder.update();
+        getHolder().update();
     }
 
     public boolean checkInvariants() {
         if (comp == null) {
             throw new AssertionError("comp is null for " + getName());
         }
-        if (holder == null) {
+        if (getHolder() == null) {
             throw new AssertionError("holder is null for " + getName());
         }
         if (name == null) {
@@ -1189,17 +1201,14 @@ public abstract class Layer implements Serializable, Debuggable {
             throw new AssertionError("blendingMode is null for " + getName());
         }
 
-        if (ui != null) {
-            // ensure this check works when called on a mask
-            Layer actualLayer = (this instanceof LayerMask m) ? m.getOwner() : this;
-            if (ui.getLayer() != actualLayer) {
-                throw new AssertionError("ui has bad layer reference for '%s', ui.getLayer() is '%s'"
-                    .formatted(getName(), ui.getLayer() != null ? ui.getLayer().getName() : "null"));
-            }
-            ui.checkInvariants();
+        if (hasUI()) {
+            getUI().checkInvariants();
         }
 
         if (mask != null) {
+            if (this instanceof LayerMask) {
+                throw new AssertionError("a mask having a mask: " + getName());
+            }
             if (mask.getOwner() != this) {
                 throw new AssertionError("mask owner mismatch for " + getName());
             }
@@ -1223,7 +1232,7 @@ public abstract class Layer implements Serializable, Debuggable {
         node.addQuotedString("name", getName());
         node.addClass();
         node.addQuotedString("comp debug name", comp.getDebugName());
-        node.addQuotedString("holder name", holder.getName());
+        node.addQuotedString("holder name", getHolder().getName());
 
         node.addBoolean("active", isActive());
 
@@ -1237,7 +1246,7 @@ public abstract class Layer implements Serializable, Debuggable {
         node.addBoolean("visible", isVisible());
         node.addFloat("opacity", getOpacity());
         node.addQuotedString("blending mode", getBlendingMode().toString());
-        node.addNullableDebuggable("ui", ui);
+        node.addNullableDebuggable("ui", getUI());
 
         return node;
     }

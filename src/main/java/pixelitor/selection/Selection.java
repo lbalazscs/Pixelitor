@@ -47,7 +47,6 @@ import static java.awt.Color.WHITE;
 public class Selection implements Transformable {
     private static final double LINE_WIDTH = 1.0;
     private static final float DASH_LENGTH = 4.0f;
-    private static final float[] MARCHING_ANTS_DASH = {DASH_LENGTH, DASH_LENGTH};
     private float dashPhase;
     private Timer marchingAntsTimer;
 
@@ -156,19 +155,14 @@ public class Selection implements Transformable {
         double viewScale = view.getZoomScale();
         float lineWidth = (float) (LINE_WIDTH / viewScale);
 
-        float[] dash;
-        if (viewScale == 1.0) { // optimize for the common case
-            dash = MARCHING_ANTS_DASH;
-        } else {
-            float scaledDashLength = (float) (DASH_LENGTH / viewScale);
-            dash = new float[]{scaledDashLength, scaledDashLength};
-        }
+        float scaledDash = (float) (DASH_LENGTH / viewScale);
+        float[] dash = {scaledDash, scaledDash};
 
         // draw white dashes
         drawDashes(g, WHITE, lineWidth, dash, dashPhase);
 
-        // draw black dashes offset by half a dash length
-        float blackPhase = (float) (dashPhase + DASH_LENGTH / viewScale);
+        // draw black dashes offset by one dash (half of the pattern period)
+        float blackPhase = dashPhase + scaledDash;
         drawDashes(g, BLACK, lineWidth, dash, blackPhase);
 
         // restore original stroke
@@ -438,10 +432,11 @@ public class Selection implements Transformable {
 
     @Override
     public String toString() {
-        return "Selection{" +
-            "compName=" + view.getComp().getName() +
-            ", shapeClass=" + shape.getClass().getName() +
-            ", shapeBounds=" + shape.getBounds() +
-            '}';
+        String compStr = view != null ? view.getComp().getName() : "no view";
+        String shapeStr = shape != null ? shape.getClass().getName() + " " + shape.getBounds() : "null";
+        return "Selection{compName=" + compStr
+            + ", disposed=" + disposed
+            + ", shape=" + shapeStr
+            + '}';
     }
 }

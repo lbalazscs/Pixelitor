@@ -19,6 +19,7 @@ package pixelitor.filters.gui;
 
 import pixelitor.colors.Colors;
 import pixelitor.filters.util.ComplexBounds;
+import pixelitor.gui.utils.Themes;
 import pixelitor.utils.Cursors;
 
 import javax.swing.*;
@@ -120,15 +121,15 @@ public class ComplexNumberSelector extends JComponent {
         }
         setFont(axisLabelFont);
 
-        bgColor = Colors.getLafBg();
-        disabledBgColor = Colors.getLafDisabledBg();
+        bgColor = Themes.getLafBg();
+        disabledBgColor = Themes.getLafDisabledBg();
         setBackground(bgColor);
 
-        axisColor = Colors.getLafFg();
+        axisColor = Themes.getLafFg();
         setForeground(axisColor);
 
-        borderColor = Colors.getLafBorder();
-        disabledBorderColor = Colors.getLafDisabledBorder();
+        borderColor = Themes.getLafBorder();
+        disabledBorderColor = Themes.getLafDisabledBorder();
 
         // faint grid lines derived from the background and axis (foreground) colors
         gridColor = Colors.interpolateRgb(bgColor, axisColor, 0.15);
@@ -149,7 +150,7 @@ public class ComplexNumberSelector extends JComponent {
         double re = pixelXToRe(clampedX, width);
         double im = pixelYToIm(clampedY, height);
 
-        model.setValue(re, im, true, isAdjusting, true);
+        model.setValue(re, im, true, !isAdjusting);
     }
 
     @Override

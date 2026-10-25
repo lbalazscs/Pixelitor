@@ -144,7 +144,13 @@ public class ZoomLevel {
      * Calculates the best-fitting zoom level for the given canvas,
      * and possibly for a given auto zoom.
      */
-    public static ZoomLevel calcBestFitZoom(Canvas canvas, AutoZoom autoZoom,
+    public static ZoomLevel calcBestFitZoom(AutoZoom autoZoom, Canvas canvas, boolean allowUpscalingToFit) {
+        return calcBestFitZoom(autoZoom,
+            canvas.getWidth(), canvas.getHeight(), allowUpscalingToFit);
+    }
+
+    public static ZoomLevel calcBestFitZoom(AutoZoom autoZoom,
+                                            int canvasWidth, int canvasHeight,
                                             boolean allowUpscalingToFit) {
         if (autoZoom == AutoZoom.ACTUAL_PIXELS) {
             return ACTUAL_SIZE;
@@ -155,7 +161,7 @@ public class ZoomLevel {
             autoZoom = AutoZoom.FIT_SPACE;
         }
 
-        double targetZoomPercent = 100.0 / calcSizeRatio(canvas, autoZoom);
+        double targetZoomPercent = 100.0 / calcSizeRatio(autoZoom, canvasWidth, canvasHeight);
 
         // if not allowed to zoom in to fit, cap the zoom at 100%
         if (!allowUpscalingToFit) {
@@ -178,7 +184,7 @@ public class ZoomLevel {
         return ZOOM_LEVELS[bestFitIndex];
     }
 
-    private static double calcSizeRatio(Canvas canvas, AutoZoom autoZoom) {
+    private static double calcSizeRatio(AutoZoom autoZoom, int canvasWidth, int canvasHeight) {
         Dimension availableArea = ImageArea.getSize();
         double availableWidth = availableArea.getWidth();
         double availableHeight = availableArea.getHeight();
@@ -188,8 +194,8 @@ public class ZoomLevel {
             availableHeight -= Themes.getActive().getFrameDecorationHeight();
         }
 
-        double horRatio = canvas.getWidth() / availableWidth;
-        double verRatio = canvas.getHeight() / availableHeight;
+        double horRatio = canvasWidth / availableWidth;
+        double verRatio = canvasHeight / availableHeight;
 
         return autoZoom.calcRatio(horRatio, verRatio);
     }

@@ -66,11 +66,12 @@ public class JHFocus extends ParametrizedFilter {
         int hRadius = blurRadius.getHorizontal();
         int vRadius = blurRadius.getVertical();
         if (hRadius == 0 && vRadius == 0) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
+
         if (radius.getHorizontal() == 0 || radius.getVertical() == 0) {
             if (invert.isChecked()) {
-                return src;
+                return ImageUtils.copy(src, dest);
             }
             return new BoxBlurFilter(getName(), hRadius, vRadius, numIterations.getValue()).filter(src, dest);
         }

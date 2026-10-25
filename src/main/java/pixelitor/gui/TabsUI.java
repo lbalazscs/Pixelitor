@@ -20,6 +20,7 @@ package pixelitor.gui;
 import pixelitor.Views;
 import pixelitor.gui.utils.TaskAction;
 import pixelitor.utils.Lazy;
+import pixelitor.utils.Threads;
 
 import javax.swing.*;
 
@@ -56,6 +57,8 @@ public final class TabsUI extends JTabbedPane implements ImageAreaUI {
 
     @Override
     public void activateView(View view) {
+        assert Threads.calledOnEDT() : Threads.callInfo();
+
         TabViewContainer tab = (TabViewContainer) view.getViewContainer();
         setSelectedIndex(indexOfComponent(tab));
     }

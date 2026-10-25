@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,6 +18,7 @@
 package pixelitor.filters.gmic;
 
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -44,7 +45,7 @@ public class Vibrance extends GMICFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (strength.isZero()) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
         return super.transform(src, dest);
     }

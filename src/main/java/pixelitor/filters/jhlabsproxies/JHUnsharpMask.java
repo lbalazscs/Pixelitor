@@ -22,6 +22,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -56,7 +57,7 @@ public class JHUnsharpMask extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (amount.isZero() || radius.isZero()) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         if (filter == null) {

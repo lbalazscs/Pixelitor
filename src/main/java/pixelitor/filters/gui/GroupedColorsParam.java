@@ -24,7 +24,6 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import java.awt.Color;
 import java.util.Arrays;
-import java.util.StringTokenizer;
 
 /**
  * Represents two or more color selectors that are grouped together in the GUI.
@@ -160,14 +159,27 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
 
     @Override
     public void loadStateFrom(String savedValue) {
-        StringTokenizer st = new StringTokenizer(savedValue, ",");
-        setLinked(Boolean.parseBoolean(st.nextToken()));
-
-        Color[] newColors = new Color[colors.length];
-        for (int i = 0; i < newColors.length; i++) {
-            newColors[i] = Colors.fromHtmlHexRgba(st.nextToken());
+        try {
+            int firstComma = savedValue.indexOf(',');
+            if (firstComma == -1) {
+                throw new IllegalArgumentException("Expected %d colors, got 0"
+                    .formatted(colors.length));
+            }
+            String linkedStr = savedValue.substring(0, firstComma);
+            if (!linkedStr.equalsIgnoreCase("true") && !linkedStr.equalsIgnoreCase("false")) {
+                throw new IllegalArgumentException("Expected boolean for 'linked', got " + linkedStr);
+            }
+            boolean newLinked = Boolean.parseBoolean(linkedStr);
+            Color[] newColors = Colors.parseHtmlHexList(savedValue.substring(firstComma + 1));
+            if (newColors.length != colors.length) {
+                throw new IllegalArgumentException("Expected %d colors, got %d"
+                    .formatted(colors.length, newColors.length));
+            }
+            setLinked(newLinked);
+            setColors(newColors, false);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Could not parse " + savedValue, e);
         }
-        setColors(newColors, false);
     }
 
     public boolean isTransparencyAllowed() {
@@ -234,13 +246,7 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
 
         @Override
         public String toPresetString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(linked);
-            for (Color color : colors) {
-                sb.append(',');
-                sb.append(Colors.toHtmlHex(color, true));
-            }
-            return sb.toString();
+            return linked + "," + Colors.toHtmlHexList(colors);
         }
     }
 }

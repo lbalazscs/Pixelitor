@@ -143,7 +143,7 @@ public class OilFilter extends WholeImageFilter {
                         int b1 = rgb & 0xFF;
 
                         int bin = bins[index];
-                        histogram[bin] += -1;
+                        histogram[bin] -= 1;
                         rTotal[bin] -= r1;
                         gTotal[bin] -= g1;
                         bTotal[bin] -= b1;

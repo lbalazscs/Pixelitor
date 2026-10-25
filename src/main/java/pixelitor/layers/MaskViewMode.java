@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,7 +17,6 @@
 
 package pixelitor.layers;
 
-import pixelitor.gui.View;
 import pixelitor.gui.utils.RestrictedLayerAction;
 import pixelitor.gui.utils.RestrictedLayerAction.LayerRestriction;
 import pixelitor.gui.utils.TaskAction;
@@ -26,10 +25,7 @@ import pixelitor.utils.Texts;
 
 import javax.swing.*;
 
-import static pixelitor.utils.Keys.CTRL_1;
-import static pixelitor.utils.Keys.CTRL_2;
-import static pixelitor.utils.Keys.CTRL_3;
-import static pixelitor.utils.Keys.CTRL_4;
+import static pixelitor.utils.Keys.*;
 
 /**
  * Defines the visibility and editing state of a layer and its mask.
@@ -52,11 +48,13 @@ public enum MaskViewMode {
         LayerRestriction.HAS_LAYER_MASK, CTRL_4);
 
     private final String displayName;
-    private final boolean showRuby;
-    private final LayerRestriction layerRestriction;
-    private final KeyStroke keyStroke;
+
     private final boolean showMask;
     private final boolean editMask;
+    private final boolean showRuby;
+
+    private final LayerRestriction layerRestriction;
+    private final KeyStroke keyStroke;
 
     MaskViewMode(String displayKey, boolean showMask, boolean editMask, boolean showRuby,
                  LayerRestriction layerRestriction, KeyStroke keyStroke) {
@@ -87,8 +85,18 @@ public enum MaskViewMode {
     }
 
     public void activateOn(Layer activeLayer) {
-        View view = activeLayer.getComp().getView();
-        view.setMaskViewMode(this, activeLayer);
+        assert activeLayer.isActive();
+
+        activeLayer.getComp().setMaskViewMode(this, activeLayer);
+    }
+
+    /**
+     * Restores this mask view mode on the given layer if it is active.
+     */
+    public void restoreOn(Layer layer) {
+        if (layer != null && layer.isActive()) {
+            layer.getComp().setMaskViewMode(this, layer);
+        }
     }
 
     public boolean isEditingMask() {
@@ -104,14 +112,10 @@ public enum MaskViewMode {
     }
 
     public boolean isApplicableTo(Layer layer) {
-        if (editMask || showMask) {
-            boolean hasMask = layer.hasMask();
-            if (!hasMask) {
-                throw new AssertionError("layer " + layer.getName()
-                    + " has no mask, view mode = " + this
-                    + ", mask icon = " + layer.getUI().hasMaskIcon());
-            }
-            return hasMask;
+        if ((editMask || showMask) && !layer.hasMask()) {
+            throw new AssertionError("layer " + layer.getName()
+                + " has no mask, view mode = " + this
+                + ", mask icon = " + (layer.hasUI() && layer.getUI().hasMaskIcon()));
         }
         return true;
     }

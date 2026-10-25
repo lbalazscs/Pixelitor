@@ -36,12 +36,14 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
     private final LayerMask mask;
     private BufferedImage prevLayerImage;
     private final ImageLayer layer;
-    private final MaskViewMode prevMaskViewMode;
+    private MaskViewMode prevMaskViewMode;
 
     public ApplyLayerMaskEdit(ImageLayer layer, LayerMask mask,
                               BufferedImage prevLayerImage,
                               MaskViewMode prevMaskViewMode) {
         super("Apply Layer Mask", layer.getComp());
+
+        assert prevMaskViewMode != null;
 
         this.prevMaskViewMode = prevMaskViewMode;
         this.prevLayerImage = prevLayerImage;
@@ -55,9 +57,8 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
 
         layer.setImage(prevLayerImage);
         layer.addConfiguredMask(mask);
-        if (layer.isActive()) {
-            comp.setMaskViewMode(prevMaskViewMode, layer);
-        }
+        assert prevMaskViewMode != null;
+        prevMaskViewMode.restoreOn(layer);
         layer.updateIconImage();
     }
 
@@ -65,7 +66,7 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
     public void redo() throws CannotRedoException {
         super.redo();
 
-        // the mask view mode is automatically set to normal
+        prevMaskViewMode = comp.getMaskViewMode();
         prevLayerImage = layer.applyLayerMask(false);
     }
 

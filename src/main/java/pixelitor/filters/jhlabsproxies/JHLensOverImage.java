@@ -23,6 +23,7 @@ import pixelitor.filters.gui.ImagePositionParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.gui.GUIText;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -63,7 +64,7 @@ public class JHLensOverImage extends ParametrizedFilter {
         double vRadius = radius.getValueAsDouble(1);
 
         if (refraction == 1.0 || hRadius == 0.0 || vRadius == 0.0) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         SphereFilter filter = new SphereFilter(NAME,

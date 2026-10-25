@@ -322,7 +322,7 @@ public interface LayerHolder extends Debuggable {
         var belowLayer = (ImageLayer) getLayer(layerIndex - 1);
 
         var belowImage = belowLayer.getImage();
-        var maskViewModeBefore = getComp().getView().getMaskViewMode();
+        var maskViewModeBefore = getComp().getMaskViewMode();
         var imageBefore = ImageUtils.copyImage(belowImage);
 
         // apply the effect of the merged layer to the image of the image layer

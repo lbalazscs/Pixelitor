@@ -19,6 +19,7 @@ package pixelitor.history;
 
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerHolder;
+import pixelitor.layers.MaskViewMode;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
@@ -31,8 +32,16 @@ public class DeleteLayerEdit extends PixelitorEdit {
     private final LayerHolder holder;
     private final Layer layer;
     private final int layerIndex;
+    private MaskViewMode prevMaskViewMode;
 
     public DeleteLayerEdit(LayerHolder holder, Layer layer, int layerIndex) {
+        // if the layer being deleted is active, record its
+        // current MaskViewMode; otherwise default to NORMAL
+        this(holder, layer, layerIndex,
+            layer.isActive() ? holder.getComp().getMaskViewMode() : MaskViewMode.NORMAL);
+    }
+
+    public DeleteLayerEdit(LayerHolder holder, Layer layer, int layerIndex, MaskViewMode prevMaskViewMode) {
         super("Delete " + layer.getName(), holder.getComp(), true);
 
         assert holder.getComp() == layer.getComp();
@@ -40,6 +49,7 @@ public class DeleteLayerEdit extends PixelitorEdit {
         this.holder = holder;
         this.layer = layer;
         this.layerIndex = layerIndex;
+        this.prevMaskViewMode = prevMaskViewMode;
     }
 
     @Override
@@ -47,12 +57,16 @@ public class DeleteLayerEdit extends PixelitorEdit {
         super.undo();
 
         holder.insertLayer(layer, layerIndex, true);
+        comp.restoreMaskViewMode(prevMaskViewMode, layer);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
+        if (layer.isActive()) {
+            prevMaskViewMode = comp.getMaskViewMode();
+        }
         holder.deleteLayer(layer, false);
     }
 
@@ -62,6 +76,7 @@ public class DeleteLayerEdit extends PixelitorEdit {
 
         node.addInt("layer index", layerIndex);
         node.add(layer.createDebugNode());
+        node.addAsString("previous mask view mode", prevMaskViewMode);
 
         return node;
     }

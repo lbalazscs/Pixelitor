@@ -21,6 +21,7 @@ import com.jhlabs.image.OilFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Texts;
 
 import java.awt.image.BufferedImage;
@@ -54,7 +55,7 @@ public class JHOilPainting extends ParametrizedFilter {
         int brushX = brushSize.getHorizontal();
         int brushY = brushSize.getVertical();
         if (brushX == 0 && brushY == 0) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         OilFilter filter = new OilFilter(NAME,

@@ -29,14 +29,14 @@ import javax.swing.undo.CannotUndoException;
  * A {@link PixelitorEdit} that represents the editing of a text layer.
  */
 public class TextLayerChangeEdit extends PixelitorEdit {
-    private TextSettings prevSettings;
+    private TextSettings otherSettings;
     private final TextLayer layer;
 
     public TextLayerChangeEdit(Composition comp, TextLayer layer,
                                TextSettings prevSettings) {
         super("Edit Text Layer", comp);
 
-        this.prevSettings = prevSettings;
+        this.otherSettings = prevSettings;
         this.layer = layer;
 
         if (prevSettings == layer.getSettings()) {
@@ -60,8 +60,8 @@ public class TextLayerChangeEdit extends PixelitorEdit {
 
     private void swapTextSettings() {
         TextSettings tmp = layer.getSettings();
-        layer.applySettings(prevSettings);
-        prevSettings = tmp;
+        layer.applySettings(otherSettings);
+        otherSettings = tmp;
 
         layer.updateLayerName();
 
@@ -72,7 +72,7 @@ public class TextLayerChangeEdit extends PixelitorEdit {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.addNullableDebuggable("previous text settings", prevSettings);
+        node.addNullableDebuggable("other settings", otherSettings);
         node.add(layer.createDebugNode());
 
         return node;

@@ -150,7 +150,7 @@ class ImageLayerTest {
         assertThat(layer)
             .stateIs(NORMAL)
             .previewImageIs(null);
-        iconChecker.verifyUpdateCounts(0, 0);
+        iconChecker.verifyUpdateCounts(1, 0);
     }
 
     @Test
@@ -192,9 +192,10 @@ class ImageLayerTest {
     @Test
     void filterWithoutDialogFinished() {
         assert Invariants.imageCoversCanvas(layer);
-        BufferedImage dest = ImageUtils.copyImage(layer.getImage());
+        BufferedImage src = layer.getFilterSourceImage();
+        BufferedImage dest = ImageUtils.copyImage(src);
 
-        layer.filterWithoutDialogFinished(dest,
+        layer.filterWithoutDialogFinished(src, dest,
             FILTER_WITHOUT_DIALOG, "opName");
 
         assertThat(layer).stateIs(NORMAL);

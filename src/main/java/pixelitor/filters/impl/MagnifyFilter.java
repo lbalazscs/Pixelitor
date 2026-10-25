@@ -17,7 +17,6 @@
 
 package pixelitor.filters.impl;
 
-import com.jhlabs.image.ImageMath;
 import pixelitor.filters.Magnify;
 import pixelitor.utils.BlurredShape;
 
@@ -27,12 +26,14 @@ import java.awt.geom.Point2D;
  * The implementation of the {@link Magnify} filter.
  */
 public class MagnifyFilter extends CenteredTransformFilter {
-    private final double radiusRatio;
+    private final double innerScale;
+    private final double scaleDelta;
+
     private final BlurredShape shape;
     private final boolean invert;
 
     /**
-     * Constructs a MagnifyFilter with specific magnification and shape parameters.
+     * Constructs a MagnifyFilter.
      *
      * @param filterName    the name of the filter.
      * @param edgeAction    the edge handling strategy (TRANSPARENT, REPEAT_EDGE, WRAP_AROUND, REFLECT).
@@ -53,7 +54,9 @@ public class MagnifyFilter extends CenteredTransformFilter {
 
         this.invert = invert;
 
-        this.radiusRatio = 1.0 / magnification;
+        this.innerScale = 1.0 / magnification;
+        this.scaleDelta = 1.0 - innerScale;
+
         this.shape = BlurredShape.create(shapeType, center,
             innerRadiusX, innerRadiusY, outerRadiusX, outerRadiusY);
     }
@@ -65,18 +68,14 @@ public class MagnifyFilter extends CenteredTransformFilter {
             outside = 1.0 - outside;
         }
 
-        if (outside == 1.0) { // 100% outside
+        if (outside == 1.0) { // 100% outside: identity mapping
             out[0] = x;
             out[1] = y;
-        } else if (outside == 0.0) { // 100% inside
-            out[0] = (float) (radiusRatio * x + (1 - radiusRatio) * cx);
-            out[1] = (float) (radiusRatio * y + (1 - radiusRatio) * cy);
-        } else { // transition between the inner and outer radius
-            double movedX = radiusRatio * x + (1 - radiusRatio) * cx;
-            double movedY = radiusRatio * y + (1 - radiusRatio) * cy;
-
-            out[0] = (float) ImageMath.lerp(outside, movedX, x);
-            out[1] = (float) ImageMath.lerp(outside, movedY, y);
+            return;
         }
+
+        double scale = innerScale + outside * scaleDelta;
+        out[0] = (float) (cx + (x - cx) * scale);
+        out[1] = (float) (cy + (y - cy) * scale);
     }
 }

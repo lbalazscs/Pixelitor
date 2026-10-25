@@ -75,7 +75,7 @@ public abstract class AbstractBrushTool extends Tool implements pixelitor.utils.
     private BrushContext brushContext; // null between strokes
 
     // the innermost brush instance
-    private Brush coreBrush;
+    private final Brush coreBrush;
 
     // the active brush instance (decorated with symmetry, lazy mouse, and affected area tracking)
     private Brush brush;

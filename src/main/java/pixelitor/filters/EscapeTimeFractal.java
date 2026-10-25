@@ -47,11 +47,6 @@ public abstract class EscapeTimeFractal extends ParametrizedFilter {
     private static final int SUPERSAMPLING_NONE = 1;
     private static final int SUPERSAMPLING_2X2 = 2;
 
-    // color cache fields
-    private static int[] cachedColors = null;
-    private static int cachedColorsStyle = -1;
-    private static int cachedMaxIterations = -1;
-
     /**
      * The available iteration algorithms.
      */
@@ -140,7 +135,6 @@ public abstract class EscapeTimeFractal extends ParametrizedFilter {
             .build();
 
         zoomParam.setPresetKey("Zoom");
-        insideOutParam.setToolTip("Inverts the starting coordinates: f(z) = 1/z");
 
         zoomCenterParam = new ImagePositionParam("Zoom Center", defaultZoomCenterX, 0.5f);
         initParams(
@@ -175,28 +169,10 @@ public abstract class EscapeTimeFractal extends ParametrizedFilter {
 
     protected abstract BufferedImage renderFractal(BufferedImage src, BufferedImage dest);
 
-    protected static int[] getColors(int colorsStyle, int maxIterations) {
-        // check if we can use the cached colors
-        if (cachedColors != null &&
-            cachedColorsStyle == colorsStyle &&
-            cachedMaxIterations == maxIterations) {
-            return cachedColors;
-        }
-
-        int[] colors = generateColors(colorsStyle, maxIterations);
-
-        // cache the generated colors
-        cachedColors = colors;
-        cachedColorsStyle = colorsStyle;
-        cachedMaxIterations = maxIterations;
-
-        return colors;
-    }
-
     /**
      * Creates a lookup table mapping iteration counts to RGB colors based on the given style.
      */
-    private static int[] generateColors(int colorsStyle, int maxIterations) {
+    protected static int[] genPalette(int colorsStyle, int maxIterations) {
         int[] colors = new int[maxIterations + 1];
         double normalizer = Math.log(maxIterations + 1);
 

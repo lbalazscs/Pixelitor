@@ -23,6 +23,10 @@ import javax.swing.*;
  * A {@link FilterParam} that can have a "Linked" checkbox.
  */
 public interface Linkable extends FilterParam {
+    /**
+     * Returns the model of the "Linked" checkbox,
+     * or null if this instance isn't linkable.
+     */
     ButtonModel getLinkedModel();
 
     String getLinkedToolTip();
@@ -38,18 +42,17 @@ public interface Linkable extends FilterParam {
      * Whether the checkbox is selected.
      */
     default boolean isLinked() {
-        ButtonModel linkedModel = getLinkedModel();
-        if (linkedModel == null) {
-            return false; // not configured to have a linked checkbox
-        }
-        return linkedModel.isSelected();
+        ButtonModel model = getLinkedModel();
+        return model != null && model.isSelected();
     }
 
+    /**
+     * Does nothing if this instance isn't linkable.
+     */
     default void setLinked(boolean linked) {
-        ButtonModel linkedModel = getLinkedModel();
-        if (linkedModel == null) {
-            return; // not configured to have a linked checkbox
+        ButtonModel model = getLinkedModel();
+        if (model != null) {
+            model.setSelected(linked);
         }
-        linkedModel.setSelected(linked);
     }
 }

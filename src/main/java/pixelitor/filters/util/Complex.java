@@ -33,6 +33,19 @@ public record Complex(double re,
     @Serial
     private static final long serialVersionUID = 1L;
 
+    public static Complex fromPresetString(String s) {
+        int comma = s.indexOf(',');
+        if (comma < 0) {
+            throw new IllegalArgumentException("Invalid complex number: '" + s + "'");
+        }
+        double re = Double.parseDouble(s.substring(0, comma).trim());
+        double im = Double.parseDouble(s.substring(comma + 1).trim());
+        if (!Double.isFinite(re) || !Double.isFinite(im)) {
+            throw new IllegalArgumentException("Non-finite complex number: '" + s + "'");
+        }
+        return new Complex(re, im);
+    }
+
     public double distSqFrom(double otherRe, double otherIm) {
         double dRe = otherRe - re;
         double dIm = otherIm - im;

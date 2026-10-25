@@ -98,17 +98,28 @@ public class LayerMask extends ImageLayer {
 
         this.owner = owner;
 
-        // layer masks use the UI of their owner
-        ui = owner.getUI();
+        // this field should never be accessed, because it is not updated
+        // when the layer and its mask are moved into a layer group
+        this.holder = null;
     }
 
     /**
      * Applies this mask to the given image, modifying its alpha channel.
+     * Expects canvas-sized images.
      */
     public void applyTo(BufferedImage in) {
+        applyTo(in, getTx(), getTy());
+    }
+
+    /**
+     * Applies this mask to the given image, modifying its alpha channel.
+     * (dx, dy) is the position of the mask image's top-left corner
+     * in the pixel coordinates of the given image.
+     */
+    public void applyTo(BufferedImage in, int dx, int dy) {
         Graphics2D g = in.createGraphics();
         g.setComposite(DstIn);
-        g.drawImage(getTransparencyImage(), 0, 0, null);
+        g.drawImage(getTransparencyImage(), dx, dy, null);
         g.dispose();
     }
 
@@ -137,8 +148,8 @@ public class LayerMask extends ImageLayer {
         var rubylithImage = new BufferedImage(RUBYLITH_COLOR_MODEL,
             raster, false, null);
         g.setComposite(RUBYLITH_COMPOSITE);
-//        g.drawImage(rubylithImage, 0, 0, null);
-        ImageUtils.drawImageVisiblePart(g, rubylithImage, 0, 0);
+//        g.drawImage(rubylithImage, getTx(), getTy(), null);
+        ImageUtils.drawImageVisiblePart(g, rubylithImage, getTx(), getTy());
         g.setComposite(origComposite);
     }
 
@@ -157,8 +168,8 @@ public class LayerMask extends ImageLayer {
     @Override
     protected void imageRefChanged() {
         updateTransparencyImage();
-        if (owner instanceof SmartFilter sf) {
-            sf.layerLevelPropertyChanged(false);
+        if (owner != null) {
+            owner.maskChanged();
         }
     }
 
@@ -168,7 +179,9 @@ public class LayerMask extends ImageLayer {
      */
     public LayerMask duplicate(Layer owner, Composition newComp) {
         BufferedImage maskImageCopy = ImageUtils.copyImage(image);
-        return new LayerMask(newComp, maskImageCopy, owner, getTx(), getTy());
+        LayerMask copy = new LayerMask(newComp, maskImageCopy, owner, getTx(), getTy());
+        copy.linked = linked;
+        return copy;
     }
 
     public boolean isLinked() {
@@ -176,10 +189,14 @@ public class LayerMask extends ImageLayer {
     }
 
     public void setLinked(boolean linked, boolean addToHistory) {
+        if (this.linked == linked) {
+            return;
+        }
+
         this.linked = linked;
         notifyListeners();
         if (addToHistory) {
-            History.add(new LinkLayerMaskEdit(comp, this));
+            History.add(new LinkLayerMaskEdit(comp, this, linked));
         }
     }
 
@@ -207,7 +224,13 @@ public class LayerMask extends ImageLayer {
                                         boolean firstVisibleLayer) {
         //g.drawImage(visibleImage, getTx(), getTy(), null);
         ImageUtils.drawImageVisiblePart(g, visibleImage, getTx(), getTy());
-        Tools.SHAPES.paintOverActiveLayer(g);
+
+        // use a copy, because we don't want to
+        // mess with the clipping of the original
+        Graphics2D gCopy = (Graphics2D) g.create();
+        comp.applySelectionClipping(gCopy);
+        Tools.SHAPES.paintOverActiveLayer(gCopy);
+        gCopy.dispose();
     }
 
     /**
@@ -230,6 +253,13 @@ public class LayerMask extends ImageLayer {
             image.getWidth(), image.getHeight(), TYPE_BYTE_GRAY);
         Graphics2D tmpG = tmpImg.createGraphics();
         tmpG.drawImage(image, 0, 0, null);
+
+        // The shapes tool paints in canvas-relative coordinates, but this
+        // buffer starts at the mask image's origin. The translation must
+        // be set before applying the selection clipping, because the
+        // clip shape is interpreted in the current user space.
+        tmpG.translate(-getTx(), -getTy());
+        comp.applySelectionClipping(tmpG);
         Tools.SHAPES.paintOverActiveLayer(tmpG);
         tmpG.dispose();
 
@@ -248,13 +278,22 @@ public class LayerMask extends ImageLayer {
         }
         Graphics2D g = image.createGraphics();
 
-        // fill the unselected part with black to hide it
+        // the shape is relative to the canvas, but the mask image
+        // can be translated relative to the canvas
+        g.translate(-getTx(), -getTy());
+
+        // fills the unselected part with black to hide it
+        // TODO the off-canvas part of a big mask is not touched,
+        //  because the inverted shape only covers the canvas
         Shape unselectedPart = comp.getCanvas().invertShape(shape);
         g.setColor(Color.BLACK);
         g.fill(unselectedPart);
         g.dispose();
 
         updateTransparencyImage();
+        // the pixels were modified in place, so the owner's cached
+        // masked image is stale
+        invalidateMaskedImageCache();
         updateIconImage();
 
         if (createEdit) {
@@ -276,11 +315,58 @@ public class LayerMask extends ImageLayer {
 
     public void changeOwner(Layer owner) {
         this.owner = owner;
-        this.ui = owner.ui;
     }
 
     public Layer getOwner() {
         return owner;
+    }
+
+    @Override
+    public LayerUI getUI() {
+        // layer masks use the UI of their owner
+        return owner.getUI();
+    }
+
+    @Override
+    public boolean hasUI() {
+        // layer masks use the UI of their owner
+        return owner.hasUI();
+    }
+
+    @Override
+    public LayerHolder getHolder() {
+        // layer masks use the holder of their owner
+        return owner.getHolder();
+    }
+
+    @Override
+    public Layer getTopLevelLayer() {
+        return owner.getTopLevelLayer();
+    }
+
+    public LayerUI createUI() {
+        // should only be called on the owner
+        throw new UnsupportedOperationException();
+    }
+
+    public void updateUI() {
+        // should only be called on the owner
+        throw new UnsupportedOperationException();
+    }
+
+    public void setVisible(boolean newVisibility, boolean addToHistory, boolean update) {
+        // layer masks have no independent visibility
+        throw new UnsupportedOperationException();
+    }
+
+    public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
+        // layer masks have no independent opacity
+        throw new UnsupportedOperationException();
+    }
+
+    public void setBlendingMode(BlendingMode newMode, boolean addToHistory, boolean update) {
+        // layer masks have no independent blending mode
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -297,27 +383,19 @@ public class LayerMask extends ImageLayer {
 
     @Override
     public void update() {
-        if (owner instanceof SmartFilter sf) {
-            sf.layerLevelPropertyChanged(false);
-        }
-        super.update();
+        owner.maskChanged();
+        getHolder().update();
     }
 
     @Override
     public void repaintRegion(PPoint start, PPoint end, double thickness) {
-        if (owner instanceof SmartFilter sf) {
-            sf.layerLevelPropertyChanged(false);
-        }
-        invalidateMaskedImageCache();
+        owner.maskChanged();
         comp.repaintRegion(start, end, thickness);
     }
 
     @Override
     public void repaintRegion(PRectangle area) {
-        if (owner instanceof SmartFilter sf) {
-            sf.layerLevelPropertyChanged(false);
-        }
-        invalidateMaskedImageCache();
+        owner.maskChanged();
         comp.repaintRegion(area);
     }
 

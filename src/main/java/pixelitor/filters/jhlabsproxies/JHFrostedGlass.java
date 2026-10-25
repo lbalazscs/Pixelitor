@@ -23,6 +23,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.FilterButtonModel;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -53,7 +54,7 @@ public class JHFrostedGlass extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (amount.isZero()) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         DiffuseFilter filter = new DiffuseFilter(NAME,

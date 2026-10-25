@@ -33,7 +33,7 @@ import javax.swing.undo.CannotUndoException;
 public class AddLayerMaskEdit extends PixelitorEdit {
     private final Layer layer;
     private final LayerMask layerMask;
-    private MaskViewMode newMode;
+    private MaskViewMode modeBeforeUndo;
 
     public AddLayerMaskEdit(String name, Composition comp, Layer layer) {
         super(name, comp);
@@ -50,7 +50,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         // the mask view mode must be saved here because its state just
         // before the undo is unknown when this edit is initially constructed
-        newMode = comp.getView().getMaskViewMode();
+        modeBeforeUndo = comp.getMaskViewMode();
 
         assert layer.isActive() || AppMode.isUnitTesting() : genNotActiveLayerErrorMsg();
 
@@ -63,8 +63,8 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         layer.addConfiguredMask(layerMask);
 
-        assert newMode != null;
-        comp.setMaskViewMode(newMode, layer);
+        assert modeBeforeUndo != null;
+        modeBeforeUndo.restoreOn(layer);
     }
 
     private String genNotActiveLayerErrorMsg() {
@@ -78,7 +78,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         node.add(layer.createDebugNode());
         node.add(layerMask.createDebugNode());
-        node.addAsString("new mask view node", newMode);
+        node.addAsString("mask view mode before undo", modeBeforeUndo);
 
         return node;
     }

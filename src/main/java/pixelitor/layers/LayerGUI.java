@@ -112,6 +112,10 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         bindSelectionToLayerActivation();
         uniqueId = idCounter++;
+
+        // initialize the borders and the toggle state
+        // (nobody else does this for nested GUIs)
+        updateSelectionState();
     }
 
     @Override
@@ -324,16 +328,12 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     private void buttonActivationChanged() {
-        if (isSelected()) {
-            // during comp actions, the active layer might already be
-            // inside the layer (which could be a composite layer)
-            if (!layer.contains(layer.getComp().getActiveLayer())) {
-                layer.activate();
-            }
-        } else {
-            // the layer was just deactivated
-            nameEditor.disableEditing();
+        // during comp actions, the active layer might already be
+        // inside the layer (which could be a composite layer)
+        if (isSelected() && !layer.contains(layer.getComp().getActiveLayer())) {
+            layer.activate();
         }
+        // also corrects the toggle if the layer didn't become active
         updateSelectionState();
     }
 
@@ -567,12 +567,35 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     public void updateSelectionState() {
-        if (!layer.isActive()) {
+        boolean active = layer.isActive();
+        syncToggleWithActivation(active);
+
+        if (!active) {
             setSelectionState(SelectionState.INACTIVE);
         } else if (layer.isMaskEditing()) {
             setSelectionState(SelectionState.MASK_SELECTED);
         } else {
             setSelectionState(SelectionState.LAYER_SELECTED);
+        }
+    }
+
+    /**
+     * Makes the toggle state mirror the activation state of the layer,
+     * without triggering the item listener.
+     */
+    private void syncToggleWithActivation(boolean active) {
+        if (isSelected() == active) {
+            return;
+        }
+        boolean prevReact = reactToItemEvents; // LayersPanel might have disabled it
+        reactToItemEvents = false;
+        try {
+            setSelected(active);
+        } finally {
+            reactToItemEvents = prevReact;
+        }
+        if (!active) {
+            nameEditor.cancelEditing(); // no-op if the name isn't being edited
         }
     }
 
@@ -611,9 +634,9 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
     @Override
     protected void paintComponent(Graphics g) {
-        if (!layer.getTopLevelLayer().isActive()) {
-            // no custom painting if not selected or semi-selected
-            return;
+        Color bg = determineBackgroundColor();
+        if (bg == null) {
+            return; // neither selected nor semi-selected
         }
 
         Graphics2D g2 = (Graphics2D) g;
@@ -625,7 +648,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         // paint a rounded rectangle with the
         // selection color on the selected layer GUI
         g2.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON);
-        g.setColor(determineSelectedColor());
+        g.setColor(bg);
         g.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
 
         // restore Graphics settings
@@ -633,13 +656,37 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         g2.setRenderingHint(KEY_ANTIALIASING, origAA);
     }
 
-    private Color determineSelectedColor() {
+    /**
+     * Returns the highlight color: the full one for the active layer,
+     * the lighter one for layers nested in the active layer,
+     * and null for all others.
+     */
+    private Color determineBackgroundColor() {
+        Layer active = layer.getComp().getActiveLayer();
         boolean darkTheme = Themes.getActive().isDark();
-        if (layer.isActive()) {
+
+        if (layer == active) {
             return darkTheme ? SELECTED_DARK_COLOR : SELECTED_COLOR;
-        } else {
+        }
+        if (isNestedIn(active)) {
             return darkTheme ? INACTIVE_SELECTED_DARK_COLOR : INACTIVE_SELECTED_COLOR;
         }
+        return null;
+    }
+
+    // true if the given layer is an ancestor (at any level) of this GUI's layer
+    private boolean isNestedIn(Layer ancestor) {
+        if (ancestor == null) { // can happen during initialization
+            return false;
+        }
+        LayerHolder h = layer.getHolder();
+        while (h instanceof Layer holderLayer) { // a Composition isn't a Layer
+            if (holderLayer == ancestor) {
+                return true;
+            }
+            h = holderLayer.getHolder();
+        }
+        return false;
     }
 
     @Override

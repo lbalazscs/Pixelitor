@@ -33,7 +33,7 @@ import javax.swing.undo.CannotUndoException;
 public class DeleteLayerMaskEdit extends PixelitorEdit {
     private final LayerMask prevMask;
     private final Layer layer;
-    private final MaskViewMode prevMode;
+    private MaskViewMode prevMode;
 
     public DeleteLayerMaskEdit(Composition comp, Layer layer, LayerMask prevMask, MaskViewMode prevMode) {
         super("Delete Layer Mask", comp);
@@ -51,13 +51,15 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
         super.undo();
 
         layer.addConfiguredMask(prevMask);
-        comp.setMaskViewMode(prevMode, layer);
+        assert prevMode != null;
+        prevMode.restoreOn(layer);
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
+        prevMode = comp.getMaskViewMode();
         layer.deleteMask(false);
     }
 

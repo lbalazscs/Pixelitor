@@ -94,7 +94,7 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
             }
         }
 
-        if (savedValue != null) {
+        if (savedValue != null) { // presets don't have to include everything
             loadStateFrom(savedValue);
         }
     }

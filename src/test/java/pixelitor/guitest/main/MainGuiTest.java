@@ -72,7 +72,6 @@ public class MainGuiTest {
             System.exit(0);
         }
 
-        app.runMenuCommand("Reset Workspace");
         app.configureRobotDelay();
 
         runConfiguredTests(logger);

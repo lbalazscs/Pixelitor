@@ -59,7 +59,7 @@ public class Fade extends ParametrizedFilter {
 
         if (previous == null) {
             // soft reference expired
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         if (ImageUtils.hasPackedIntArray(src)) {

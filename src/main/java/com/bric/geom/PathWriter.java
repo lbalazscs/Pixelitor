@@ -1,8 +1,6 @@
 /*
  * @(#)PathWriter.java
  *
- * $Date: 2014-06-06 20:04:49 +0200 (P, 06 jún. 2014) $
- *
  * Copyright (c) 2011 by Jeremy Wood.
  * All rights reserved.
  *
@@ -17,10 +15,10 @@
  * That site should also contain the most recent official version
  * of this software.  (See the SVN repository for more details.)
  */
+
 package com.bric.geom;
 
 import java.awt.Shape;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.PathIterator;
 
 import static java.awt.geom.PathIterator.*;
@@ -126,28 +124,8 @@ public abstract class PathWriter {
     }
 
     /**
-     * This appends a cubic curve to the GeneralPath provided that ranges from t = t0 to t = t1.
-     * This assumes that the path already ends at the point (ax*t0*t0*t0+bx*t0*t0+cx*t0+dx, ay*t0*t0*t0+by*t0*t0+cy*t0+dx).
-     *
-     * @param path the path to append data to.
-     * @param t0   the t-value for the beginning of this curve
-     * @param t1   the t-value for the end of this curve
-     * @param ax   the coefficient for the (t^3) term of the x parametric equation
-     * @param bx   the coefficient for the (t^2) term of the x parametric equation
-     * @param cx   the coefficient for the t term of the x parametric equation
-     * @param dx   the constant for the x parametric equation.
-     * @param ay   the coefficient for the (t^3) term of the y parametric equation
-     * @param by   the coefficient for the (t^2) term of the y parametric equation
-     * @param cy   the coefficient for the t term of the y parametric equation
-     * @param dy   the constant for the y parametric equation.
-     */
-    public static void cubicTo(GeneralPath path, double t0, double t1, double ax, double bx, double cx, double dx, double ay, double by, double cy, double dy) {
-        cubicTo2(path, t0, t1, ax, bx, cx, dx, ay, by, cy, dy);
-    }
-
-    /**
      * This appends a cubic curve to the PathWriter provided that ranges from t = t0 to t = t1.
-     * This assumes that the path already ends at the point (ax*t0*t0*t0+bx*t0*t0+cx*t0+dx, ay*t0*t0*t0+by*t0*t0+cy*t0+dx).
+     * This assumes that the path already ends at the point (ax*t0*t0*t0+bx*t0*t0+cx*t0+dx, ay*t0*t0*t0+by*t0*t0+cy*t0+dy).
      *
      * @param path the path to append data to.
      * @param t0   the t-value for the beginning of this curve
@@ -162,68 +140,32 @@ public abstract class PathWriter {
      * @param dy   the constant for the y parametric equation.
      */
     public static void cubicTo(PathWriter path, double t0, double t1, double ax, double bx, double cx, double dx, double ay, double by, double cy, double dy) {
-        cubicTo2(path, t0, t1, ax, bx, cx, dx, ay, by, cy, dy);
+        float[] pts = computeCubic(t0, t1, ax, bx, cx, dx, ay, by, cy, dy);
+        path.curveTo(pts[0], pts[1], pts[2], pts[3], pts[4], pts[5]);
     }
 
-    private static void cubicTo2(Object obj, double t0, double t1, double ax, double bx, double cx, double dx, double ay, double by, double cy, double dy) {
-        double tW = 2.0 * t0 / 3.0 + t1 / 3.0;
-        double tZ = t0 / 3.0 + 2.0 * t1 / 3.0;
+    private static float[] computeCubic(double t0, double t1, double ax, double bx, double cx, double dx, double ay, double by, double cy, double dy) {
+        double h = t1 - t0;
+        double hThird = h / 3.0;
 
-        double f0 = ay * t0 * t0 * t0 + by * t0 * t0 + cy * t0 + dy;
-        double f1 = ay * tW * tW * tW + by * tW * tW + cy * tW + dy;
-        double f2 = ay * tZ * tZ * tZ + by * tZ * tZ + cy * tZ + dy;
-        double f3 = ay * t1 * t1 * t1 + by * t1 * t1 + cy * t1 + dy;
+        double f0x = ((ax * t0 + bx) * t0 + cx) * t0 + dx;
+        double f1x = ((ax * t1 + bx) * t1 + cx) * t1 + dx;
+        double df0x = (3 * ax * t0 + 2 * bx) * t0 + cx;
+        double df1x = (3 * ax * t1 + 2 * bx) * t1 + cx;
 
-        double dy2 = f0;
-        double cy2 = (-11 * f0 + 18 * f1 - 9 * f2 + 2 * f3) / 2.0;
-        double by2 = (-19 * f0 + 27 * f2 - 8 * f3 - 10 * cy2) / 4;
-        double ay2 = f3 - by2 - cy2 - f0;
+        double f0y = ((ay * t0 + by) * t0 + cy) * t0 + dy;
+        double f1y = ((ay * t1 + by) * t1 + cy) * t1 + dy;
+        double df0y = (3 * ay * t0 + 2 * by) * t0 + cy;
+        double df1y = (3 * ay * t1 + 2 * by) * t1 + cy;
 
-        f0 = ax * t0 * t0 * t0 + bx * t0 * t0 + cx * t0 + dx;
-        f1 = ax * tW * tW * tW + bx * tW * tW + cx * tW + dx;
-        f2 = ax * tZ * tZ * tZ + bx * tZ * tZ + cx * tZ + dx;
-        f3 = ax * t1 * t1 * t1 + bx * t1 * t1 + cx * t1 + dx;
-
-        double dx2 = f0;
-        double cx2 = (-11 * f0 + 18 * f1 - 9 * f2 + 2 * f3) / 2.0;
-        double bx2 = (-19 * f0 + 27 * f2 - 8 * f3 - 10 * cx2) / 4;
-        double ax2 = f3 - bx2 - cx2 - f0;
-
-        double cy0 = (3 * dy2 + cy2) / 3;
-        double cy1 = (by2 - 3 * dy2 + 6 * cy0) / 3;
-        double y1 = ay2 + dy2 - 3 * cy0 + 3 * cy1;
-
-        double cx0 = (3 * dx2 + cx2) / 3;
-        double cx1 = (bx2 - 3 * dx2 + 6 * cx0) / 3;
-        double x1 = ax2 + dx2 - 3 * cx0 + 3 * cx1;
-
-        if (obj instanceof GeneralPath generalPath) {
-            generalPath.curveTo((float) cx0, (float) cy0,
-                    (float) cx1, (float) cy1,
-                    (float) x1, (float) y1);
-        } else if (obj instanceof PathWriter pathWriter) {
-            pathWriter.curveTo((float) cx0, (float) cy0,
-                    (float) cx1, (float) cy1,
-                    (float) x1, (float) y1);
-        }
-    }
-
-    /**
-     * This appends a quadratic curve to the GeneralPath provided that ranges from t = t0 to t = t1.
-     * This assumes that the path already ends at the point (ax*t0*t0+bx*t0+cx, ay*t0*t0+by*t0+cy).
-     *
-     * @param path the path to append data to.
-     * @param t0   the t-value for the beginning of this curve
-     * @param t1   the t-value for the end of this curve
-     * @param ax   the coefficient for the (t^2) term of the x parametric equation
-     * @param bx   the coefficient for the t term of the x parametric equation
-     * @param cx   the constant for the x parametric equation.
-     * @param ay   the coefficient for the (t^2) term of the y parametric equation
-     * @param by   the coefficient for the t term of the y parametric equation
-     * @param cy   the constant for the y parametric equation.
-     */
-    public static void quadTo(GeneralPath path, double t0, double t1, double ax, double bx, double cx, double ay, double by, double cy) {
-        quadTo2(path, t0, t1, ax, bx, cx, ay, by, cy);
+        return new float[]{
+            (float) (f0x + hThird * df0x),
+            (float) (f0y + hThird * df0y),
+            (float) (f1x - hThird * df1x),
+            (float) (f1y - hThird * df1y),
+            (float) f1x,
+            (float) f1y
+        };
     }
 
     /**
@@ -241,40 +183,27 @@ public abstract class PathWriter {
      * @param cy   the constant for the y parametric equation.
      */
     public static void quadTo(PathWriter path, double t0, double t1, double ax, double bx, double cx, double ay, double by, double cy) {
-        quadTo2(path, t0, t1, ax, bx, cx, ay, by, cy);
+        float[] pts = computeQuad(t0, t1, ax, bx, cx, ay, by, cy);
+        path.quadTo(pts[0], pts[1], pts[2], pts[3]);
     }
 
-    private static void quadTo2(Object obj, double t0, double t1, double ax, double bx, double cx, double ay, double by, double cy) {
-        double tZ = (t0 + t1) / 2.0;
+    private static float[] computeQuad(double t0, double t1, double ax, double bx, double cx, double ay, double by, double cy) {
+        double h = t1 - t0;
+        double hHalf = h / 2.0;
 
-        double f0 = ay * t0 * t0 + by * t0 + cy;
-        double f1 = ay * tZ * tZ + by * tZ + cy;
-        double f2 = ay * t1 * t1 + by * t1 + cy;
+        double f0x = (ax * t0 + bx) * t0 + cx;
+        double df0x = 2 * ax * t0 + bx;
+        double f1x = (ax * t1 + bx) * t1 + cx;
 
-        double ay2 = 2 * f2 - 4 * f1 + 2 * f0;
-        double cy2 = f0;
-        double by2 = f2 - cy2 - ay2;
+        double f0y = (ay * t0 + by) * t0 + cy;
+        double df0y = 2 * ay * t0 + by;
+        double f1y = (ay * t1 + by) * t1 + cy;
 
-        f0 = ax * t0 * t0 + bx * t0 + cx;
-        f1 = ax * tZ * tZ + bx * tZ + cx;
-        f2 = ax * t1 * t1 + bx * t1 + cx;
-
-        double ax2 = 2 * f2 - 4 * f1 + 2 * f0;
-        double cx2 = f0;
-        double bx2 = f2 - cx2 - ax2;
-
-        double ctrlY = (2 * cy2 + by2) / 2;
-        double y1 = ay2 - cy2 + 2 * ctrlY;
-
-        double ctrlX = (2 * cx2 + bx2) / 2;
-        double x1 = ax2 - cx2 + 2 * ctrlX;
-
-        if (obj instanceof GeneralPath generalPath) {
-            generalPath.quadTo((float) ctrlX, (float) ctrlY,
-                    (float) x1, (float) y1);
-        } else if (obj instanceof PathWriter pathWriter) {
-            pathWriter.quadTo((float) ctrlX, (float) ctrlY,
-                    (float) x1, (float) y1);
-        }
+        return new float[]{
+            (float) (f0x + hHalf * df0x),
+            (float) (f0y + hHalf * df0y),
+            (float) f1x,
+            (float) f1y
+        };
     }
 }

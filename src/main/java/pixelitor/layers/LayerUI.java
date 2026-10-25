@@ -51,8 +51,6 @@ public interface LayerUI extends Debuggable {
 
     void updateChildrenPanel();
 
-    void setSelected(boolean b);
-
     void changeLayer(Layer newLayer);
 
     int getId();

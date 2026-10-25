@@ -26,6 +26,7 @@ import pixelitor.filters.gui.UserPreset;
 import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.gui.utils.MlpAlignmentSelector;
 import pixelitor.layers.TextLayer;
+import pixelitor.utils.FontNames;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Rnd;
 import pixelitor.utils.Utils;
@@ -39,7 +40,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -128,10 +128,10 @@ public class TextSettings implements Serializable, Debuggable {
     /**
      * Default settings.
      */
-    public TextSettings() {
+    public TextSettings(Composition comp) {
         areaEffects = new AreaEffects();
         color = WHITE;
-        font = calcDefaultFont();
+        font = calcDefaultFont(comp);
         horizontalAlignment = HorizontalAlignment.CENTER;
         text = DEFAULT_TEXT;
         verticalAlignment = VerticalAlignment.CENTER;
@@ -202,10 +202,6 @@ public class TextSettings implements Serializable, Debuggable {
         sy = preset.getDouble(PRESET_KEY_SY, 1.0);
         shx = preset.getDouble(PRESET_KEY_SHX, 0.0);
         shy = preset.getDouble(PRESET_KEY_SHY, 0.0);
-
-        if (guiUpdateCallback != null) { // can be null in tests that don't create a dialog
-            guiUpdateCallback.accept(this);
-        }
     }
 
     public static TextSettings createRandomized(Consumer<TextSettings> guiUpdateCallback) {
@@ -270,29 +266,16 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     /**
-     * Calculates a default font based on available system fonts and active composition.
+     * Calculates a default font based on available system fonts and given composition.
      */
-    private static Font calcDefaultFont() {
-        String[] fontNames = Utils.getAvailableFontNames();
-        return new Font(fontNames[0], Font.PLAIN, calcDefaultFontSize())
-            .deriveFont(Map.of(KERNING, KERNING_ON));
-    }
+    private static Font calcDefaultFont(Composition comp) {
+        int defaultFontSize = comp != null
+            ? Math.max(1, (int) (comp.getCanvasHeight() * 0.2))
+            : 100; // default if there is no active composition
+        String firstFontName = FontNames.getFirstFontName();
 
-    /**
-     * Calculates a default font size based on the active composition's canvas height.
-     */
-    private static int calcDefaultFontSize() {
-        Composition comp = Views.getActiveComp();
-        if (comp != null) {
-            int canvasHeight = comp.getCanvasHeight();
-            int size = (int) (canvasHeight * 0.2);
-            if (size == 0) {
-                size = 1;
-            }
-            return size;
-        } else {
-            return 100; // default if no active composition
-        }
+        return new Font(firstFontName, Font.PLAIN, defaultFontSize)
+            .deriveFont(Map.of(KERNING, KERNING_ON));
     }
 
     public TextSettings withAlignment(BoxAlignment newAlignment) {
@@ -345,9 +328,8 @@ public class TextSettings implements Serializable, Debuggable {
         }
         String fontName = font.getName();
 
-        String[] sortedFontNames = Utils.getAvailableFontNames();
-        int index = Arrays.binarySearch(sortedFontNames, fontName);
-        if (index < 0) {
+        boolean found = FontNames.fontExists(fontName);
+        if (!found) {
             if (fontName.equals("Default")) {
                 // for some reason the "all smart filters" test file has this
                 return;
@@ -410,10 +392,6 @@ public class TextSettings implements Serializable, Debuggable {
         return rotation;
     }
 
-    public boolean isOnPath() {
-        return horizontalAlignment == null || verticalAlignment == null;
-    }
-
     public void setGuiUpdateCallback(Consumer<TextSettings> guiUpdateCallback) {
         this.guiUpdateCallback = guiUpdateCallback;
     }
@@ -430,13 +408,12 @@ public class TextSettings implements Serializable, Debuggable {
         node.add(DebugNodes.createFontNode("font", font));
         node.addColor("color", color);
         node.add(areaEffects.createDebugNode("effects"));
-        node.addDouble("rotation", rotation);
         node.addBoolean("watermark", watermark);
         node.addString("boxAlignment", getAlignment().toString());
         node.addInt("multiline/path alignment", mlpAlignment);
 
         DebugNode transformNode = new DebugNode("transformations", this);
-        transformNode.addDouble("rotationRad", rotation);
+        transformNode.addDouble("rotation", rotation);
         transformNode.addDouble("relativeLineHeight", relLineHeight);
         transformNode.addDouble("scaleX", sx);
         transformNode.addDouble("scaleY", sy);

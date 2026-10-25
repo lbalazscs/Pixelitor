@@ -44,12 +44,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static java.util.stream.Collectors.toList;
 import static javax.swing.JOptionPane.*;
 import static pixelitor.gui.ImageArea.Mode.FRAMES;
 import static pixelitor.utils.Texts.i18n;
+import static pixelitor.utils.Threads.onEDT;
 
 /**
  * Static methods for managing the collection of open views.
@@ -75,10 +76,6 @@ public class Views {
 
     public static List<View> getAll() {
         return views;
-    }
-
-    public static View getActive() {
-        return activeView;
     }
 
     public static int getNumViews() {
@@ -204,9 +201,7 @@ public class Views {
         if (ImageArea.isActiveMode(FRAMES)) {
             repaintAll();
         } else {
-            if (activeView != null) {
-                activeView.repaint();
-            }
+            repaintActive();
         }
     }
 
@@ -254,24 +249,22 @@ public class Views {
             if (comp.hasUnsavedChanges()) {
                 int answer = Dialogs.showUnsavedChangesWarning(comp.getName());
 
-                switch (answer) {
-                    case YES_OPTION:  // "Save"
+                return switch (answer) {
+                    case YES_OPTION -> { // "Save"
                         boolean saved = FileIO.save(comp, false);
                         if (saved) {
                             view.close();
-                            return true;
                         }
-                        // the user canceled the save dialog or save failed
-                        return false;
-                    case NO_OPTION:  // "Don't Save"
+                        yield saved;
+                    }
+                    case NO_OPTION -> {  // "Don't Save"
                         view.close();
-                        return true;
-                    case CANCEL_OPTION:
-                    case CLOSED_OPTION:  // dialog closed by pressing X
-                        return false;
-                    default:
+                        yield true;
+                    }
+                    case CANCEL_OPTION, CLOSED_OPTION -> false;
+                    default ->
                         throw new IllegalStateException("answer = " + answer);
-                }
+                };
             } else {
                 // no unsaved changes, close directly
                 view.close();
@@ -318,15 +311,6 @@ public class Views {
         return false;
     }
 
-    public static Composition getActiveComp() {
-        if (activeView != null) {
-            return activeView.getComp();
-        }
-
-        // there is no open view
-        return null;
-    }
-
     public static Optional<Composition> findCompByName(String name) {
         return views.stream()
             .map(View::getComp)
@@ -338,7 +322,7 @@ public class Views {
         return views.stream()
             .map(View::getComp)
             .filter(Composition::hasUnsavedChanges)
-            .collect(toList());
+            .toList();
     }
 
     /**
@@ -404,17 +388,6 @@ public class Views {
         return getActiveLayer().getHolderForNewLayers().getNumLayers();
     }
 
-    /**
-     * Returns the active layer of the active composition.
-     */
-    public static Layer getActiveLayer() {
-        if (activeView != null) {
-            return activeView.getComp().getActiveLayer();
-        }
-
-        return null;
-    }
-
     public static Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
         if (activeView != null) {
             return activeView.getComp().findFirstLayerWhere(predicate, includeMasks);
@@ -423,41 +396,52 @@ public class Views {
         return null;
     }
 
-    public static Drawable getActiveDrawable() {
+    public static Composition getActiveComp() {
         if (activeView != null) {
-            return activeView.getComp().getActiveDrawable();
+            return activeView.getComp();
         }
 
+        // there is no open view
         return null;
     }
 
-    public static Filterable getActiveFilterable() {
+    public static View getActive() {
+        return activeView;
+    }
+
+    public static <T> T getActive(Function<Composition, T> func) {
         if (activeView != null) {
-            return activeView.getComp().getActiveFilterable();
+            return func.apply(activeView.getComp());
         }
 
-        throw new IllegalStateException("no active view");
+        // there is no open view
+        return null;
+    }
+
+    /**
+     * Returns the active layer of the active composition.
+     */
+    public static Layer getActiveLayer() {
+        return getActive(Composition::getActiveLayer);
+    }
+
+    public static Drawable getActiveDrawable() {
+        return getActive(Composition::getActiveDrawable);
+    }
+
+    public static Filterable getActiveFilterable() {
+        return getActive(Composition::getActiveFilterable);
     }
 
     /**
      * Returns the selection of the active composition.
      */
     public static Selection getActiveSelection() {
-        if (activeView != null) {
-            return activeView.getComp().getSelection();
-        }
-
-        // there is no open view
-        return null;
+        return getActive(Composition::getSelection);
     }
 
     public static Path getActivePath() {
-        if (activeView != null) {
-            return activeView.getComp().getActivePath();
-        }
-
-        // there is no open view
-        return null;
+        return getActive(Composition::getActivePath);
     }
 
     public static void setActivePath(Path path) {
@@ -488,10 +472,13 @@ public class Views {
 
     // finds an open view associated with the given file path
     private static View findViewByFile(File targetFile) {
+        String targetFilePath = targetFile.getAbsolutePath();
         for (View view : views) {
             File file = view.getComp().getFile();
-            if (file != null && file.getPath().equals(targetFile.getPath())) {
-                return view;
+            if (file != null) {
+                if (file.getAbsolutePath().equals(targetFilePath)) {
+                    return view;
+                }
             }
         }
         return null;
@@ -503,7 +490,9 @@ public class Views {
         for (View view : views) {
             // make sure that the next reload is not started
             // before the previous one is finished
-            chainedChecks = chainedChecks.thenCompose(comp -> view.checkAutoReload());
+            chainedChecks = chainedChecks
+                .thenComposeAsync(_ -> view.checkAutoReload(), onEDT)
+                .exceptionally(_ -> null); // the error was already reported by reloadCompAsync
         }
     }
 

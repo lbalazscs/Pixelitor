@@ -94,7 +94,7 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
 
         for (int step = 1; step <= maxIterations; step++) {
             if (!Double.isFinite(zx) || !Double.isFinite(zy)) {
-                return IN_SET_COLOR;
+                return NOT_CONVERGED_COLOR;
             }
 
             // calculate w = z^(n - 1)
@@ -109,7 +109,7 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
 
             double denom = n * (u * u + v * v);
             if (denom == 0.0) {
-                return IN_SET_COLOR; // derivative is zero (singularity at origin)
+                return NOT_CONVERGED_COLOR; // derivative is zero (singularity at origin)
             }
 
             // Newton step for f(z) = zⁿ − 1:
@@ -133,13 +133,13 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
             zy = nextZy;
         }
 
-        return IN_SET_COLOR;
+        return NOT_CONVERGED_COLOR;
     }
 
     private int calcHalley(double zx, double zy) {
         for (int step = 1; step <= maxIterations; step++) {
             if (!Double.isFinite(zx) || !Double.isFinite(zy)) {
-                return IN_SET_COLOR;
+                return NOT_CONVERGED_COLOR;
             }
 
             // calculate w = zⁿ
@@ -158,7 +158,7 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
             double dy = (n + 1) * v;
             double denom = dx * dx + dy * dy;
             if (denom < 1e-14 || !Double.isFinite(denom)) {
-                return IN_SET_COLOR;
+                return NOT_CONVERGED_COLOR;
             }
 
             // 2 * z * (zⁿ − 1) = 2 * (zx + i*zy) * ((u - 1) + i*v)
@@ -184,7 +184,7 @@ public class NewtonFractalFilter extends ComplexPlaneFilter {
             zy = nextZy;
         }
 
-        return IN_SET_COLOR;
+        return NOT_CONVERGED_COLOR;
     }
 
     /**

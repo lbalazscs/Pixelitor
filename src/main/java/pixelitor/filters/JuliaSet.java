@@ -49,19 +49,22 @@ public class JuliaSet extends EscapeTimeFractal {
         // insert right after Zoom, before Zoom Center, to match the base param order
         insertParam(cParam, 3);
 
+        insideOutParam.setToolTip("Inverts the starting coordinates: f(z) = 1/z");
+
         help = Help.fromWikiURL("https://en.wikipedia.org/wiki/Julia_set");
     }
 
     @Override
-    public BufferedImage renderFractal(BufferedImage src, BufferedImage dest) {
+    protected BufferedImage renderFractal(BufferedImage src, BufferedImage dest) {
         int iterations = iterationsParam.getValue();
+        int[] palette = genPalette(colorsParam.getValue(), iterations);
 
-        JuliaSetFilter filter = new JuliaSetFilter(
+        JuliaSetFilter filter = new JuliaSetFilter(NAME,
             iterationTypeParam.getValue().strategy(),
             zoomParam.getZoomRatio(),
             zoomCenterParam.getRelativePoint(),
             iterations,
-            getColors(colorsParam.getValue(), iterations),
+            palette,
             cParam.getValue(),
             insideOutParam.isChecked()
         );

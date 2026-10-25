@@ -21,8 +21,6 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.Layer;
 
 import javax.swing.*;
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
@@ -34,11 +32,9 @@ import java.io.UncheckedIOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -50,9 +46,6 @@ import static java.lang.String.format;
 public final class Utils {
     private static final String ENCODED_NEWLINE = "#NL#";
     private static final CompletableFuture<?>[] EMPTY_CF_ARRAY = new CompletableFuture<?>[0];
-
-    private static String[] fontNames;
-    private static final CountDownLatch fontLoadingLatch = new CountDownLatch(1);
 
     private Utils() {
     }
@@ -233,41 +226,6 @@ public final class Utils {
         };
     }
 
-    public static void preloadFontNames() {
-        assert fontLoadingLatch.getCount() == 1;
-        try {
-            fontNames = GraphicsEnvironment
-                .getLocalGraphicsEnvironment()
-                .getAvailableFontFamilyNames();
-
-            // it's almost sorted already, but not completely
-            Arrays.sort(fontNames);
-        } finally {
-            fontLoadingLatch.countDown();
-        }
-    }
-
-    public static void preloadUnitTestFontNames() {
-        assert fontLoadingLatch.getCount() == 1;
-        fontNames = new String[]{Font.DIALOG, Font.DIALOG_INPUT,
-            Font.MONOSPACED, Font.SANS_SERIF, Font.SERIF};
-        fontLoadingLatch.countDown();
-    }
-
-    public static String[] getAvailableFontNames() {
-        // wait until all font names are loaded
-        try {
-            boolean ok = fontLoadingLatch.await(5, TimeUnit.MINUTES);
-            if (!ok) {
-                throw new RuntimeException("Timeout: the font names could not be loaded");
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        return fontNames;
-    }
-
     /**
      * Returns a new CompletableFuture that is completed when all the
      * CompletableFutures in the given list complete.
@@ -291,7 +249,7 @@ public final class Utils {
     public static String addArticle(String word) {
         String article = switch (word.charAt(0)) {
             // this is a limited heuristic based on spelling, not pronunciation
-            case 'a', 'e', 'i', 'o', 'u', 'h' -> "an ";
+            case 'a', 'e', 'i', 'o', 'u' -> "an ";
             default -> "a ";
         };
         return article + word;

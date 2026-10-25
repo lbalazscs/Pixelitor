@@ -32,14 +32,17 @@ public class LayerMaskActions {
     private LayerMaskActions() {
     }
 
-    public static void addPopupMenu(JLabel label, Layer layer) {
-        label.addMouseListener(new MaskPopupListener(layer));
+    public static void addPopupMenu(JLabel maskIconLabel, Layer layer) {
+        maskIconLabel.addMouseListener(new MaskPopupListener(layer));
     }
 
+    /**
+     * A mouse listener attached to mask icon labels in {@link LayerGUI}.
+     */
     private static class MaskPopupListener extends MouseAdapter {
         private final JPopupMenu menu;
 
-        protected MaskPopupListener(Layer layer) {
+        MaskPopupListener(Layer layer) {
             menu = new JPopupMenu();
 
             JMenu showMenu = new JMenu("Show/Edit");

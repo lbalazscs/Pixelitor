@@ -221,7 +221,7 @@ public class ChannelMixer extends ParametrizedFilter {
         if (rfr == 1.0f && rfg == 0.0f && rfb == 0.0f
             && gfr == 0.0f && gfg == 1.0f && gfb == 0.0f
             && bfr == 0.0f && bfg == 0.0f && bfb == 1.0f) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         boolean packedInt = ImageUtils.hasPackedIntArray(src);

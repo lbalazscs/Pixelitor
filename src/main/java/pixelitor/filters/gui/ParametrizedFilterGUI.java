@@ -152,7 +152,11 @@ public class ParametrizedFilterGUI extends FilterGUI implements ParamAdjustmentL
             super(text);
             addActionListener(_ -> {
                 if (trigger) {
-                    Views.getActiveFilterable().setShowOriginal(isSelected());
+                    Filterable filterable = Views.getActiveFilterable();
+                    if (filterable == null) {
+                        throw new IllegalStateException("no active filterable");
+                    }
+                    filterable.setShowOriginal(isSelected());
                 }
             });
             setName("show original");

@@ -70,45 +70,30 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     private TextSettings settings;
 
     public TextLayer(Composition comp) {
-        this(comp, "", new TextSettings());
+        this(comp, "", new TextSettings(comp));
     }
 
     public TextLayer(Composition comp, String name, TextSettings settings) {
         super(comp, name);
-
-        painter = new TransformedTextPainter();
-        applySettings(settings);
+        initPainter(settings);
     }
 
     public TextLayer(TextLayer other, Composition newComp, String name) {
         super(newComp, name);
-
-        this.settings = other.settings.copy();
-
-        // makes a copy of the painter instead of just calling
-        // applySettings so that flip/rotate see fully initialized
-        // internal data structures when they are applied
-        // TODO still needed? what about readObject, which calls applySettings?
-        this.painter = other.painter.copy(settings);
-
-        this.isAdjustment = other.isAdjustment;
+        initPainter(other.settings.copy());
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-
-        // reconstruct the transient painter
-        painter = new TransformedTextPainter();
-        painter.setTranslation(getTx(), getTy());
-        applySettings(settings);
+        initPainter(settings);
     }
 
     /**
      * Creates a new text layer with default settings and shows an editing dialog.
      */
     public static TextLayer createNew(Composition comp) {
-        return createNew(comp, new TextSettings());
+        return createNew(comp, new TextSettings(comp));
     }
 
     /**
@@ -125,7 +110,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
         var textLayer = new TextLayer(comp, "", settings);
         var prevActiveLayer = comp.getActiveLayer();
-        var prevViewMode = comp.getView().getMaskViewMode();
+        var prevViewMode = comp.getMaskViewMode();
 
         // don't add it to the history yet; only do so after the user presses OK (and not Cancel!)
         LayerHolder holder = comp.getHolderForNewLayers();
@@ -191,7 +176,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     private void restorePrevSettings(TextSettings prevSettings) {
         applySettings(prevSettings);
-        holder.update();
+        update();
     }
 
     @Override
@@ -214,7 +199,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         if (includeTransparent) {
             // a quick and rough estimate of the text content,
             // which can include some transparency at the edges
-            return painter.getBoundingBox();
+            return painter.getBoundingBox(comp);
         } else {
             // make an image-based calculation for an exact "content crop"
             BufferedImage image = toImage(false, false);
@@ -226,7 +211,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public int getPixelAtPoint(Point p) {
-        if (painter.getBoundingShape().contains(p)) {
+        if (painter.getBoundingShape(comp).contains(p)) {
             if (hasMask() && mask.isMaskEnabled()) {
                 BufferedImage maskImage = mask.getImage();
                 int ix = p.x - mask.getTx();
@@ -307,6 +292,12 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         return settings;
     }
 
+    private void initPainter(TextSettings s) {
+        painter = new TransformedTextPainter();
+        painter.setTranslation(getTx(), getTy());
+        applySettings(s); // also sets isAdjustment
+    }
+
     /**
      * Updates the layer's name based on its current text content.
      */
@@ -330,8 +321,8 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
      */
     @Override
     public ORAImageInfo getORAImageInfo() {
-        Rectangle textBounds = painter.getBoundingBox();
-        BufferedImage img = painter.renderArea(textBounds);
+        Rectangle textBounds = painter.getBoundingBox(comp);
+        BufferedImage img = painter.renderArea(textBounds, comp);
         return new ORAImageInfo(img, textBounds.x, textBounds.y);
     }
 
@@ -361,17 +352,17 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void flip(FlipDirection direction, boolean layerTransform) {
-        painter.flip(direction, comp.getCanvas());
+        // TODO unimplemented
     }
 
     @Override
     public void rotate(QuadrantAngle angle, boolean layerTransform) {
-        painter.rotate(angle, comp.getCanvas());
+        // TODO unimplemented
     }
 
     @Override
     public void rotate(double angleRadians, boolean layerTransform) {
-        throw new UnsupportedOperationException("TextLayer arbitrary-angle rotation is not implemented.");
+        // TODO unimplemented
     }
 
     @Override
@@ -477,15 +468,18 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
      * Handles changes to the path this text layer might be attached to.
      */
     public void pathChanged(boolean deleted) {
-        if (painter.isOnPath()) {
+        if (!painter.isOnPath()) {
+            return;
+        }
+
+        if (deleted) {
+            applySettings(settings.withAlignment(BoxAlignment.CENTER_CENTER));
+        } else {
             // history is managed by path edits, here we just update the text
             painter.pathChanged();
-            holder.update();
-
-            if (deleted) {
-                applySettings(settings.withAlignment(BoxAlignment.CENTER_CENTER));
-            }
         }
+
+        holder.update();
     }
 
     /**

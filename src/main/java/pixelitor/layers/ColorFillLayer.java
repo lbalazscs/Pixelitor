@@ -59,7 +59,7 @@ public class ColorFillLayer extends Layer {
         Color defaultColor = FgBgColors.getFgColor();
         ColorFillLayer layer = new ColorFillLayer(comp, generateName(), defaultColor);
         var activeLayerBefore = comp.getActiveLayer();
-        var prevViewMode = comp.getView().getMaskViewMode();
+        var prevViewMode = comp.getMaskViewMode();
 
         // don't add it to the history yet; wait until the user accepts the dialog
         LayerHolder holder = comp.getHolderForNewLayers();

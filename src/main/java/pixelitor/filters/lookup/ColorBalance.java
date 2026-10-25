@@ -29,6 +29,7 @@ import pixelitor.filters.gui.RangeWithColorsParam;
 import pixelitor.filters.util.Channel;
 import pixelitor.filters.util.ColorSpace;
 import pixelitor.gui.GUIText;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -137,7 +138,7 @@ public class ColorBalance extends ParametrizedFilter {
         float p3 = range3.getValueAsFloat();
 
         if (p1 == 0 && p2 == 0 && p3 == 0) { // no change
-            return src;
+            return ImageUtils.copyImage(src);
         }
 
         return switch (colorSpace.getSelected()) {

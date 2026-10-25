@@ -276,7 +276,7 @@ public class ShapesTool extends DragTool {
         DialogBuilder builder = new DialogBuilder()
             .owner(PixelitorWindow.get())
             .modeless();
-        strokeParam.configureSettingsDialog(builder);
+        strokeParam.configureDialog(builder);
         return builder.build();
     }
 

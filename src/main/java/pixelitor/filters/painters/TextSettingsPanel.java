@@ -23,8 +23,8 @@ import pixelitor.filters.gui.*;
 import pixelitor.gui.utils.*;
 import pixelitor.layers.Filterable;
 import pixelitor.layers.TextLayer;
+import pixelitor.utils.FontNames;
 import pixelitor.utils.Messages;
-import pixelitor.utils.Utils;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -143,7 +143,8 @@ public class TextSettingsPanel extends FilterGUI
         JPanel colorRotPanel = new JPanel(new FlowLayout(LEFT));
         colorRotPanel.add(color.createGUI());
         colorRotPanel.add(new JLabel("     Rotation:"));
-        rotationParam = new AngleParam("", settings.getRotation());
+        rotationParam = new AngleParam("", 0.0);
+        rotationParam.setValue(settings.getRotation(), false);
         rotationParam.setAdjustmentListener(this);
         colorRotPanel.add(rotationParam.createGUI());
         gbh.addControl(colorRotPanel);
@@ -154,7 +155,7 @@ public class TextSettingsPanel extends FilterGUI
         lastBoxAlignment = alignment;
         boxAlignmentCB.setSelectedItem(alignment);
 
-        boxAlignmentCB.addActionListener(e -> boxAlignmentChanged(comp, e));
+        boxAlignmentCB.addActionListener(_ -> boxAlignmentChanged(comp));
         gbh.addLabel("Box Alignment:", 0, 2);
 
         JPanel alignPanel = new JPanel(new FlowLayout(LEFT));
@@ -170,7 +171,7 @@ public class TextSettingsPanel extends FilterGUI
         return textPanel;
     }
 
-    private void boxAlignmentChanged(Composition comp, ActionEvent e) {
+    private void boxAlignmentChanged(Composition comp) {
         BoxAlignment selectedAlignment = getBoxAlignment();
         if (selectedAlignment.isPath() && !comp.hasActivePath()) {
             String msg = "<html>There's no path in <b>\"" + comp.getName() + "\"</b>.<br>You can have text along a path after creating a path with the Pen Tool.";
@@ -181,7 +182,7 @@ public class TextSettingsPanel extends FilterGUI
 
         lastBoxAlignment = selectedAlignment;
         updateMlpAlignEnabled();
-        actionPerformed(e);
+        paramAdjusted();
     }
 
     private void createTextArea(TextSettings settings) {
@@ -230,7 +231,7 @@ public class TextSettingsPanel extends FilterGUI
         gbh.addLastControl(fontSizeSlider);
 
         gbh.addLabel("Font Type:", 0, 1);
-        String[] availableFonts = Utils.getAvailableFontNames();
+        String[] availableFonts = FontNames.getAvailableFontNames();
         fontFamilyCB = new JComboBox<>(availableFonts);
 
         // it's important to use Font.getName(), and not Font.getFontName(),

@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CompletionException;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 import static java.lang.String.format;
@@ -67,6 +68,22 @@ public class Dialogs {
         return null;
     }
 
+    private static <T> T showModal(Supplier<T> dialogAction) {
+        GlobalEvents.modalDialogOpened();
+        try {
+            return dialogAction.get();
+        } finally {
+            GlobalEvents.modalDialogClosed();
+        }
+    }
+
+    private static void showModal(Runnable dialogAction) {
+        showModal(() -> {
+            dialogAction.run();
+            return null;
+        });
+    }
+
     public static void showInfo(String title, String msg) {
         showInfo(getMainWindow(), title, msg);
     }
@@ -77,13 +94,8 @@ public class Dialogs {
             return;
         }
 
-        if (parent == null) { // can happen when called via Messages
-            parent = getMainWindow();
-        }
-
-        GlobalEvents.modalDialogOpened();
-        JOptionPane.showMessageDialog(parent, msg, title, INFORMATION_MESSAGE);
-        GlobalEvents.modalDialogClosed();
+        Component dialogParent = parent != null ? parent : getMainWindow();
+        showModal(() -> JOptionPane.showMessageDialog(dialogParent, msg, title, INFORMATION_MESSAGE));
     }
 
     public static boolean showYesNoQuestion(String title, String msg) {
@@ -104,12 +116,9 @@ public class Dialogs {
                                         String question, Object[] options,
                                         int messageType) {
         assert !(parent instanceof View);
-        GlobalEvents.modalDialogOpened();
-        int choice = JOptionPane.showOptionDialog(parent, new JLabel(question),
+        return showModal(() -> JOptionPane.showOptionDialog(parent, new JLabel(question),
             title, YES_NO_CANCEL_OPTION,
-            messageType, null, options, options[0]);
-        GlobalEvents.modalDialogClosed();
-        return choice;
+            messageType, null, options, options[0]));
     }
 
     public static boolean showYesNoWarning(String title, String msg) {
@@ -125,9 +134,8 @@ public class Dialogs {
                                             String msg, int messageType) {
         assert !(parent instanceof View);
 
-        GlobalEvents.modalDialogOpened();
-        int choice = JOptionPane.showConfirmDialog(parent, msg, title, YES_NO_OPTION, messageType);
-        GlobalEvents.modalDialogClosed();
+        int choice = showModal(() ->
+            JOptionPane.showConfirmDialog(parent, msg, title, YES_NO_OPTION, messageType));
 
         return choice == YES_OPTION;
     }
@@ -153,11 +161,9 @@ public class Dialogs {
                                                int messageType) {
         assert !(parent instanceof View);
 
-        GlobalEvents.modalDialogOpened();
-        int choice = JOptionPane.showOptionDialog(parent, msg, title,
+        int choice = showModal(() -> JOptionPane.showOptionDialog(parent, msg, title,
             OK_CANCEL_OPTION, messageType, null,
-            options, options[initialOptionIndex]);
-        GlobalEvents.modalDialogClosed();
+            options, options[initialOptionIndex]));
 
         return choice == OK_OPTION;
     }
@@ -170,30 +176,20 @@ public class Dialogs {
         assert !(parent instanceof View);
 
         if (RandomGuiTest.isRunning()) { // avoid dialogs
-            if (!msg.contains("can't be used")) {
-                System.err.println("\nError: " + msg);
-                Thread.dumpStack();
-            }
+            System.err.println("\nError: " + msg);
+            Thread.dumpStack();
             return;
         }
 
-        if (parent == null) { // can happen when called via Messages
-            parent = getMainWindow();
-        }
-
-        GlobalEvents.modalDialogOpened();
-        JOptionPane.showMessageDialog(parent, msg, title, ERROR_MESSAGE);
-        GlobalEvents.modalDialogClosed();
+        Component dialogParent = parent != null ? parent : getMainWindow();
+        showModal(() -> JOptionPane.showMessageDialog(dialogParent, msg, title, ERROR_MESSAGE));
     }
 
     public static String showInputQuestion(Component parent, String title, String msg) {
         assert !(parent instanceof View);
 
-        GlobalEvents.modalDialogOpened();
-        String userInput = JOptionPane.showInputDialog(parent, msg, title, QUESTION_MESSAGE);
-        GlobalEvents.modalDialogClosed();
-
-        return userInput;
+        return showModal(() ->
+            JOptionPane.showInputDialog(parent, msg, title, QUESTION_MESSAGE));
     }
 
     public static void showFileNotWritableError(File file) {
@@ -224,9 +220,7 @@ public class Dialogs {
     public static void showWarning(Component parent, String title, String msg) {
         assert !(parent instanceof View);
 
-        GlobalEvents.modalDialogOpened();
-        JOptionPane.showMessageDialog(parent, msg, title, WARNING_MESSAGE);
-        GlobalEvents.modalDialogClosed();
+        showModal(() -> JOptionPane.showMessageDialog(parent, msg, title, WARNING_MESSAGE));
     }
 
     public static void showException(Throwable e) {

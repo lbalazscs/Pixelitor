@@ -17,61 +17,37 @@
 
 package pixelitor.filters.impl;
 
-import pixelitor.filters.MandelbrotSet;
-
 import java.awt.geom.Point2D;
 
 /**
  * Renders a Mandelbrot-type set, where the constant c is varied across pixels and z starts at 0.
  */
 public class MandelbrotSetFilter extends EscapeTimeFilter {
-    private final boolean insideOut;
-
     /**
      * Constructs a new MandelbrotSetFilter.
      *
+     * @param filterName    The name of the filter.
      * @param iterator      The iteration strategy for the fractal.
      * @param zoom          The zoom level for the fractal.
      * @param zoomCenter    The relative coordinates of the center point for
      *                      zooming (in the unit square [0, 1] x [0, 1]).
      * @param maxIterations The maximum number of iterations for the escape time algorithm.
-     * @param colors        The color palette used for rendering.
+     * @param palette       The color palette used for rendering.
      * @param insideOut     True to invert the complex constant c using f(c) = 1/c, false otherwise.
      */
-    public MandelbrotSetFilter(IterationStrategy iterator, double zoom,
+    public MandelbrotSetFilter(String filterName,
+                               IterationStrategy iterator, double zoom,
                                Point2D zoomCenter, int maxIterations,
-                               int[] colors, boolean insideOut) {
-        super(MandelbrotSet.NAME, iterator.getBounds(),
-            iterator, zoom, zoomCenter, maxIterations, colors);
-        this.insideOut = insideOut;
+                               int[] palette, boolean insideOut) {
+        super(filterName, iterator.getBounds(),
+            iterator, zoom, zoomCenter, maxIterations, palette, insideOut);
     }
 
     @Override
-    public int processPixel(int x, int y, int rgb) {
+    protected int calcColor(double cx, double cy) {
         // for Mandelbrot-type sets, z starts at 0
-        double zx = 0;
-        double zy = 0;
-
-        // the complex constant c is mapped from the pixel's image coordinates
-        double cx = xStart + x * xMultiplier;
-        double cy = yStart + y * yMultiplier;
-
-        if (insideOut) {
-            // invert c using f(c) = 1/c
-            double d = cx * cx + cy * cy;
-            if (d == 0) {
-                // c is at the origin, so 1/c is at infinity => escape immediately
-                return colors[colors.length - 1];
-            }
-            // use the inverted c' as c
-            cx = cx / d;
-            cy = -cy / d;
-        }
-
-        // check for known regions of the set for a quick exit
-        if (iterator.checkShortcuts(cx, cy)) {
-            return IN_SET_COLOR; // the point is in the set
-        }
-        return calcIteratedColor(zx, zy, cx, cy);
+        return iterator.checkShortcuts(cx, cy)
+            ? IN_SET_COLOR
+            : calcIteratedColor(0, 0, cx, cy);
     }
 }

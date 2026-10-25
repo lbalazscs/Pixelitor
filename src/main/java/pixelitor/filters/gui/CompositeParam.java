@@ -33,9 +33,9 @@ import java.util.stream.Stream;
  */
 public class CompositeParam extends AbstractFilterParam {
     private final FilterParam[] children;
-    private ResetButton resetButton;
 
     private final Layout layout;
+    private JPanel dialogContentPanel;
 
     public CompositeParam(String name, FilterParam... children) {
         this(name, Layout.DIALOG, children);
@@ -71,10 +71,7 @@ public class CompositeParam extends AbstractFilterParam {
     @Override
     public JComponent createGUI() {
         var gui = switch (layout) {
-            case DIALOG -> {
-                resetButton = new ResetButton(this);
-                yield new DialogLauncherGUI(this::configureDialog, resetButton);
-            }
+            case DIALOG -> new DialogLauncherGUI(this::configureDialog, new ResetButton(this));
             case VERTICAL -> new VerGroupedParamGUI(this);
             case HORIZONTAL -> new HorGroupedParamGUI(this);
         };
@@ -82,8 +79,11 @@ public class CompositeParam extends AbstractFilterParam {
     }
 
     private void configureDialog(DialogBuilder builder) {
+        if (dialogContentPanel == null) {
+            dialogContentPanel = GUIUtils.createVerticalPanel(List.of(children));
+        }
         builder
-            .content(GUIUtils.createVerticalPanel(List.of(children)))
+            .content(dialogContentPanel)
             .title(getName())
             .withScrollbars()
             .okText(GUIText.CLOSE_DIALOG)
@@ -130,17 +130,14 @@ public class CompositeParam extends AbstractFilterParam {
     @Override
     public void saveStateTo(UserPreset preset) {
         for (FilterParam child : children) {
-            preset.put(child.getPresetKey(), child.copyState().toPresetString());
+            child.saveStateTo(preset);
         }
     }
 
     @Override
     public void loadStateFrom(UserPreset preset) {
         for (FilterParam child : children) {
-            String savedString = preset.get(child.getPresetKey());
-            if (savedString != null) { // presets don't have to include everything
-                child.loadStateFrom(savedString);
-            }
+            child.loadStateFrom(preset);
         }
         updateResetButtonState();
     }
@@ -157,12 +154,16 @@ public class CompositeParam extends AbstractFilterParam {
 
     @Override
     public void setEnabled(boolean enabled, EnabledReason reason) {
-        // call super to set the enabled state of the launching button
+        // call super to update this parameter's own state (and launcher button GUI)
         super.setEnabled(enabled, reason);
 
+        // children inherit this composite's overall enabled state as PARENT_PARAM,
+        // while ANIMATION_ENDING_STATE is forwarded so each child can check if it is animatable
         for (FilterParam child : children) {
-            // doesn't overwrite their internal FILTER_LOGIC state
-            child.setEnabled(enabled, EnabledReason.PARENT_PARAM);
+            child.setEnabled(isEnabled(), EnabledReason.PARENT_PARAM);
+            if (reason == EnabledReason.ANIMATION_ENDING_STATE) {
+                child.setEnabled(enabled, reason); // each child applies its own animatable check
+            }
         }
     }
 
@@ -192,8 +193,8 @@ public class CompositeParam extends AbstractFilterParam {
     }
 
     private void updateResetButtonState() {
-        if (resetButton != null) {
-            resetButton.updateState();
+        if (paramGUI != null) {
+            paramGUI.updateGUI();
         }
     }
 
@@ -218,9 +219,16 @@ public class CompositeParam extends AbstractFilterParam {
     @Override
     public void guiDisposed() {
         super.guiDisposed();
+        if (layout == Layout.DIALOG && dialogContentPanel == null) {
+            // the dialog was never opened, the children GUIs
+            // were never created, so no cleanup is necessary
+            return;
+        }
+
         for (FilterParam child : children) {
             child.guiDisposed();
         }
+        dialogContentPanel = null;
     }
 
     @Override

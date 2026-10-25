@@ -23,6 +23,7 @@ import pixelitor.colors.ColorSpaces;
 import pixelitor.filters.gui.EnumParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.util.CylColorSpace;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -62,7 +63,7 @@ public class HueSat extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (hue.isZero() && saturation.isZero() && brightness.isZero()) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         return switch (colorSpace.getSelected()) {

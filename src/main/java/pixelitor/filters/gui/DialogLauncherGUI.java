@@ -33,23 +33,25 @@ import static java.awt.BorderLayout.EAST;
  */
 public class DialogLauncherGUI extends JPanel implements ParamGUI {
     private static final String CONFIGURE_BUTTON_TEXT = "Configure...";
-    
+
     private final JButton configureButton;
     private final ResetButton resetButton;
+    private final Consumer<DialogBuilder> dialogConfigurator;
 
     public DialogLauncherGUI(Consumer<DialogBuilder> dialogConfigurator,
                              ResetButton resetButton) {
         super(new BorderLayout());
+        this.dialogConfigurator = dialogConfigurator;
         this.resetButton = resetButton;
 
         configureButton = new JButton(CONFIGURE_BUTTON_TEXT);
-        configureButton.addActionListener(_ -> createAndShowDialog(dialogConfigurator));
+        configureButton.addActionListener(_ -> createAndShowDialog());
 
         add(configureButton, CENTER);
         add(resetButton, EAST);
     }
 
-    private void createAndShowDialog(Consumer<DialogBuilder> dialogConfigurator) {
+    private void createAndShowDialog() {
         DialogBuilder builder = new DialogBuilder()
             .owner(SwingUtilities.getWindowAncestor(configureButton))
             .parentComponent(configureButton);
@@ -64,7 +66,7 @@ public class DialogLauncherGUI extends JPanel implements ParamGUI {
 
     @Override
     public void updateGUI() {
-
+        resetButton.updateState();
     }
 
     @Override

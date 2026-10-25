@@ -155,6 +155,8 @@ public class AppRunner {
             waitForImageLoading(fileNames.length);
             mouse.updateCanvasBounds();
         }
+
+        runMenuCommand("Reset Workspace");
     }
 
     private static void waitForImageLoading(int numImages) {

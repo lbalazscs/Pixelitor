@@ -37,20 +37,19 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.NONE;
  */
 public class ColorListParamGUI extends JPanel implements ParamGUI {
     private final ColorListParam model;
-    private final Color[] candidateColors;
     private final List<ColorSwatch> swatches;
 
     private final SliderSpinner numColorsSlider;
     private final ResetButton resetButton;
     private final JPanel colorsPanel;
 
-    private boolean sliderMovedByUser = true;
+    private boolean updatingFromModel;
     private int numVisibleSwatches;
+    private String toolTip;
 
-    public ColorListParamGUI(ColorListParam model, Color[] candidateColors, int minNumColors) {
+    public ColorListParamGUI(ColorListParam model) {
         super(new VerticalLayout());
         this.model = model;
-        this.candidateColors = candidateColors;
 
         Color[] initialColors = model.getColors();
         this.numVisibleSwatches = initialColors.length;
@@ -66,15 +65,18 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
 
         // the range name doesn't matter, because it will not be shown
         RangeParam numColorsModel = new RangeParam(model.getName(),
-            minNumColors, numVisibleSwatches, candidateColors.length);
+            model.getMinNumColors(), numVisibleSwatches, model.getMaxNumColors());
         numColorsSlider = new SliderSpinner(numColorsModel, NONE, false);
         numColorsSlider.setupTicks(1, 0);
         numColorsSlider.addExplicitResetButton(resetButton);
         add(numColorsSlider);
         add(colorsPanel);
 
-        numColorsModel.setAdjustmentListener(() ->
-            numColorsChanged(numColorsModel.getValue()));
+        numColorsModel.setAdjustmentListener(() -> {
+            if (!updatingFromModel) {
+                numColorsChanged(numColorsModel.getValue());
+            }
+        });
 
         setBorder(createTitledBorder(model.getName()));
     }
@@ -83,6 +85,13 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         ColorSwatch swatch = Colors.createFilterSwatch(this, color, model.getName(),
             () -> model.getColor(index), false,
             c -> model.setColor(index, c, true));
+
+        if (toolTip != null) {
+            swatch.setToolTipText(toolTip);
+        }
+        // the swatch can be created while the panel is disabled (preset loading)
+        swatch.setEnabled(isEnabled());
+
         swatches.add(swatch);
         colorsPanel.add(swatch);
     }
@@ -108,7 +117,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
                 if (i < swatches.size()) {
                     swatches.get(i).setVisible(true);
                 } else {
-                    createAndAddSwatch(candidateColors[i], i);
+                    createAndAddSwatch(model.getCandidateColor(i), i);
                 }
             }
             // ensure the new swatches are displayed
@@ -123,7 +132,7 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
         for (int i = 0; i < numVisibleSwatches; i++) {
             newColors[i] = swatches.get(i).getForeground();
         }
-        model.setColors(newColors, sliderMovedByUser);
+        model.setColors(newColors, true);
     }
 
     @Override
@@ -141,19 +150,19 @@ public class ColorListParamGUI extends JPanel implements ParamGUI {
             }
         }
 
-        // do this only after setting the foreground colors,
-        // because it calls setColors on the model
-        sliderMovedByUser = false;
-        numColorsSlider.setValue(numColors);
-        sliderMovedByUser = true;
-
-        if (resetButton != null) {
-            resetButton.updateState();
+        updatingFromModel = true;
+        try {
+            numColorsSlider.setValue(numColors);
+        } finally {
+            updatingFromModel = false;
         }
+
+        resetButton.updateState();
     }
 
     @Override
     public void setToolTip(String tip) {
+        toolTip = tip;
         for (ColorSwatch swatch : swatches) {
             swatch.setToolTipText(tip);
         }

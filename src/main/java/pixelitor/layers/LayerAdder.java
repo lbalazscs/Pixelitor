@@ -33,12 +33,11 @@ public class LayerAdder {
     private final Composition comp;
     private String editName; // null if the addition should not be recorded in history
     private int insertionIndex = -1;
+    private Position position = ABOVE_ACTIVE;
+    private boolean addToUI = true;
     private boolean updateComp = true;
 
     public enum Position {ABOVE_ACTIVE, BELOW_ACTIVE}
-
-    private Position position = ABOVE_ACTIVE;
-    private boolean addToUI = true;
 
     public LayerAdder(LayerHolder holder) {
         this.comp = holder.getComp();
@@ -52,6 +51,7 @@ public class LayerAdder {
 
     /**
      * Sets the relative position where the layer should be inserted.
+     * Ignored if a specific index is set with {@link #atIndex(int)}.
      */
     public LayerAdder atPosition(Position position) {
         this.position = position;
@@ -60,8 +60,10 @@ public class LayerAdder {
 
     /**
      * Sets a specific index where the layer should be inserted.
+     * Takes precedence over {@link #atPosition(Position)}.
      */
     public LayerAdder atIndex(int targetIndex) {
+        assert targetIndex >= 0;
         this.insertionIndex = targetIndex;
         return this;
     }
@@ -69,6 +71,10 @@ public class LayerAdder {
     /**
      * Skips adding the layer's UI (because the layer is being added
      * programmatically rather than as a direct user action).
+     * <p>
+     * Note: skipping UI add also skips marking the composition as dirty
+     * ({@link Composition#setDirty(boolean)}) and updating the layer holder
+     * ({@link LayerHolder#update()}).
      */
     public LayerAdder skipUIAdd() {
         addToUI = false;
@@ -86,23 +92,18 @@ public class LayerAdder {
     /**
      * Calculates the insertion index based on the relative position setting.
      */
-    private void calcIndexFromPosition() {
+    private int calcIndexFromPosition() {
         int activeIndex = holder.indexOf(comp.getActiveLayer());
+        boolean above = position == ABOVE_ACTIVE;
 
         if (activeIndex == -1) {
             // the active layer is not a direct child of the target holder:
             // default to adding at the top or bottom of the holder
-            insertionIndex = switch (position) {
-                case ABOVE_ACTIVE -> holder.getNumLayers(); // add to the top
-                case BELOW_ACTIVE -> 0;
-            };
-        } else {
-            // the active layer is a direct child, so insert relative to it
-            insertionIndex = switch (position) {
-                case ABOVE_ACTIVE -> activeIndex + 1;
-                case BELOW_ACTIVE -> activeIndex;
-            };
+            return above ? holder.getNumLayers() : 0;
         }
+
+        // the active layer is a direct child, so insert relative to it
+        return above ? activeIndex + 1 : activeIndex;
     }
 
     /**
@@ -116,19 +117,17 @@ public class LayerAdder {
         // capture state for history if needed
         if (isHistoryEnabled()) {
             prevActiveLayer = comp.getActiveLayer();
-            prevMaskViewMode = comp.getView().getMaskViewMode();
+            prevMaskViewMode = comp.getMaskViewMode();
         }
 
-        if (insertionIndex == -1) { // no index was explicitly set
-            calcIndexFromPosition();
-        }
+        int index = insertionIndex != -1 ? insertionIndex : calcIndexFromPosition();
 
-        holder.insertDirectChild(layer, insertionIndex);
+        holder.insertDirectChild(layer, index);
         comp.setActiveLayer(layer);
 
         if (addToUI) {
             if (holder == comp) {
-                comp.getView().addLayerUI(layer, insertionIndex);
+                comp.getView().addLayerUI(layer, index);
                 comp.fireLayerUICountChanged();
             } else {
                 ((CompositeLayer) holder).updateChildrenUI();

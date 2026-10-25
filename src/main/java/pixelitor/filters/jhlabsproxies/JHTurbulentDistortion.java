@@ -22,6 +22,7 @@ import com.jhlabs.image.TransformFilter;
 import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -59,7 +60,7 @@ public class JHTurbulentDistortion extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (amount.isZero() || turbulence.isZero()) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         MarbleFilter filter = new MarbleFilter(NAME,

@@ -25,10 +25,8 @@ import pixelitor.tools.pen.SubPath;
 
 import java.awt.*;
 import java.awt.geom.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Locale;
-import java.util.StringJoiner;
 import java.util.random.RandomGenerator;
 
 import static java.awt.Color.BLACK;
@@ -460,6 +458,7 @@ public class Shapes {
         if (numPoints <= 2) {
             throw new IllegalArgumentException("numPoints = " + numPoints);
         }
+        assert !hasConsecutiveDuplicates(points);
 
         // calculate arrays of centers and lengths to avoid repeated computing
         Point2D[] centers = new Point2D[numPoints - 1];
@@ -618,6 +617,29 @@ public class Shapes {
         }
 
         return path;
+    }
+
+    /**
+     * Checks if there are consecutive identical points in the given list.
+     */
+    private static boolean hasConsecutiveDuplicates(List<Point2D> points) {
+        if (points.size() < 2) {
+            return false;
+        }
+
+        Iterator<Point2D> iterator = points.iterator();
+        Point2D prev = iterator.next();
+
+        while (iterator.hasNext()) {
+            Point2D current = iterator.next();
+            if (Objects.equals(prev, current)) {
+                return true;
+            }
+
+            prev = current;
+        }
+
+        return false;
     }
 
     /**

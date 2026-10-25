@@ -67,7 +67,7 @@ public interface Filterable {
 
     void onFilterDialogCanceled();
 
-    void filterWithoutDialogFinished(BufferedImage filteredImage, FilterContext context, String filterName);
+    void filterWithoutDialogFinished(BufferedImage src, BufferedImage dest, FilterContext context, String filterName);
 
     default void startFilter(Filter filter, FilterContext context) {
         startFilter(filter, context, PixelitorWindow.get());
@@ -96,45 +96,51 @@ public interface Filterable {
         assert Threads.calledOnEDT();
 
         if (filter instanceof FilterWithGUI fwg) {
-            PixelitorWindow.get().setCursor(Cursors.BUSY);
-            View view = Views.getActive();
-
-            // save the view cursor set by the current
-            // tool so that it can be restored later
-            Cursor toolViewCursor = view.getCursor();
-            view.setCursor(Cursors.BUSY);
-
-            startPreviewing();
-            Tools.forceFinish();
-
-            FilterGUI gui = fwg.createGUI(this, resetSettings);
-            MouseZoomMethod.active.installOnOther(gui);
-            ZoomMenu.setupZoomKeys(gui);
-
-            DialogBuilder dialogBuilder = new DialogBuilder()
-                .title(filter.getName())
-                .menuBar(fwg.getMenuBar())
-                .name("filterDialog")
-                .content(gui)
-                .withScrollbars()
-                .enableCopyShortcuts()
-                .onVisibleAction(() -> gui.startPreview(true))
-                .okAction(() -> onFilterDialogAccepted(filter.getName()))
-                .cancelAction(this::onFilterDialogCanceled);
-            JDialog dialog = dialogBuilder.build();
-
-            PixelitorWindow.get().setCursor(Cursors.DEFAULT);
-            view.setCursor(toolViewCursor);
-
-            GUIUtils.showDialog(dialog, FRAME_RIGHT);
-
-            // since the dialog is modal, this is the point where
-            // we know that it has been closed => clean up resources
-            gui.dispose();
-
-            return dialogBuilder.wasAccepted();
+            return startFilterWithGUI(filter, resetSettings, fwg);
         }
         startFilter(filter, FILTER_WITHOUT_DIALOG);
         return true;
+    }
+
+    private boolean startFilterWithGUI(Filter filter, boolean resetSettings, FilterWithGUI fwg) {
+        PixelitorWindow.get().setCursor(Cursors.BUSY);
+        View view = Views.getActive();
+
+        // save the view cursor set by the current
+        // tool so that it can be restored later
+        Cursor toolViewCursor = view.getCursor();
+        view.setCursor(Cursors.BUSY);
+
+        Tools.forceFinish();
+
+        startPreviewing();
+        FilterGUI gui = fwg.createGUI(this, resetSettings);
+        MouseZoomMethod.active.installOnOther(gui);
+        ZoomMenu.setupZoomKeys(gui);
+
+        DialogBuilder dialogBuilder = new DialogBuilder()
+            .title(filter.getName())
+            .menuBar(fwg.getMenuBar())
+            .name("filterDialog")
+            .content(gui)
+            .withScrollbars()
+            .enableCopyShortcuts()
+            .onVisibleAction(() -> gui.startPreview(true))
+            .okAction(() -> onFilterDialogAccepted(filter.getName()))
+            .cancelAction(this::onFilterDialogCanceled);
+        JDialog dialog = dialogBuilder.build();
+
+        PixelitorWindow.get().setCursor(Cursors.DEFAULT);
+        view.setCursor(toolViewCursor);
+
+        try {
+            GUIUtils.showDialog(dialog, FRAME_RIGHT);
+        } finally {
+            // since the dialog is modal, this is the point where
+            // we know that it has been closed => clean up resources
+            gui.dispose();
+        }
+
+        return dialogBuilder.wasAccepted();
     }
 }

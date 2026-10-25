@@ -22,6 +22,7 @@ import pixelitor.filters.gui.FilterGUI;
 import pixelitor.filters.gui.TextParam;
 import pixelitor.io.ProcessIO;
 import pixelitor.layers.Filterable;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -59,7 +60,7 @@ public class CommandLineFilter extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (textParam.isEmpty()) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         List<String> commands = parseCommands(textParam.getValue());

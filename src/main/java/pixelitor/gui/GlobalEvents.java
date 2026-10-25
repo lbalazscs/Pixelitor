@@ -83,7 +83,7 @@ public class GlobalEvents {
 
     private static void putHotkey(char key, int modifiers, Action action) {
         // deliberately a key code, not a key char (see issue #31)
-        KeyStroke keyStroke = KeyStroke.getKeyStroke((int) key, modifiers);
+        KeyStroke keyStroke = KeyStroke.getKeyStroke(key, modifiers);
         Action previous = hotkeyMap.put(keyStroke, action);
         assert previous == null : "duplicate hotkey " + keyStroke;
     }

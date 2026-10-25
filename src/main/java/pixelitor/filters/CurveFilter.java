@@ -286,29 +286,60 @@ public abstract class CurveFilter extends ParametrizedFilter {
      * Manages and filters 2D points to create a smooth path.
      */
     protected static class PathConnector {
+        private static final double MIN_DIST = 1e-4;
+        private static final double MIN_DIST_SQ = MIN_DIST * MIN_DIST;
+
         private final List<Point2D> points;
 
         private final double angleThreshold;
-        private final double distThreshold;
+        private final double distThresholdSq;
 
-        double lastX = 0;
-        double lastY = 0;
-        double lastAngle = 0;
+        private double lastX;
+        private double lastY;
+        private double lastAngle;
+        private boolean hasLastAngle;
 
         public PathConnector(int capacity, double distThreshold, double angleThreshold) {
             this.points = new ArrayList<>(capacity);
             this.angleThreshold = angleThreshold;
-            this.distThreshold = distThreshold;
+            this.distThresholdSq = distThreshold * distThreshold;
         }
 
         public void add(double x, double y) {
-            double angle = FastMath.atan2(y - lastY, x - lastX);
-            if (Math.abs(lastAngle - angle) > angleThreshold || Math.abs(x - lastX) > distThreshold || Math.abs(y - lastY) > distThreshold) {
-                // this point adds some significant information to the curve
+            if (points.isEmpty()) {
+                points.add(new Point2D.Double(x, y));
+                lastX = x;
+                lastY = y;
+                return;
+            }
+
+            double dx = x - lastX;
+            double dy = y - lastY;
+            double distSq = dx * dx + dy * dy;
+
+            // reject duplicate or sub-pixel points to avoid zero/near-zero segments
+            if (distSq < MIN_DIST_SQ) {
+                return;
+            }
+
+            boolean distExceeded = distSq > distThresholdSq;
+
+            double angle = FastMath.atan2(dy, dx);
+            boolean angleExceeded = false;
+            if (hasLastAngle) {
+                double diff = Math.abs(lastAngle - angle);
+                if (diff > Math.PI) {
+                    diff = Math.TAU - diff; // normalize to [0, PI]
+                }
+                angleExceeded = diff > angleThreshold;
+            }
+
+            if (distExceeded || angleExceeded) {
                 points.add(new Point2D.Double(x, y));
                 lastX = x;
                 lastY = y;
                 lastAngle = angle;
+                hasLastAngle = true;
             }
         }
 

@@ -29,7 +29,6 @@ import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
 import pixelitor.colors.Colors;
 import pixelitor.filters.Invert;
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
@@ -556,14 +555,8 @@ public class ImageUtils {
     public static BufferedImage copyImage(BufferedImage src) {
         assert src != null;
 
-        BufferedImage copy = null;
-        try {
-            WritableRaster raster = src.copyData(null);
-            copy = new BufferedImage(src.getColorModel(), raster, src.isAlphaPremultiplied(), null);
-        } catch (OutOfMemoryError e) {
-            Dialogs.showOutOfMemoryError(e);
-        }
-        return copy;
+        WritableRaster raster = src.copyData(null);
+        return new BufferedImage(src.getColorModel(), raster, src.isAlphaPremultiplied(), null);
     }
 
     // whether the given image was created via BufferedImage.getSubimage()
@@ -607,6 +600,17 @@ public class ImageUtils {
         return new BufferedImage(src.getColorModel(),
             (WritableRaster) startingFrom00,
             src.isAlphaPremultiplied(), null);
+    }
+
+    /**
+     * Copies the source image into the destination buffer.
+     */
+    public static BufferedImage copy(BufferedImage src, BufferedImage dest) {
+        Graphics2D g = dest.createGraphics();
+        g.setComposite(AlphaComposite.Src);
+        g.drawImage(src, 0, 0, null);
+        g.dispose();
+        return dest;
     }
 
     /**

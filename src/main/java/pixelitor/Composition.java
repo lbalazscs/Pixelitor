@@ -43,10 +43,7 @@ import pixelitor.tools.pen.history.ConvertSelectionToPathEdit;
 import pixelitor.tools.selection.SelectionChangeListener;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
-import pixelitor.utils.ImageUtils;
-import pixelitor.utils.Messages;
-import pixelitor.utils.Shapes;
-import pixelitor.utils.Utils;
+import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
@@ -62,6 +59,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -153,6 +151,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public static Composition fromImage(BufferedImage img, File file, String name, int dpi) {
         assert img != null;
+        if (file == null && name == null) {
+            throw new IllegalArgumentException("must be given a file or a name");
+        }
+
         Canvas canvas = new Canvas(img.getWidth(), img.getHeight());
 
         ImageMode mode;
@@ -168,10 +170,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         if (file != null) {
             comp.setFile(file); // also sets the name based on the file name
-        } else if (name != null) {
-            comp.setName(name);
         } else {
-            throw new IllegalArgumentException("must be given a file or a name");
+            comp.setName(name);
         }
         comp.initDebugName();
         assert comp.getName() != null;
@@ -343,6 +343,26 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
+    public MaskViewMode getMaskViewMode() {
+        return (view != null)
+            ? view.getMaskViewMode()
+            : MaskViewMode.NORMAL;
+    }
+
+    public void setMaskViewMode(MaskViewMode maskViewMode, Layer activeLayer) {
+        if (view != null) {
+            view.setMaskViewMode(maskViewMode, activeLayer);
+        } else if (activeLayer != null) {
+            activeLayer.setMaskEditing(maskViewMode.isEditingMask());
+        }
+    }
+
+    public void restoreMaskViewMode(MaskViewMode maskViewMode, Layer layer) {
+        if (maskViewMode != null) {
+            maskViewMode.restoreOn(layer);
+        }
+    }
+
     /**
      * Returns the parent component for displaying dialogs related to this composition.
      */
@@ -473,7 +493,12 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         this.dirty = dirty;
+        updateTitlesIfActive();
+    }
+
+    private void updateTitlesIfActive() {
         if (isActive() && !AppMode.isUnitTesting()) {
+            view.updateTitle();
             PixelitorWindow.get().updateTitle(this);
         }
     }
@@ -517,10 +542,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Called when this composition is no longer needed because it was closed or replaced.
      */
     public void dispose() {
-        if (selection != null) {
-            disposeSelection();
+        if (isOpen()) {
+            removeTopLevelLayerUIs();
         }
-        removeTopLevelLayerUIs();
         setView(null);
     }
 
@@ -550,10 +574,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert name != null;
         this.name = name;
 
-        if (isActive() && !AppMode.isUnitTesting()) {
-            view.updateTitle();
-            PixelitorWindow.get().updateTitle(this);
-        }
+        updateTitlesIfActive();
     }
 
     /**
@@ -579,10 +600,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Renames the composition and adds a history entry.
      */
     public void rename(String oldName, String newName) {
-        if (newName == null) { // can happen if the user canceled or closed the dialog
-            return;
-        }
-        if (newName.equals(oldName)) {
+        if (newName == null || newName.equals(oldName)) {
             return;
         }
         setName(newName);
@@ -671,10 +689,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      */
     public void duplicateActiveLayer() {
         Layer duplicate = activeLayer.copy(CopyOptions.duplicateLayer(), this);
-        if (duplicate == null) {
-            // there was an out of memory error
-            return;
-        }
         getActiveHolder().addWithHistory(duplicate, "Duplicate Layer");
         assert checkInvariants();
     }
@@ -741,7 +755,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (update) {
             adder().atIndex(index).add(newLayer);
         } else {
-            layerList.add(index, newLayer);
+            insertDirectChild(newLayer, index);
         }
     }
 
@@ -768,10 +782,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         if (layer.contains(activeLayer)) {
             // the active layer was deleted, a new one must be activated
-            Layer newActiveLayer = deletedIndex > 0
-                ? layerList.get(deletedIndex - 1)
-                : layerList.getFirst();
-            setActiveLayer(newActiveLayer);
+            setActiveLayer(layerList.get(Math.max(0, deletedIndex - 1)));
         }
 
         if (updateUI) {
@@ -780,6 +791,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     private void updateUIAfterLayerDeletion(Layer deletedLayer) {
+        assert deletedLayer.isTopLevel();
+
         LayerUI ui = deletedLayer.getUI();
         if (ui == null) { // can be null if part of layer rasterization
             return;
@@ -829,6 +842,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // won't be restored correctly if a container of the active layer was
             // rasterized. However, normally rasterization is called on the active layer.
             activeLayer = after;
+
+            after.updateUI(); // the UI was transferred while 'before' was still the active layer
         }
 
         assert checkInvariants();
@@ -909,33 +924,25 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return layerList.size();
     }
 
+    private int countNestedLayers(ToIntFunction<Layer> counter) {
+        int[] total = {0};
+        forEachNestedLayer(l -> total[0] += counter.applyAsInt(l), false);
+        return total[0];
+    }
+
     /**
      * Returns the number of images exportable in OpenRaster format.
      */
     public int getNumORAExportableImages() {
-        int[] count = {0};
-        forEachNestedLayer(layer -> {
-            if (layer.canExportORAImage()) {
-                count[0]++;
-            }
-        }, false);
-        return count[0];
+        return countNestedLayers(layer -> layer.canExportORAImage() ? 1 : 0);
     }
 
     /**
      * Returns the total number of images in this composition including any mask images.
      */
     public int getNumImages() {
-        int[] count = {0};
-        forEachNestedLayer(layer -> {
-            if (layer instanceof ImageLayer) {
-                count[0]++;
-            }
-            if (layer.hasMask()) {
-                count[0]++;
-            }
-        }, false);
-        return count[0];
+        return countNestedLayers(layer ->
+            (layer instanceof ImageLayer ? 1 : 0) + (layer.hasMask() ? 1 : 0));
     }
 
     // this is the only GUI entry point for isolation =>
@@ -1031,7 +1038,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         assert isOpen();
 
         // in mask editing mode never auto-select another layer
-        if (getView().getMaskViewMode().isShowingMask()) {
+        if (getMaskViewMode().isShowingMask()) {
             return getActiveLayer();
         }
 
@@ -1043,45 +1050,37 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return Utils.calcCombinedBounds(layerList, includeTransparent);
     }
 
-    public void setMaskViewMode(MaskViewMode maskViewMode, Layer activeLayer) {
-        view.setMaskViewMode(maskViewMode, activeLayer);
-    }
-
     public void updateAllIconImages() {
         forEachNestedLayerAndMask(Layer::updateIconImage);
+    }
+
+    private Layer activeEditTarget() { // mask if mask editing, otherwise the layer
+        return activeLayer.isMaskEditing() ? activeLayer.getMask() : activeLayer;
     }
 
     /**
      * Checks if the currently active target (layer or mask) can be drawn on.
      */
     public boolean canDrawOnActiveTarget() {
-        return activeLayer instanceof Drawable || activeLayer.isMaskEditing();
+        return getActiveDrawable() != null;
     }
 
     public Layer getActiveMoveTarget() {
-        return activeLayer.isMaskEditing() ? activeLayer.getMask() : activeLayer;
+        return activeEditTarget();
     }
 
     /**
      * Returns the active {@link Drawable} (layer or mask), or null if none is active.
      */
     public Drawable getActiveDrawable() {
-        assert checkInvariants();
-        if (activeLayer.isMaskEditing()) {
-            return activeLayer.getMask();
-        }
-        return activeLayer instanceof Drawable dr ? dr : null;
+        return activeEditTarget() instanceof Drawable d ? d : null;
     }
 
     /**
      * Returns the active {@link Filterable} (layer or mask), or null if none is active.
      */
     public Filterable getActiveFilterable() {
-        assert checkInvariants();
-        if (activeLayer.isMaskEditing()) {
-            return activeLayer.getMask();
-        }
-        return activeLayer instanceof Filterable f ? f : null;
+        return activeEditTarget() instanceof Filterable f ? f : null;
     }
 
     /**
@@ -1146,12 +1145,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         History.add(new LayerOrderChangeEdit(
             "Layer Reordering", this, oldIndex, newIndex));
-    }
-
-    public void createLayerUIs() {
-        for (Layer layer : layerList) {
-            layer.createUI();
-        }
     }
 
     public void repaint() {
@@ -1280,8 +1273,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         if (combinedShape.getBounds().isEmpty()) {
             // the combination resulted in an empty shape => deselect
-            deselect(false);
-            return SelectionChangeResult.success(new DeselectEdit(this, origShape));
+            DeselectEdit edit = deselect(false);
+            return SelectionChangeResult.success(edit);
         } else {
             // the selection was successfully modified to a new, non-empty shape
             selection.setShape(combinedShape);
@@ -1467,26 +1460,32 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
+    private Outsets calcRequiredEnlargement() {
+        Rectangle2D bounds = calcContentBounds(true);
+        if (bounds == null || bounds.isEmpty()) {
+            return new Outsets(0, 0, 0, 0);
+        }
+
+        int left = Math.max(0, (int) Math.ceil(-bounds.getMinX()));
+        int top = Math.max(0, (int) Math.ceil(-bounds.getMinY()));
+        int right = Math.max(0, (int) Math.ceil(bounds.getMaxX() - canvas.getWidth()));
+        int bottom = Math.max(0, (int) Math.ceil(bounds.getMaxY() - canvas.getHeight()));
+
+        return new Outsets(top, right, bottom, left);
+    }
+
     /**
      * Enlarges the canvas to fit the content of all layers.
      */
     public void fitCanvasToLayers() {
-        Rectangle2D bounds = calcContentBounds(true);
-        if (bounds != null && !bounds.isEmpty()) {
-            int left = Math.max(0, (int) Math.ceil(-bounds.getMinX()));
-            int top = Math.max(0, (int) Math.ceil(-bounds.getMinY()));
-            int right = Math.max(0, (int) Math.ceil(bounds.getMaxX() - canvas.getWidth()));
-            int bottom = Math.max(0, (int) Math.ceil(bounds.getMaxY() - canvas.getHeight()));
-
-            Outsets enlargement = new Outsets(top, right, bottom, left);
-            if (!enlargement.isZero()) {
-                new EnlargeCanvas(enlargement).process(this);
-                return;
-            }
+        Outsets enlargement = calcRequiredEnlargement();
+        if (enlargement.isZero()) {
+            Dialogs.showInfo(getDialogParent(), "Nothing To Be Done",
+                "The canvas is already large enough to show all layer content.");
+            return;
         }
 
-        Dialogs.showInfo(getDialogParent(), "Nothing To Be Done",
-            "The canvas is already large enough to show all layer content.");
+        new EnlargeCanvas(enlargement).process(this);
     }
 
     /**
@@ -1709,6 +1708,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * need to be reloaded due to external file modifications.
      */
     public CompletableFuture<Composition> checkAutoReload() {
+        assert Threads.calledOnEDT() : Threads.callInfo();
+
         // check only the open compositions here; hidden
         // smart object contents will be checked later
         if (file != null && isOpen()) {
@@ -1733,7 +1734,9 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         for (SmartObject so : nestedSOs) {
             // open contents are checked directly via the view
             if (!so.isContentOpen()) {
-                reloadFuture = reloadFuture.thenCompose(_ -> so.checkAutoReload());
+                reloadFuture = reloadFuture
+                    .thenComposeAsync(_ -> so.checkAutoReload(), onEDT)
+                    .exceptionally(_ -> null);
             }
         }
         return reloadFuture;
@@ -1833,7 +1836,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         forEachNestedLayerAndMask(layer -> {
-            assert layer.checkInvariants();
+            layer.checkInvariants();
             if (layer.getComp() != this) {
                 throw new AssertionError(
                     "bad comp in '%s' (that comp='%s', this='%s')".formatted(

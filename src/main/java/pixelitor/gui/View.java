@@ -88,14 +88,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         assert !AppMode.isUnitTesting() : "Swing component in unit test";
         assert comp != null;
 
-        setComp(comp);
-
-        // there is no container yet, so there is nothing to
-        // scroll or notify: the initial zoom is simply assigned
-        zoomLevel = ZoomLevel.calcBestFitZoom(canvas, null, false);
+        canvas = comp.getCanvas();
+        zoomLevel = ZoomLevel.calcBestFitZoom(null, canvas, false);
         zoomScale = zoomLevel.getScale();
-
         layersPanel = new LayersPanel();
+
+        setComp(comp);
         addMouseListeners();
     }
 
@@ -178,12 +176,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         History.add(new CompositionReplacedEdit("Reload", this, comp, newComp, CompositionReplacedContext.RELOAD));
         replaceComp(newComp, MaskViewMode.NORMAL, CompositionReplacedContext.RELOAD);
 
-        // the view was active when the reloading started, but since
-        // the reloading was asynchronous, this could have changed
-        if (isActive()) {
-            SelectionActions.update(newComp);
-        }
-
         Messages.showStatusMessage(String.format(
             "The image <b>%s</b> was reloaded from the file <b>%s</b>.",
             newComp.getName(), newComp.getFile().getAbsolutePath()));
@@ -216,8 +208,6 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         setComp(newComp);
         oldComp.dispose();
 
-        newComp.createLayerUIs();
-
         // Evaluates all smart objects. It's better to do it here than
         // have it triggered by async updateIconImage calls when the
         // layers are added to the GUI, which could trigger multiple
@@ -244,7 +234,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * Updates all UI elements when a new composition becomes active in this view.
      */
     private void updateUIForNewComp(Composition newComp, MaskViewMode newMaskViewMode, CompositionReplacedContext context) {
-        LayersContainer.showLayersFor(this);
+        showLayersUI();
 
         LayerEvents.fireActiveCompChanged(newComp, context == CompositionReplacedContext.RELOAD);
 
@@ -254,6 +244,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         HistogramsPanel.updateFrom(newComp);
         PixelitorWindow.get().updateTitle(newComp);
         Tools.compReplaced(newComp, context);
+        SelectionActions.update(newComp);
     }
 
     @Override
@@ -472,12 +463,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         // adjust for thickness (zoom dependent)
         double coThickness = zoomScale * thickness;
 
-        int x = (int) (minX - coThickness);
-        int y = (int) (minY - coThickness);
-        int w = (int) (maxX - minX + 2 * coThickness) + 1;
-        int h = (int) (maxY - minY + 2 * coThickness) + 1;
+        int x = (int) Math.floor(minX - coThickness);
+        int y = (int) Math.floor(minY - coThickness);
+        int right = (int) Math.ceil(maxX + coThickness);
+        int bottom = (int) Math.ceil(maxY + coThickness);
 
-        repaint(x, y, w, h);
+        repaint(x, y, right - x, bottom - y);
     }
 
     /**
@@ -604,7 +595,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      * Sets the zoom level using an automatic zoom calculation type.
      */
     public void setZoom(AutoZoom autoZoom) {
-        setZoom(ZoomLevel.calcBestFitZoom(canvas, autoZoom, true));
+        setZoom(ZoomLevel.calcBestFitZoom(autoZoom, canvas, true));
     }
 
     /**
@@ -640,7 +631,10 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
 
         // map the determined focus point into image-space coordinates
         if (focusPoint != null) {
-            imFocus = componentToImageSpace(focusPoint);
+            // componentToImageSpace() would apply pixel snapping
+            imFocus = new Point2D.Double(
+                (focusPoint.x - canvasStartX) / zoomScale,
+                (focusPoint.y - canvasStartY) / zoomScale);
         }
 
         // apply the zoom logic
@@ -668,7 +662,9 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
                                            Point2D imFocus,
                                            Rectangle oldVisibleRegion) {
         // the tracked image point in the newly-scaled component-space
-        Point newCoFocusPoint = fromImageToComponentSpace(imFocus, zoomLevel);
+        Point newCoFocusPoint = new Point(
+            (int) imageXToComponentSpace(imFocus.getX()),
+            (int) imageYToComponentSpace(imFocus.getY()));
 
         // the physical offset of the mouse from the old viewport's top-left corner
         int offsetX = oldCoFocusPoint.x - oldVisibleRegion.x;
@@ -701,11 +697,11 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             return;
         }
 
-        Canvas tmpCanvas = new Canvas(
-            Math.max(1, (int) (zoomRect.getWidth() + 0.5)),
-            Math.max(1, (int) (zoomRect.getHeight() + 0.5)));
+        int zoomWidth = Math.max(1, (int) (zoomRect.getWidth() + 0.5));
+        int zoomHeight = Math.max(1, (int) (zoomRect.getHeight() + 0.5));
+        setZoom(ZoomLevel.calcBestFitZoom(AutoZoom.FIT_SPACE,
+            zoomWidth, zoomHeight, true));
 
-        setZoom(ZoomLevel.calcBestFitZoom(tmpCanvas, AutoZoom.FIT_SPACE, true));
         scrollRectToVisible(imageToComponentSpace(zoomRect));
     }
 
@@ -784,20 +780,15 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
         }
     }
 
-    public double componentXToImageSpace(double coX) {
-        if (pixelSnapping) {
-            return (int) (((coX - canvasStartX) / zoomScale) + 0.5);
-        } else {
-            return ((coX - canvasStartX) / zoomScale);
-        }
+    private static double snapIfNeeded(double v) {
+        return pixelSnapping ? Math.floor(v + 0.5) : v;
     }
 
+    public double componentXToImageSpace(double coX) {
+        return snapIfNeeded((coX - canvasStartX) / zoomScale);
+    }
     public double componentYToImageSpace(double coY) {
-        if (pixelSnapping) {
-            return (int) (((coY - canvasStartY) / zoomScale) + 0.5);
-        } else {
-            return ((coY - canvasStartY) / zoomScale);
-        }
+        return snapIfNeeded((coY - canvasStartY) / zoomScale);
     }
 
     public double imageXToComponentSpace(double imX) {
@@ -820,34 +811,12 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             imageYToComponentSpace(im.getY()));
     }
 
-    private Point2D fromComponentToImageSpace(Point co, ZoomLevel zoom) {
-        double zoomViewScale = zoom.getScale();
-        return new Point2D.Double(
-            (co.x - canvasStartX) / zoomViewScale,
-            (co.y - canvasStartY) / zoomViewScale
-        );
-    }
-
-    private Point fromImageToComponentSpace(Point2D im, ZoomLevel zoom) {
-        double zoomViewScale = zoom.getScale();
-        return new Point(
-            (int) (canvasStartX + im.getX() * zoomViewScale),
-            (int) (canvasStartY + im.getY() * zoomViewScale)
-        );
-    }
-
     public Rectangle2D componentToImageSpace(Rectangle2D co) {
-        double imX = componentXToImageSpace(co.getX());
-        double imY = componentYToImageSpace(co.getY());
-        double imWidth, imHeight;
-        if (pixelSnapping) {
-            imWidth = (int) ((co.getWidth() / zoomScale) + 0.5);
-            imHeight = (int) ((co.getHeight() / zoomScale) + 0.5);
-        } else {
-            imWidth = co.getWidth() / zoomScale;
-            imHeight = co.getHeight() / zoomScale;
-        }
-        return new Rectangle2D.Double(imX, imY, imWidth, imHeight);
+        double x1 = componentXToImageSpace(co.getMinX());
+        double x2 = componentXToImageSpace(co.getMaxX());
+        double y1 = componentYToImageSpace(co.getMinY());
+        double y2 = componentYToImageSpace(co.getMaxY());
+        return new Rectangle2D.Double(x1, y1, x2 - x1, y2 - y1);
     }
 
     public Rectangle imageToComponentSpace(Rectangle2D im) {

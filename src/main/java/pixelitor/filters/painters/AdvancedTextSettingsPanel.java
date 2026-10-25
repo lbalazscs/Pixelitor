@@ -92,7 +92,8 @@ public class AdvancedTextSettingsPanel extends JPanel {
 
     private void addLineHeightGUI(double lineHeightRatio) {
         lineHeightParam = new RangeParam("Line Height (%)",
-            0, 100 * lineHeightRatio, 200, true, LabelPosition.NONE_WITH_TICKS);
+            0, 100, 200, true, LabelPosition.NONE_WITH_TICKS);
+        lineHeightParam.setValueNoTrigger(100 * lineHeightRatio);
         lineHeightParam.addChangeListener(_ -> actionListener.actionPerformed(null));
         gbh.addParam(lineHeightParam);
     }
@@ -104,22 +105,26 @@ public class AdvancedTextSettingsPanel extends JPanel {
         ChangeListener changeListener = _ -> actionListener.actionPerformed(null);
 
         scaleXParam = new RangeParam("Horizontal Scaling (%)",
-            -300, 100 * scaleX, 300, true, LabelPosition.NONE_WITH_TICKS);
+            -300, 100, 300, true, LabelPosition.NONE_WITH_TICKS);
+        scaleXParam.setValueNoTrigger(100 * scaleX);
         scaleXParam.addChangeListener(changeListener);
         gbh.addParam(scaleXParam);
 
         scaleYParam = new RangeParam("Vertical Scaling (%)",
-            -300, 100 * scaleY, 300, true, LabelPosition.NONE_WITH_TICKS);
+            -300, 100, 300, true, LabelPosition.NONE_WITH_TICKS);
+        scaleYParam.setValueNoTrigger(100 * scaleY);
         scaleYParam.addChangeListener(changeListener);
         gbh.addParam(scaleYParam);
 
         shearXParam = new RangeParam("Horizontal Shearing (%)",
-            -100, 100 * shearX, 100, true, LabelPosition.NONE_WITH_TICKS);
+            -100, 0, 100, true, LabelPosition.NONE_WITH_TICKS);
+        shearXParam.setValueNoTrigger(100 * shearX);
         shearXParam.addChangeListener(changeListener);
         gbh.addParam(shearXParam);
 
         shearYParam = new RangeParam("Vertical Shearing (%)",
-            -100, 100 * shearY, 100, true, LabelPosition.NONE_WITH_TICKS);
+            -100, 0, 100, true, LabelPosition.NONE_WITH_TICKS);
+        shearYParam.setValueNoTrigger(100 * shearY);
         shearYParam.addChangeListener(changeListener);
         gbh.addParam(shearYParam);
     }

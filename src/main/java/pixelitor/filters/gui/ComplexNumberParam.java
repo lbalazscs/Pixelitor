@@ -29,11 +29,8 @@ import java.util.function.Predicate;
  * specified bounds in the complex plane.
  */
 public class ComplexNumberParam extends AbstractFilterParam {
-    private double re;
-    private double im;
-
-    private final double defaultRe;
-    private final double defaultIm;
+    private Complex value;
+    private final Complex defaultValue;
 
     private ComplexBounds bounds;
 
@@ -44,14 +41,13 @@ public class ComplexNumberParam extends AbstractFilterParam {
         super(name, RandomizeMode.ALLOW);
 
         if (!bounds.contains(value)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(
+                "value %s is outside bounds %s".formatted(value, bounds));
         }
 
         this.bounds = bounds;
-        this.re = value.re();
-        this.im = value.im();
-        this.defaultRe = this.re;
-        this.defaultIm = this.im;
+        this.value = value;
+        this.defaultValue = value;
     }
 
     @Override
@@ -83,19 +79,19 @@ public class ComplexNumberParam extends AbstractFilterParam {
             }
         }
 
-        setValue(c, true, false, false);
+        setValue(c, true, false);
     }
 
     public Complex getValue() {
-        return new Complex(re, im);
+        return value;
     }
 
     public double getRe() {
-        return re;
+        return value.re();
     }
 
     public double getIm() {
-        return im;
+        return value.im();
     }
 
     public ComplexBounds getBounds() {
@@ -109,8 +105,7 @@ public class ComplexNumberParam extends AbstractFilterParam {
      */
     public void updateBounds(ComplexBounds newBounds) {
         this.bounds = newBounds;
-        this.re = bounds.clampRe(re);
-        this.im = bounds.clampIm(im);
+        this.value = new Complex(bounds.clampRe(value.re()), bounds.clampIm(value.im()));
 
         if (paramGUI != null) {
             // a plain updateGUI() doesn't update the bounds
@@ -118,53 +113,40 @@ public class ComplexNumberParam extends AbstractFilterParam {
         }
     }
 
-    public void setValue(Complex c,
-                         boolean updateGUI, boolean isAdjusting,
-                         boolean trigger) {
-        setValue(c.re(), c.im(), updateGUI, isAdjusting, trigger);
+    public void setValue(Complex c, boolean updateGUI, boolean trigger) {
+        setValue(c.re(), c.im(), updateGUI, trigger);
     }
 
-    public void setValue(double re, double im,
-                         boolean updateGUI, boolean isAdjusting,
-                         boolean trigger) {
-        this.re = bounds.clampRe(re);
-        this.im = bounds.clampIm(im);
+    public void setValue(double re, double im, boolean updateGUI, boolean trigger) {
+        this.value = new Complex(bounds.clampRe(re), bounds.clampIm(im));
         if (updateGUI && paramGUI != null) {
             paramGUI.updateGUI();
         }
-        if (trigger && !isAdjusting) {
+        if (trigger) {
             triggerFilter();
         }
     }
 
     public void setValue(double re, double im) {
-        setValue(re, im, true, false, true);
-    }
-
-    public void setRe(double re, boolean isAdjusting) {
-        setValue(re, this.im, true, isAdjusting, true);
-    }
-
-    public void setIm(double im, boolean isAdjusting) {
-        setValue(this.re, im, true, isAdjusting, true);
+        setValue(re, im, true, true);
     }
 
     public void setRe(double re) {
-        setRe(re, false);
+        setValue(re, value.im());
     }
 
     public void setIm(double im) {
-        setIm(im, false);
+        setValue(value.re(), im);
     }
 
     @Override
     public boolean isAtDefault() {
-        return re == defaultRe && im == defaultIm;
+        return value.re() == defaultValue.re() && value.im() == defaultValue.im();
     }
 
     @Override
     public void reset(boolean trigger) {
-        setValue(defaultRe, defaultIm, true, false, trigger);
+        setValue(defaultValue, true, trigger);
     }
 
     @Override
@@ -174,31 +156,29 @@ public class ComplexNumberParam extends AbstractFilterParam {
 
     @Override
     public Complex copyState() {
-        return new Complex(re, im);
+        return value;
     }
 
     @Override
     public void loadStateFrom(ParamState<?> state, boolean updateGUI) {
         Complex s = (Complex) state;
-        setValue(s.re(), s.im(), updateGUI, false, false);
+        setValue(s, updateGUI, false);
     }
 
     @Override
     public void loadStateFrom(String savedValue) {
-        int commaIndex = savedValue.indexOf(',');
-        double newRe = Double.parseDouble(savedValue.substring(0, commaIndex).trim());
-        double newIm = Double.parseDouble(savedValue.substring(commaIndex + 1).trim());
-        setValue(newRe, newIm, true, false, false);
+        Complex newValue = Complex.fromPresetString(savedValue);
+        setValue(newValue, true, false);
     }
 
     @Override
     public String getValueAsString() {
-        return String.format(Locale.ROOT, "(%.2f, %.2f)", re, im);
+        return String.format(Locale.ROOT, "(%.2f, %.2f)", value.re(), value.im());
     }
 
     @Override
     public String toString() {
         return String.format(Locale.ROOT, "%s[name = '%s', re = %.2f, im = %.2f]",
-            getClass().getSimpleName(), getName(), re, im);
+            getClass().getSimpleName(), getName(), value.re(), value.im());
     }
 }

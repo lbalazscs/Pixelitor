@@ -108,10 +108,6 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void setSelected(boolean b) {
-    }
-
-    @Override
     public void changeLayer(Layer newLayer) {
         this.layer = newLayer;
         updateName();

@@ -178,7 +178,7 @@ public class EffectsPanel extends JPanel implements Resettable, ParamGUI {
             Point2D offset = effect.getOffset();
             double x = offset.getX();
             double y = offset.getY();
-            distance = (int) ImageMath.hypot(x, y);
+            distance = (int) Math.round(ImageMath.hypot(x, y));
             angle = Math.atan2(y, x);
         }
 

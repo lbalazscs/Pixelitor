@@ -67,7 +67,7 @@ public class MergeDownEdit extends PixelitorEdit {
 
         // restore the original mask view mode of the merged layer
         if (layer.hasMask()) {
-            maskViewMode.activateOn(layer);
+            maskViewMode.restoreOn(layer);
         }
     }
 

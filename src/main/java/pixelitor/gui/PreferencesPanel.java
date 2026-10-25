@@ -171,7 +171,7 @@ public class PreferencesPanel extends JTabbedPane {
         gbh.addParam(fontSize);
 
         // prepend "Default" to the standard array of system font names
-        String[] availableFonts = Utils.getAvailableFontNames();
+        String[] availableFonts = FontNames.getAvailableFontNames();
         String[] fontChoices = new String[availableFonts.length + 1];
         fontChoices[0] = "Default";
         System.arraycopy(availableFonts, 0, fontChoices, 1, availableFonts.length);

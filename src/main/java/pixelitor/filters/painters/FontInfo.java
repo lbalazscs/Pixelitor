@@ -24,15 +24,7 @@ import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.awt.font.TextAttribute.KERNING;
-import static java.awt.font.TextAttribute.KERNING_ON;
-import static java.awt.font.TextAttribute.LIGATURES;
-import static java.awt.font.TextAttribute.LIGATURES_ON;
-import static java.awt.font.TextAttribute.STRIKETHROUGH;
-import static java.awt.font.TextAttribute.STRIKETHROUGH_ON;
-import static java.awt.font.TextAttribute.TRACKING;
-import static java.awt.font.TextAttribute.UNDERLINE;
-import static java.awt.font.TextAttribute.UNDERLINE_ON;
+import static java.awt.font.TextAttribute.*;
 
 /**
  * Wraps a {@link Font} to provide a more usable API.
@@ -88,7 +80,7 @@ public class FontInfo {
 
         Float trackingValue = (Float) map.get(TRACKING);
         if (trackingValue != null) {
-            tracking = (int) (100 * trackingValue);
+            tracking = Math.round(100 * trackingValue);
         }
     }
 

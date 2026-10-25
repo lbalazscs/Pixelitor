@@ -26,8 +26,9 @@ import java.awt.geom.Point2D;
  * An abstract base filter that maps image pixel coordinates to a zoomable region of the complex plane.
  */
 public abstract class ComplexPlaneFilter extends PointFilter {
-    // points that never converge/escape are colored black
+    // points that never escape/converge are colored black
     public static final int IN_SET_COLOR = 0xFF_00_00_00;
+    public static final int NOT_CONVERGED_COLOR = IN_SET_COLOR;
 
     // the bounds in the complex plane
     private final ComplexBounds bounds;
@@ -81,7 +82,6 @@ public abstract class ComplexPlaneFilter extends PointFilter {
             extentY = rangeIm;
         } else {
             // isotropic mapping: uniform units per pixel
-            // fitting the zoomed range to the shorter image side
             double unitsPerPixel = Math.max(rangeRe / width, rangeIm / height);
             xMultiplier = unitsPerPixel;
             yMultiplier = unitsPerPixel;

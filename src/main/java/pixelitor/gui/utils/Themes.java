@@ -132,4 +132,37 @@ public class Themes {
     public static Font getOriginalDefaultFont() {
         return originalDefaultFont;
     }
+
+    private static Color lafColor(String key, Color fallback) {
+        Color c = UIManager.getColor(key);
+        return c != null ? c : fallback;
+    }
+
+    private static Color lafColor(String key, Color darkFallback, Color lightFallback) {
+        Color c = UIManager.getColor(key);
+        if (c != null) {
+            return c;
+        }
+        return getActive().isDark() ? darkFallback : lightFallback;
+    }
+
+    public static Color getLafBg() {
+        return lafColor("Panel.background", Color.BLACK, Color.WHITE);
+    }
+
+    public static Color getLafDisabledBg() {
+        return lafColor("Component.disabledBackground", Color.DARK_GRAY, Color.LIGHT_GRAY);
+    }
+
+    public static Color getLafFg() {
+        return lafColor("Label.foreground", Color.WHITE, Color.BLACK);
+    }
+
+    public static Color getLafBorder() {
+        return lafColor("Component.borderColor", Color.GRAY);
+    }
+
+    public static Color getLafDisabledBorder() {
+        return lafColor("Component.disabledBorderColor", Color.GRAY);
+    }
 }

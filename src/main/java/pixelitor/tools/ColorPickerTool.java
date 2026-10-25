@@ -131,22 +131,21 @@ public class ColorPickerTool extends Tool {
 
         if (!isWithinBounds(x, y, srcImg)) {
             return;
+        }
+        int sampledRGB = isGray
+            ? sampleGrayImage(srcImg, x, y, samplingRadius.getValue())
+            : sampleRGBImage(srcImg, x, y, samplingRadius.getValue());
+
+        if (paintSamplingBounds) {
+            view.repaint();
+        }
+        showColorInfo(x, y, sampledRGB, isGray);
+
+        Color pickedColor = new Color(sampledRGB);
+        if (selectBackground) {
+            setBgColor(pickedColor);
         } else {
-            int sampledRGB = isGray
-                ? sampleGrayImage(srcImg, x, y, samplingRadius.getValue())
-                : sampleRGBImage(srcImg, x, y, samplingRadius.getValue());
-
-            if (paintSamplingBounds) {
-                view.repaint();
-            }
-            showColorInfo(x, y, sampledRGB, isGray);
-
-            Color pickedColor = new Color(sampledRGB);
-            if (selectBackground) {
-                setBgColor(pickedColor);
-            } else {
-                setFgColor(pickedColor);
-            }
+            setFgColor(pickedColor);
         }
     }
 

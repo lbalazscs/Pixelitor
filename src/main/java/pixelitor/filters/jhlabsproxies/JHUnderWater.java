@@ -22,6 +22,7 @@ import pixelitor.filters.ParametrizedFilter;
 import pixelitor.filters.gui.AngleParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
+import pixelitor.utils.ImageUtils;
 
 import java.awt.image.BufferedImage;
 import java.io.Serial;
@@ -64,7 +65,7 @@ public class JHUnderWater extends ParametrizedFilter {
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         if (amount.isZero()) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         SwimFilter filter = new SwimFilter(NAME,

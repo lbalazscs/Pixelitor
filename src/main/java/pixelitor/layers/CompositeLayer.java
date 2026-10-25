@@ -38,10 +38,10 @@ public abstract class CompositeLayer extends ContentLayer implements LayerHolder
     public abstract void afterDeserialization();
 
     public void updateChildrenUI() {
-        if (ui == null) { // in some unit tests
+        if (!hasUI()) { // in some unit tests
             return;
         }
-        ui.updateChildrenPanel();
+        getUI().updateChildrenPanel();
         EventQueue.invokeLater(this::revalidateUI);
     }
 

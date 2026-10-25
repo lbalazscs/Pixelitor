@@ -54,7 +54,7 @@ public class JHSmartBlur extends ParametrizedFilter {
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {
         int radius = radiusParam.getValue();
         if (radius == 0) {
-            return src;
+            return ImageUtils.copy(src, dest);
         }
 
         SmartBlurFilter filter = new SmartBlurFilter(NAME,
