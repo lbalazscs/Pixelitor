@@ -28,7 +28,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * The abstract superclass for all edits in Pixelitor.
+ * The abstract superclass for all undo/redo history edits in Pixelitor.
  */
 public abstract class PixelitorEdit extends AbstractUndoableEdit implements Debuggable {
     protected Composition comp;

@@ -25,7 +25,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A {@link PixelitorEdit} that represents the changes made to the blending mode of a layer.
+ * Represents the changes made to the blending mode of a layer.
  */
 public class LayerBlendingModeEdit extends PixelitorEdit {
     private final Layer layer;

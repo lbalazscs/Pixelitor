@@ -37,7 +37,7 @@ public interface Drawable extends Filterable {
     BufferedImage getImage();
 
     /**
-     * Sets the image ignoring the selection
+     * Sets the image ignoring the selection.
      */
     void setImage(BufferedImage newImage);
 
@@ -57,12 +57,6 @@ public interface Drawable extends Filterable {
      */
     BufferedImage getSelectedSubImage(boolean copyIfNoSelection);
 
-    /**
-     * Returns the image from which the "image position" thumbnail is calculated.
-     * The canvas size is not considered, only the selection.
-     */
-    BufferedImage getImageForFilterDialogs();
-
     void debugImages();
 
     void updateIconImage();
@@ -79,7 +73,7 @@ public interface Drawable extends Filterable {
      */
     int getTy();
 
-    boolean isMaskEditing();
+    boolean isEditingMask();
 
     String getName();
 
@@ -120,7 +114,7 @@ public interface Drawable extends Filterable {
 
             var ise = new IllegalStateException(errorDetails, e);
             if (RandomGuiTest.isRunning()) {
-                throw ise; // we can debug the exact filter parameters only in RandomGUITest
+                throw ise; // we can debug the exact filter parameters only in RandomGuiTest
             }
             Messages.showException(ise);
         }

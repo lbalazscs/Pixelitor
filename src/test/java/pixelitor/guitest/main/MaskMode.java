@@ -24,10 +24,7 @@ import pixelitor.layers.MaskViewMode;
 import java.util.Arrays;
 import java.util.Locale;
 
-import static pixelitor.layers.MaskViewMode.EDIT_MASK;
-import static pixelitor.layers.MaskViewMode.NORMAL;
-import static pixelitor.layers.MaskViewMode.RUBYLITH;
-import static pixelitor.layers.MaskViewMode.VIEW_MASK;
+import static pixelitor.layers.MaskViewMode.*;
 
 /**
  * The possible states of the active layer with regards to its mask.
@@ -63,7 +60,7 @@ public enum MaskMode {
         @Override
         public void check() {
             EDT.assertActiveLayerHasMask();
-            EDT.assertActiveLayerIsNotMaskEditing();
+            EDT.assertActiveLayerIsNotEditingMask();
         }
 
         @Override
@@ -84,7 +81,7 @@ public enum MaskMode {
     ON_MASK_VIEW_LAYER(EDIT_MASK) {
         @Override
         public void check() {
-            checkMaskEditingInMode(EDIT_MASK);
+            checkEditingMaskInMode(EDIT_MASK);
         }
 
         @Override
@@ -103,7 +100,7 @@ public enum MaskMode {
     ON_MASK_VIEW_MASK(VIEW_MASK) {
         @Override
         public void check() {
-            checkMaskEditingInMode(VIEW_MASK);
+            checkEditingMaskInMode(VIEW_MASK);
         }
 
         @Override
@@ -122,7 +119,7 @@ public enum MaskMode {
     RUBY(RUBYLITH) {
         @Override
         public void check() {
-            checkMaskEditingInMode(RUBYLITH);
+            checkEditingMaskInMode(RUBYLITH);
         }
 
         @Override
@@ -136,9 +133,9 @@ public enum MaskMode {
         }
     };
 
-    private static void checkMaskEditingInMode(MaskViewMode expectedMode) {
+    private static void checkEditingMaskInMode(MaskViewMode expectedMode) {
         EDT.assertActiveLayerHasMask();
-        EDT.assertActiveLayerIsMaskEditing();
+        EDT.assertActiveLayerIsEditingMask();
         EDT.assertMaskViewModeIs(expectedMode);
     }
 
@@ -148,7 +145,7 @@ public enum MaskMode {
         this.viewMode = viewMode;
     }
 
-    public boolean isMaskEditing() {
+    public boolean isEditingMask() {
         return viewMode != null && viewMode.isEditingMask();
     }
 

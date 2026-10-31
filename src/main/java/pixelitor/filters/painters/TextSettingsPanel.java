@@ -27,10 +27,7 @@ import pixelitor.utils.FontNames;
 import pixelitor.utils.Messages;
 
 import javax.swing.*;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagLayout;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
@@ -88,6 +85,7 @@ public class TextSettingsPanel extends FilterGUI
     public TextSettingsPanel(TextFilter textFilter, Filterable layer) {
         super(textFilter, layer);
         init(textFilter.getSettings(), layer.getComp());
+        textFilter.setSettingsUiUpdater(this);
     }
 
     /**
@@ -102,10 +100,11 @@ public class TextSettingsPanel extends FilterGUI
         if (textArea.getText().equals(TextSettings.DEFAULT_TEXT)) {
             textArea.selectAll();
         }
+
+        textLayer.setSettingsUiUpdater(this);
     }
 
     private void init(TextSettings settings, Composition comp) {
-        settings.setGuiUpdateCallback(this);
         createGUI(settings, comp);
 
         this.relLineHeight = settings.getRelLineHeight();
@@ -132,47 +131,52 @@ public class TextSettingsPanel extends FilterGUI
         JPanel textPanel = new JPanel(new GridBagLayout());
         var gbh = new GridBagHelper(textPanel);
 
-        gbh.addLabel("Text:", 0, 0);
         createTextArea(settings);
-        gbh.addLastControl(textArea);
+        gbh.addLabelAndLastControl("Text:", textArea);
 
-        gbh.addLabel("Color:", 0, 1);
         color = new ColorParam("Color", settings.getColor(), MANUAL_ALPHA_ONLY);
         color.setAdjustmentListener(this);
 
-        JPanel colorRotPanel = new JPanel(new FlowLayout(LEFT));
-        colorRotPanel.add(color.createGUI());
-        colorRotPanel.add(new JLabel("     Rotation:"));
+        JPanel colorRotPanel = new JPanel(new BorderLayout(5, 0));
+        JPanel colorPanel = new JPanel(new FlowLayout(LEFT, 0, 0));
+        colorPanel.add(color.createGUI());
+        colorPanel.add(new JLabel("     Rotation:"));
+        colorRotPanel.add(colorPanel, BorderLayout.WEST);
+
         rotationParam = new AngleParam("", 0.0);
         rotationParam.setValue(settings.getRotation(), false);
         rotationParam.setAdjustmentListener(this);
-        colorRotPanel.add(rotationParam.createGUI());
-        gbh.addControl(colorRotPanel);
+        colorRotPanel.add(rotationParam.createGUI(), BorderLayout.CENTER);
+        gbh.addLabelAndLastControl("Color:", colorRotPanel);
+
+        JPanel alignPanel = new JPanel(new FlowLayout(LEFT));
+        alignPanel.add(new JLabel("Box Alignment:"));
 
         boxAlignmentCB = new JComboBox<>(BoxAlignment.values());
         boxAlignmentCB.setName("alignmentCB");
         BoxAlignment alignment = settings.getAlignment();
         lastBoxAlignment = alignment;
         boxAlignmentCB.setSelectedItem(alignment);
-
         boxAlignmentCB.addActionListener(_ -> boxAlignmentChanged(comp));
-        gbh.addLabel("Box Alignment:", 0, 2);
-
-        JPanel alignPanel = new JPanel(new FlowLayout(LEFT));
         alignPanel.add(boxAlignmentCB);
+
         mlpAlignLabel = new JLabel("     Multiline/Path Alignment:");
         alignPanel.add(mlpAlignLabel);
         mlpAlignmentSelector = new MlpAlignmentSelector(settings.getMLPAlignment(), this);
         alignPanel.add(mlpAlignmentSelector);
         updateMlpAlignEnabled();
 
-        gbh.addControl(alignPanel);
+        gbh.addFullRow(alignPanel);
 
         return textPanel;
     }
 
     private void boxAlignmentChanged(Composition comp) {
         BoxAlignment selectedAlignment = getBoxAlignment();
+        if (selectedAlignment == lastBoxAlignment) {
+            return; // the programmatic revert below
+        }
+
         if (selectedAlignment.isPath() && !comp.hasActivePath()) {
             String msg = "<html>There's no path in <b>\"" + comp.getName() + "\"</b>.<br>You can have text along a path after creating a path with the Pen Tool.";
             Messages.showError("No Path", msg, this);
@@ -285,15 +289,15 @@ public class TextSettingsPanel extends FilterGUI
         return cb;
     }
 
-    private Font getSelectedFont() {
+    private Font createFontFromUI() {
         String fontFamily = (String) fontFamilyCB.getSelectedItem();
         int size = fontSizeSlider.getValue();
         boolean bold = boldCB.isSelected();
         boolean italic = italicCB.isSelected();
-        fontInfo.updateBasicProperties(fontFamily, size, bold, italic);
+        fontInfo = fontInfo.withBasic(fontFamily, size, bold, italic);
 
         if (advancedSettingsDialog != null) {
-            advancedSettingsPanel.updateFontInfo(fontInfo);
+            fontInfo = advancedSettingsPanel.updateFontInfo(fontInfo);
         }
 
         return fontInfo.createFont();
@@ -375,7 +379,7 @@ public class TextSettingsPanel extends FilterGUI
 
         return new TextSettings(
             textArea.getText(),
-            getSelectedFont(),
+            createFontFromUI(),
             color.getColor(),
             effects,
             alignment.getHorizontal(),
@@ -385,7 +389,7 @@ public class TextSettingsPanel extends FilterGUI
             rotationParam.getValueInRadians(),
             getRelLineHeight(),
             getScaleX(), getScaleY(),
-            getShearX(), getShearY(), this);
+            getShearX(), getShearY());
     }
 
     private BoxAlignment getBoxAlignment() {
@@ -404,8 +408,9 @@ public class TextSettingsPanel extends FilterGUI
     }
 
     /**
-     * Updates the GUI when the settings are changed externally
-     * (e.g., when loading a preset).
+     * Called when settings are loaded from outside the panel (e.g., presets).
+     * Updates the GUI and also applies the settings to the layer or filter,
+     * so callers must not apply them separately.
      */
     @Override
     public void accept(TextSettings settings) {
@@ -455,5 +460,19 @@ public class TextSettingsPanel extends FilterGUI
 
     private boolean isUsingFilter() {
         return filter != null;
+    }
+
+    /**
+     * Unregisters this panel from its layer or filter, so that
+     * they don't keep the closed dialog alive.
+     */
+    @Override
+    public void dispose() {
+        super.dispose();
+        if (isUsingFilter()) {
+            ((TextFilter) filter).clearSettingsUiUpdater(this);
+        } else if (textLayer != null) {
+            textLayer.clearSettingsUiUpdater(this);
+        }
     }
 }

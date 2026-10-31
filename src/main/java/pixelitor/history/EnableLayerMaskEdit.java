@@ -19,13 +19,14 @@ package pixelitor.history;
 
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
+import pixelitor.layers.LayerMask;
 import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A {@link PixelitorEdit} that represents the enabling or disabling of a layer mask.
+ * Represents the enabling or disabling of a {@link LayerMask}.
  */
 public class EnableLayerMaskEdit extends PixelitorEdit {
     private final Layer layer;

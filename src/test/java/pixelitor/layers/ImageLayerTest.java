@@ -229,26 +229,6 @@ class ImageLayerTest {
     }
 
     @Test
-    void getImageForFilterDialogs() {
-        BufferedImage image = layer.getImageForFilterDialogs();
-
-        if (withSelection.isTrue()) {
-            Rectangle selShape = WithSelection.SELECTION_SHAPE;
-            assertThat(image)
-                .isNotNull()
-                .isNotSameAs(layer.getImage())
-                .hasSameSizeAs(selShape);
-        } else {
-            // no selection, we expect it to return the image
-            assertThat(image)
-                .isNotNull()
-                .isSameAs(layer.getImage());
-        }
-
-        iconChecker.verifyUpdateCounts(0, 0);
-    }
-
-    @Test
     void tmpDrawingLayer() {
         TmpLayer tmpLayer
             = layer.createTmpLayer(AlphaComposite.SrcOver, false);

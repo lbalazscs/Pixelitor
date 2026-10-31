@@ -17,13 +17,18 @@
 
 package pixelitor.layers;
 
+import pixelitor.Composition;
 import pixelitor.utils.debug.Debuggable;
 
 import java.awt.image.BufferedImage;
 
 /**
- * Provides the base source image for a non-destructive smart filter chain.
+ * A provider of an input image for a smart filter: the content {@link Composition},
+ * an {@link ImageTransformer}, or the previous {@link SmartFilter} in the chain.
  */
 public interface ImageSource extends Debuggable {
+    /**
+     * The returned image may be cached or shared, and callers must not modify it.
+     */
     BufferedImage getImage();
 }

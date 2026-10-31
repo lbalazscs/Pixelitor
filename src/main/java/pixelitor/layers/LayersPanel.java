@@ -47,7 +47,7 @@ public class LayersPanel extends JLayeredPane {
         addLayerGUIImpl(gui, index);
 
         // finalize the single layer
-        gui.updateSelectionState();
+        gui.updateEditTarget();
         gui.setReactToItemEvents(true);
 
         revalidate();
@@ -67,7 +67,7 @@ public class LayersPanel extends JLayeredPane {
 
         // finalize all layers after the batch addition
         for (LayerGUI gui : guis) {
-            gui.updateSelectionState();
+            gui.updateEditTarget();
             gui.setReactToItemEvents(true);
         }
 

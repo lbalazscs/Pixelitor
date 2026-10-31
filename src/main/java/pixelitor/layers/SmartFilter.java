@@ -59,36 +59,35 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     // chain, or the smart object's base image source if this is the first filter
     private ImageSource imageSource;
 
-    private transient BufferedImage outputCache;
+    private transient BufferedImage filteredImageCache;
     private SmartObject smartObject; // the parent smart object that contains this filter
 
     // the next smart filter in the chain (null if this is the last filter)
     private SmartFilter next;
 
-    // static field used for the copy-paste of smart filters
+    // an internal, in-memory clipboard for the copy-paste of smart filters
     public static SmartFilter copiedSmartFilter;
 
     public SmartFilter(Filter filter, ImageSource imageSource, SmartObject smartObject) {
         super(smartObject.getComp(), filter.getName(), filter);
+
         setImageSource(imageSource);
         setSmartObject(smartObject);
-        holder = smartObject;
     }
 
     public SmartFilter(SmartFilter orig, Composition newComp, String name) {
         super(newComp, name, orig.getFilter().copy());
 
-        this.imageSource = orig.imageSource;
-        this.smartObject = orig.smartObject;
+        setImageSource(orig.imageSource);
+        setSmartObject(orig.smartObject);
 
-        holder = smartObject;
-        outputCache = orig.outputCache; // safe to share
+        filteredImageCache = orig.filteredImageCache; // safe to share
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // defaults for transient fields
-        outputCache = null;
+        filteredImageCache = null;
 
         in.defaultReadObject();
 
@@ -118,88 +117,59 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
         BufferedImage transformed = transformImage(srcImage);
 
-        if (usesMask()) {
+        boolean usesMask = usesMask();
+        if (usesMask) {
             // copy, because otherwise different masks
             // are applied to the same cached image
             transformed = ImageUtils.copyImage(transformed);
 
             mask.applyTo(transformed);
         }
-        if (!usesMask() && isNormalAndOpaque()) {
+        if (!usesMask && isNormalAndOpaque()) {
             return transformed;
         } else {
             // unlike an adjustment layer, this makes sure that srcImage
             // (which could be cached in the image source) isn't modified
-            BufferedImage copy = ImageUtils.copyImage(srcImage);
+            BufferedImage result = ImageUtils.copyImage(srcImage);
 
-            Graphics2D g = copy.createGraphics();
+            Graphics2D g = result.createGraphics();
             setupComposite(g, false);
             g.drawImage(transformed, 0, 0, null);
             g.dispose();
-            return copy;
+            return result;
         }
     }
 
     @Override
     public BufferedImage transformImage(BufferedImage src) {
-        if (outputCache != null) {
-            return outputCache;
+        if (filteredImageCache != null) {
+            return filteredImageCache;
         }
         assert src != null;
-        createOutputCache(src);
+        computeOutputCache(src);
 
-        return outputCache;
+        return filteredImageCache;
     }
 
-    public void forceRendering() {
-        if (outputCache == null) {
-            createOutputCache(imageSource.getImage());
+    public void ensureRendered() {
+        if (filteredImageCache == null) {
+            computeOutputCache(imageSource.getImage());
         }
     }
 
-    private void createOutputCache(BufferedImage src) {
-        outputCache = filter.transformImage(src);
-    }
-
-    @Override
-    public void setVisible(boolean newVisibility, boolean addToHistory, boolean update) {
-        super.setVisible(newVisibility, addToHistory, false);
-        if (update) {
-            layerLevelPropertyChanged(true);
-        }
+    private void computeOutputCache(BufferedImage src) {
+        filteredImageCache = filter.transformImage(src);
     }
 
     @Override
     protected void maskChanged() {
         super.maskChanged();
-        layerLevelPropertyChanged(false);
-    }
-
-    @Override
-    public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
-        if (opacity == newOpacity) {
-            return;
-        }
-        super.setOpacity(newOpacity, addToHistory, false);
-        if (update) {
-            layerLevelPropertyChanged(true);
-        }
-    }
-
-    @Override
-    public void setBlendingMode(BlendingMode newMode, boolean addToHistory, boolean update) {
-        if (blendingMode == newMode) {
-            return;
-        }
-        super.setBlendingMode(newMode, addToHistory, false);
-        if (update) {
-            layerLevelPropertyChanged(true);
-        }
+        invalidateDownstreamAndSOCaches();
     }
 
     @Override
     public void setShowOriginal(boolean show) {
-        // otherwise the caching overrides the effect
+        // otherwise the caching hides the effect
         // of swapping the filter settings in the superclass
         invalidateAll();
 
@@ -217,7 +187,10 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         }
     }
 
-    public void invalidateSubsequent() {
+    /**
+     * Invalidates caches starting from the next one.
+     */
+    public void invalidateDownstream() {
         if (next != null) {
             next.invalidateChain();
         }
@@ -227,9 +200,9 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
      * Clears the cached filtered image, forcing recomputation on next access.
      */
     public void invalidateCache() {
-        if (outputCache != null) {
-            outputCache.flush();
-            outputCache = null;
+        if (filteredImageCache != null) {
+            filteredImageCache.flush();
+            filteredImageCache = null;
         }
     }
 
@@ -254,10 +227,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
      * Only invalidates downstream filters and the smart object cache.
      */
     private void invalidateDownstreamAndSOCaches() {
-        // invalidate only starting from the next one
-        if (next != null) {
-            next.invalidateChain();
-        }
+        invalidateDownstream();
         smartObject.invalidateImageCache();
     }
 
@@ -266,12 +236,11 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
      * blending mode, or mask) changes. These properties don't affect
      * the filter's own output cache, but they do affect the final composition.
      */
-    private void layerLevelPropertyChanged(boolean update) {
+    @Override
+    protected void propertyChangeUpdate() {
         invalidateDownstreamAndSOCaches();
-        if (update) {
-            holder.update();
-            smartObject.updateIconImage();
-        }
+        holder.update();
+        smartObject.updateIconImage();
     }
 
     @Override
@@ -307,12 +276,12 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
         if (!initialPreview) {
             invalidateAll();
         }
-        if (outputCache != null) {
+        if (hasCachedImage()) {
             // the painting thread already calculated it
             return;
         }
         GUIUtils.runWithBusyCursor(() ->
-            createOutputCache(imageSource.getImage()), busyCursorTarget);
+            computeOutputCache(imageSource.getImage()), busyCursorTarget);
         holder.update();
     }
 
@@ -358,7 +327,7 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     public void shapeDraggedOnMask() {
-        maskContentChanged();
+        maskChanged();
     }
 
     private void replaceFilter() {
@@ -442,11 +411,11 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     }
 
     public boolean hasCachedImage() {
-        return outputCache != null;
+        return filteredImageCache != null;
     }
 
-    public BufferedImage getOutputCache() {
-        return outputCache;
+    public BufferedImage getCachedImage() {
+        return filteredImageCache;
     }
 
     @Override
@@ -458,6 +427,11 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public boolean checkInvariants() {
         if (!super.checkInvariants()) {
             return false;
+        }
+
+        if (smartObject != holder) {
+            throw new AssertionError("smartObject (%s) != holder (%s)"
+                .formatted(smartObject.getName(), holder.getName()));
         }
 
         if (!smartObject.containsSmartFilter(this)) {
@@ -481,10 +455,10 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.addString("imageSource class", imageSource.getClass().getSimpleName());
-        node.add(imageSource.createDebugNode("imageSource"));
+        node.addString("image source class", imageSource.getClass().getSimpleName());
+        node.add(imageSource.createDebugNode("image source"));
         node.addString("next", String.valueOf(next));
-        node.addBoolean("cached", (outputCache != null));
+        node.addBoolean("cached", hasCachedImage());
 
         return node;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,7 @@ import pixelitor.Composition;
 import pixelitor.filters.RandomFilterSource;
 import pixelitor.filters.gui.FilterParam;
 import pixelitor.filters.gui.IntChoiceParam;
+import pixelitor.filters.painters.AreaEffects;
 import pixelitor.gui.utils.NamedAction;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.*;
@@ -137,5 +138,9 @@ public class PixelitorAssertions extends Assertions {
 
     public static <S, E> ResultAssert<S, E> assertThat(Result<S, E> actual) {
         return new ResultAssert<>(actual);
+    }
+
+    public static AreaEffectsAssert assertThat(AreaEffects actual) {
+        return new AreaEffectsAssert(actual);
     }
 }

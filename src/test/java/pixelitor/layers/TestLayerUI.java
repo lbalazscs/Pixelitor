@@ -100,7 +100,7 @@ public class TestLayerUI implements LayerUI {
     }
 
     @Override
-    public void updateSelectionState() {
+    public void updateEditTarget() {
     }
 
     @Override

@@ -86,7 +86,7 @@ public class FilterAction extends AbstractViewEnabledAction {
     }
 
     private void applyFilterTo(Layer layer) {
-        if (layer.isMaskEditing()) {
+        if (layer.isEditingMask()) {
             applyToFilterable(layer.getMask());
         } else if (layer instanceof SmartFilter smartFilter) {
             // smart filters are Filterable, but the filter
@@ -117,7 +117,7 @@ public class FilterAction extends AbstractViewEnabledAction {
 
     private void applyToFilterable(Filterable filterable) {
         ensureFilterCreated();
-        filterable.startFilter(filter, true);
+        filterable.startFilterInteractively(filter, true);
     }
 
     // adds this filter as a new, non-destructive smart filter

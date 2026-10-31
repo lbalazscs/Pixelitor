@@ -353,7 +353,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         if (view != null) {
             view.setMaskViewMode(maskViewMode, activeLayer);
         } else if (activeLayer != null) {
-            activeLayer.setMaskEditing(maskViewMode.isEditingMask());
+            activeLayer.setEditingMask(maskViewMode.isEditingMask());
         }
     }
 
@@ -551,7 +551,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Finds the first open view in the parent hierarchy.
      */
-    public View findParentView() {
+    public View findNearestOpenView() {
         if (isOpen()) {
             return view;
         }
@@ -559,7 +559,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             // Recursively search in the hierarchy of parents.
             // It checks only the first owner, because it assumes
             // that all owners share the same root composition.
-            return owners.getFirst().findParentView();
+            return owners.getFirst().findNearestOpenView();
         }
 
         throw new IllegalStateException("no view for top-level comp " + getDebugName());
@@ -1034,7 +1034,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     /**
      * Finds the topmost layer that is opaque at a given image-space point.
      */
-    public Layer findLayerAtPoint(Point p) {
+    public Layer findTopmostOpaqueLayer(Point p) {
         assert isOpen();
 
         // in mask editing mode never auto-select another layer
@@ -1042,8 +1042,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             return getActiveLayer();
         }
 
-        // iterate in reverse order to search layers from top to bottom
-        return ContentLayer.findOpaqueInList(layerList, p);
+        return ContentLayer.findTopmostOpaqueLayer(layerList, p);
     }
 
     public Rectangle2D calcContentBounds(boolean includeTransparent) {
@@ -1055,7 +1054,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     private Layer activeEditTarget() { // mask if mask editing, otherwise the layer
-        return activeLayer.isMaskEditing() ? activeLayer.getMask() : activeLayer;
+        return activeLayer.isEditingMask() ? activeLayer.getMask() : activeLayer;
     }
 
     /**
@@ -1805,7 +1804,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Creates a shallow copy (clone) of the given smart object and adds it.
      */
     public void shallowDuplicate(SmartObject so) {
-        so.getHolder().addWithHistory(so.shallowDuplicate(), "Clone");
+        so.getHolder().addWithHistory(so.createShallowCopy(), "Clone");
     }
 
     // called from assertions and unit tests

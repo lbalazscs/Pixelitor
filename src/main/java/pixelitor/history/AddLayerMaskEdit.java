@@ -17,7 +17,6 @@
 
 package pixelitor.history;
 
-import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -28,7 +27,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A {@link PixelitorEdit} that represents the adding of a layer mask.
+ * Represents the adding of a {@link LayerMask} to a {@link Layer}.
  */
 public class AddLayerMaskEdit extends PixelitorEdit {
     private final Layer layer;
@@ -41,7 +40,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         this.layer = layer;
         layerMask = layer.getMask();
 
-        assert layer.isActive() || AppMode.isUnitTesting() : genNotActiveLayerErrorMsg();
+        assert layer.checkIsActive();
     }
 
     @Override
@@ -52,7 +51,7 @@ public class AddLayerMaskEdit extends PixelitorEdit {
         // before the undo is unknown when this edit is initially constructed
         modeBeforeUndo = comp.getMaskViewMode();
 
-        assert layer.isActive() || AppMode.isUnitTesting() : genNotActiveLayerErrorMsg();
+        assert layer.checkIsActive();
 
         layer.deleteMask(false);
     }
@@ -65,11 +64,6 @@ public class AddLayerMaskEdit extends PixelitorEdit {
 
         assert modeBeforeUndo != null;
         modeBeforeUndo.restoreOn(layer);
-    }
-
-    private String genNotActiveLayerErrorMsg() {
-        return "%s '%s' in '%s' is not active".formatted(
-            layer.getTypeString(), layer.getName(), comp.getName());
     }
 
     @Override

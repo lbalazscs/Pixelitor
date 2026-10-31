@@ -66,6 +66,9 @@ public class DialogBuilder {
     private Runnable cancelAction;
     private Predicate<JDialog> validator;
 
+    private Runnable onVisibleAction;
+    private Runnable closeAction;
+
     private JDialog dialog;
     private boolean canceled;
 
@@ -79,7 +82,6 @@ public class DialogBuilder {
     private String name;
     private JButton okButton;
     private JMenuBar menuBar;
-    private Runnable onVisibleAction;
 
     private boolean built = false;
 
@@ -193,6 +195,27 @@ public class DialogBuilder {
 
     public DialogBuilder cancelAction(Runnable r) {
         cancelAction = r;
+        return this;
+    }
+
+    /**
+     * Sets an action to run whenever the dialog is closed,
+     * regardless of whether it was accepted or canceled.
+     * Runs after okAction or cancelAction.
+     */
+    public DialogBuilder closeAction(Runnable r) {
+        if (closeAction == null) {
+            closeAction = r;
+        } else {
+            Runnable prev = closeAction;
+            closeAction = () -> {
+                try {
+                    prev.run();
+                } finally {
+                    r.run();
+                }
+            };
+        }
         return this;
     }
 
@@ -362,8 +385,14 @@ public class DialogBuilder {
             closeDialog();
         }
 
-        if (okAction != null) {
-            okAction.run();
+        try {
+            if (okAction != null) {
+                okAction.run();
+            }
+        } finally {
+            if (!keepOpenAfterOk && closeAction != null) {
+                closeAction.run();
+            }
         }
 
         canceled = false;
@@ -376,10 +405,16 @@ public class DialogBuilder {
             return;
         }
         closeDialog();
-        if (cancelAction != null) {
-            cancelAction.run();
-        }
         canceled = true;
+        try {
+            if (cancelAction != null) {
+                cancelAction.run();
+            }
+        } finally {
+            if (closeAction != null) {
+                closeAction.run();
+            }
+        }
     }
 
     public boolean wasAccepted() {

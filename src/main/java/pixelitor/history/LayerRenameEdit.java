@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -26,7 +26,7 @@ import javax.swing.undo.CannotUndoException;
 import static java.lang.String.format;
 
 /**
- * A {@link PixelitorEdit} that represents the renaming of a layer.
+ * Represents the renaming of a layer.
  */
 public class LayerRenameEdit extends PixelitorEdit {
     private final Layer layer;

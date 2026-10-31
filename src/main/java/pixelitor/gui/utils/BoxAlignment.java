@@ -24,6 +24,7 @@ import static org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignmen
 
 /**
  * A two-dimensional text box alignment combining horizontal and vertical positioning.
+ * The ordinal is persisted in user presets, so constants must not be reordered.
  */
 public enum BoxAlignment {
     CENTER_CENTER("Center", HorizontalAlignment.CENTER, VerticalAlignment.CENTER),

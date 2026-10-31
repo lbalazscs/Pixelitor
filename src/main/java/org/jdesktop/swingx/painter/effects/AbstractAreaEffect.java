@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 package org.jdesktop.swingx.painter.effects;
 
 import com.jhlabs.image.ImageMath;
@@ -487,7 +486,7 @@ public class AbstractAreaEffect implements AreaEffect {
     protected float opacity = 1.0f;
 
     // opacity support added by lbalazscs
-    protected void setOpacity(float opacity) {
+    public void setOpacity(float opacity) {
         this.opacity = opacity;
     }
 
@@ -531,6 +530,12 @@ public class AbstractAreaEffect implements AreaEffect {
 
     public double interpolateEffectWidth(double endWidth, double progress) {
         return ImageMath.lerp(progress, effectWidthDouble, endWidth);
+    }
+
+    public Point2D interpolateOffset(Point2D endOffset, double progress) {
+        double x = ImageMath.lerp(progress, offset.getX(), endOffset.getX());
+        double y = ImageMath.lerp(progress, offset.getY(), endOffset.getY());
+        return new Point2D.Double(x, y);
     }
 
     public void saveStateTo(UserPreset preset, String keyPrefix, boolean includeOffset) {

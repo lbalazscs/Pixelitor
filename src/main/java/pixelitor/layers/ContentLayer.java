@@ -57,24 +57,6 @@ public abstract class ContentLayer extends Layer {
         super(comp, name);
     }
 
-    /**
-     * Finds the first opaque layer at the given image-space point,
-     * in the given list, searching from top to bottom.
-     */
-    public static ContentLayer findOpaqueInList(List<Layer> layers, Point p) {
-        ListIterator<Layer> li = layers.listIterator(layers.size());
-        while (li.hasPrevious()) {
-            Layer layer = li.previous();
-            if (layer instanceof ContentLayer contentLayer) {
-                ContentLayer found = contentLayer.findOpaqueLayerAtPoint(p);
-                if (found != null) {
-                    return found;
-                }
-            }
-        }
-        return null;
-    }
-
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
@@ -121,7 +103,7 @@ public abstract class ContentLayer extends Layer {
      * For simple content layers, this method checks the layer itself.
      * Subclasses like layer groups may override this to descend into child layers.
      */
-    public ContentLayer findOpaqueLayerAtPoint(Point p) {
+    public ContentLayer findTopmostOpaqueLayer(Point p) {
         // a small opacity makes the layer effectively invisible for hit-testing
         if (!isVisible() || getOpacity() < 0.05f) {
             return null;
@@ -134,6 +116,24 @@ public abstract class ContentLayer extends Layer {
             return this;
         }
 
+        return null;
+    }
+
+    /**
+     * Finds the first opaque layer at the given image-space point,
+     * in the given list, searching from top to bottom.
+     */
+    public static ContentLayer findTopmostOpaqueLayer(List<Layer> layers, Point p) {
+        ListIterator<Layer> li = layers.listIterator(layers.size());
+        while (li.hasPrevious()) {
+            Layer layer = li.previous();
+            if (layer instanceof ContentLayer contentLayer) {
+                ContentLayer found = contentLayer.findTopmostOpaqueLayer(p);
+                if (found != null) {
+                    return found;
+                }
+            }
+        }
         return null;
     }
 

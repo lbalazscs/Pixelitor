@@ -65,6 +65,11 @@ import static pixelitor.utils.Thumbnails.createThumbnail;
  * A layer that holds and renders pixel data from a BufferedImage.
  */
 public class ImageLayer extends ContentLayer implements Drawable, Transformable {
+    // A safeguard against absurd image allocations resulting from extreme transforms.
+    // A maximum canvas (9999x9999) rotated 45° requires ~200 MP, so 250 MP provides
+    // headroom while preventing multi-gigabyte allocations or integer overflow.
+    private static final long MAX_TRANSFORM_PIXELS = 250_000_000L;
+
     public enum State {
         NORMAL, // no GUI filter is running on the layer
         PREVIEW, // a filter dialog is shown
@@ -157,37 +162,22 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         int imgWidth = externalImg.getWidth();
         int imgHeight = externalImg.getHeight();
 
+        int newWidth = Math.max(canvasWidth, imgWidth);
+        int newHeight = Math.max(canvasHeight, imgHeight);
+
         BufferedImage finalImage;
-        int finalTx;
-        int finalTy;
-
-        boolean smallerThanCanvas = imgWidth < canvasWidth || imgHeight < canvasHeight;
-        if (smallerThanCanvas) {
-            // create a new image buffer, at least canvas-sized
-            int newWidth = Math.max(canvasWidth, imgWidth);
-            int newHeight = Math.max(canvasHeight, imgHeight);
+        if (imgWidth < canvasWidth || imgHeight < canvasHeight) {
             finalImage = layer.createEmptyLayerImage(newWidth, newHeight);
-
-            // draw the external image centered within the new image
             Graphics2D g = finalImage.createGraphics();
-            int drawX = (newWidth - imgWidth) / 2;
-            int drawY = (newHeight - imgHeight) / 2;
-            g.drawImage(externalImg, drawX, drawY, null);
+            g.drawImage(externalImg, (newWidth - imgWidth) / 2, (newHeight - imgHeight) / 2, null);
             g.dispose();
-
-            // the layer itself is not translated relative to the canvas
-            finalTx = 0;
-            finalTy = 0;
         } else {
-            // the external image is large enough, use it directly
             finalImage = ImageUtils.toSysCompatibleImage(externalImg);
-            // add a negative translation to center it on the canvas
-            finalTx = (canvasWidth - imgWidth) / 2;
-            finalTy = (canvasHeight - imgHeight) / 2;
         }
 
         layer.setImage(finalImage);
-        layer.setTranslation(finalTx, finalTy);
+        // center the (at least canvas-sized) image on the canvas; always <= 0
+        layer.setTranslation((canvasWidth - newWidth) / 2, (canvasHeight - newHeight) / 2);
 
         return layer;
     }
@@ -279,24 +269,6 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         // there is selection
         return ImageUtils.extractSelectedRegion(image,
             selection, getTx(), getTy());
-    }
-
-    @Override
-    public BufferedImage getImageForFilterDialogs() {
-        var selection = comp.getSelection();
-        if (selection == null) {
-            return image;
-        }
-
-        Rectangle selBounds = selection.getShapeBounds();
-
-        assert image.getRaster().getBounds().contains(selBounds) :
-            "image bounds = " + image.getRaster().getBounds()
-                + ", selection bounds = " + selBounds;
-
-        return image.getSubimage(
-            selBounds.x, selBounds.y,
-            selBounds.width, selBounds.height);
     }
 
     @Override
@@ -492,7 +464,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     public void changePreviewImage(BufferedImage newPreview, String filterName, FilterContext context) {
         if (state == NORMAL) {
             throw new IllegalStateException(format(
-                "change preview in normal state, filter = %s, context = %s, class = %s)",
+                "change preview in normal state, filter = %s, context = %s, class = %s",
                 filterName, context, getClass().getSimpleName()));
         }
 
@@ -642,7 +614,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
         TransformResult result = applyTransform(image, at, VALUE_INTERPOLATION_BILINEAR);
         if (result == null) {
-            throw new IllegalStateException("transform resulted in an empty image");
+            throw transformFailedException();
         }
 
         if (layerTransform) {
@@ -663,7 +635,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
         TransformResult result = applyTransform(image, at, VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         if (result == null) {
-            throw new IllegalStateException("transform resulted in an empty image");
+            throw transformFailedException();
         }
 
         replaceTranslatedImage(result.image, angle.getDisplayName(), result.tx, result.ty);
@@ -716,9 +688,9 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     /**
      * Sets the layer's translation, temporarily allowing positive translation values.
      */
-    public void forceTranslation(int x, int y) {
+    public void forceTranslation(int tx, int ty) {
         // skips the range check of the overridden setTranslation
-        super.setTranslation(x, y);
+        super.setTranslation(tx, ty);
         invalidateMaskedImageCache();
     }
 
@@ -926,7 +898,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             assert (long) imgTargetWidth * imgTargetHeight < Integer.MAX_VALUE :
                 ", tx = " + getTx() + ", ty = " + getTy()
                     + ", imgTargetWidth = " + imgTargetWidth + ", imgTargetHeight = " + imgTargetHeight
-                    + ", newWidth = " + newSize.getWidth() + ", newHeight() = " + newSize.getHeight()
+                    + ", newWidth = " + newSize.getWidth() + ", newHeight = " + newSize.getHeight()
                     + ", imgWidth = " + image.getWidth() + ", imgHeight = " + image.getHeight()
                     + ", canvasWidth = " + comp.getCanvasWidth() + ", canvasHeight = " + comp.getCanvasHeight()
                     + ", horRatio = " + horRatio + ", verRatio = " + verRatio;
@@ -977,7 +949,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     protected void paintWithoutTmpLayer(Graphics2D g,
                                         BufferedImage visibleImage,
                                         boolean firstVisibleLayer) {
-        if (Tools.isDrawingShapes() && isActive() && !isMaskEditing()) {
+        if (Tools.isDrawingShapes() && isActive() && !isEditingMask()) {
             paintLayerWithShapes(g, visibleImage, firstVisibleLayer);
         } else { // the simple case
             g.drawImage(visibleImage, getTx(), getTy(), null);
@@ -1069,6 +1041,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     /**
      * Deletes the layer mask, but its effect is transferred
      * to the transparency of the layer.
+     * Returns the previous layer image before the mask was applied.
      */
     public BufferedImage applyLayerMask(boolean addToHistory) {
         BufferedImage prevLayerImage = copyImage(image);
@@ -1212,12 +1185,16 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         Rectangle2D transformedBounds = transform.createTransformedShape(sourceBounds).getBounds2D();
 
         // the new image must be large enough to contain the transformed image and cover the canvas
-        Rectangle2D targetBounds = transformedBounds.createUnion(comp.getCanvasBounds());
+        Rectangle2D union = transformedBounds.createUnion(comp.getCanvasBounds());
 
-        int newWidth = (int) Math.ceil(targetBounds.getWidth());
-        int newHeight = (int) Math.ceil(targetBounds.getHeight());
-        if (newWidth <= 0 || newHeight <= 0) {
-            return null; // invalid transform resulted in empty image
+        int newTx = (int) Math.floor(union.getMinX()); // <= 0 because the union contains the canvas
+        int newTy = (int) Math.floor(union.getMinY());
+        int newWidth = (int) Math.ceil(union.getMaxX()) - newTx;
+        int newHeight = (int) Math.ceil(union.getMaxY()) - newTy;
+
+        long pixelCount = (long) newWidth * newHeight;
+        if (newWidth <= 0 || newHeight <= 0 || pixelCount > MAX_TRANSFORM_PIXELS) {
+            return null; // invalid transform resulted in empty or absurdly large image
         }
 
         BufferedImage newImage = createEmptyLayerImage(newWidth, newHeight);
@@ -1227,15 +1204,11 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         // create a transform for drawing into the new buffer, which translates
         // the main transform to the new buffer's origin
         AffineTransform drawTransform = (AffineTransform) transform.clone();
-        drawTransform.preConcatenate(AffineTransform.getTranslateInstance(
-            -targetBounds.getX(), -targetBounds.getY()));
+        drawTransform.preConcatenate(AffineTransform.getTranslateInstance(-newTx, -newTy));
 
         g.setTransform(drawTransform);
         g.drawImage(sourceImage, 0, 0, null);
         g.dispose();
-
-        int newTx = (int) Math.round(targetBounds.getX());
-        int newTy = (int) Math.round(targetBounds.getY());
 
         return new TransformResult(newImage, newTx, newTy);
     }
@@ -1250,5 +1223,9 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
     @Override
     public void updateUI(View view) {
         view.repaint();
+    }
+
+    private static IllegalStateException transformFailedException() {
+        return new IllegalStateException("transform resulted in an empty or excessively large image");
     }
 }

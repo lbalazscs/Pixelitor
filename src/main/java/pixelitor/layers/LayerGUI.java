@@ -62,7 +62,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     private static final Color INACTIVE_SELECTED_COLOR = new Color(131, 146, 167);
     private static final Color INACTIVE_SELECTED_DARK_COLOR = new Color(38, 39, 40);
 
-    private SelectionState selectionState;
+    private LayerEditTarget layerEditTarget;
 
     // this field can't be called parent, because the setters/getters
     // would conflict with the methods in java.awt.Component
@@ -115,7 +115,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
 
         // initialize the borders and the toggle state
         // (nobody else does this for nested GUIs)
-        updateSelectionState();
+        updateEditTarget();
     }
 
     @Override
@@ -199,7 +199,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
                 } else if (SwingUtilities.isLeftMouseButton(e)) {
                     // by putting it into mouse pressed, it is
                     // consistent with the mask clicks
-                    selectLayerIfIconClicked(e);
+                    activateLayerIfIconClicked(e);
                 }
             }
 
@@ -260,10 +260,10 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
     }
 
-    public static void selectLayerIfIconClicked(MouseEvent e) {
+    public static void activateLayerIfIconClicked(MouseEvent e) {
         // By adding a mouse listener to the JLabel, it loses the
         // ability to automatically forward the mouse events to its
-        // parent, and therefore the layer cannot be selected anymore
+        // parent, and therefore the layer cannot be activated anymore
         // by left-clicking on this label. This is the workaround.
         JLabel source = (JLabel) e.getSource();
         LayerGUI layerGUI = (LayerGUI) source.getParent();
@@ -334,7 +334,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             layer.activate();
         }
         // also corrects the toggle if the layer didn't become active
-        updateSelectionState();
+        updateEditTarget();
     }
 
     @Override
@@ -543,7 +543,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
             // ...but make sure that the layer is notified even if
             // the view already was in mask editing mode
             // (this is important for smart filters)
-            layer.setMaskEditing(true);
+            layer.setEditingMask(true);
         }
     }
 
@@ -566,16 +566,16 @@ public class LayerGUI extends JToggleButton implements LayerUI {
     }
 
     @Override
-    public void updateSelectionState() {
+    public void updateEditTarget() {
         boolean active = layer.isActive();
         syncToggleWithActivation(active);
 
         if (!active) {
-            setSelectionState(SelectionState.INACTIVE);
-        } else if (layer.isMaskEditing()) {
-            setSelectionState(SelectionState.MASK_SELECTED);
+            setEditTarget(LayerEditTarget.NONE);
+        } else if (layer.isEditingMask()) {
+            setEditTarget(LayerEditTarget.MASK);
         } else {
-            setSelectionState(SelectionState.LAYER_SELECTED);
+            setEditTarget(LayerEditTarget.LAYER);
         }
     }
 
@@ -599,10 +599,10 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         }
     }
 
-    private void setSelectionState(SelectionState newSelectionState) {
-        if (newSelectionState != selectionState) {
-            selectionState = newSelectionState;
-            selectionState.applyBorderStyles(layerIconLabel, maskIconLabel);
+    private void setEditTarget(LayerEditTarget newLayerEditTarget) {
+        if (newLayerEditTarget != layerEditTarget) {
+            layerEditTarget = newLayerEditTarget;
+            layerEditTarget.applyBorderStyles(layerIconLabel, maskIconLabel);
         }
     }
 
@@ -623,7 +623,7 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         if (newLayer.hasMask()) {
             addMaskIcon();
         }
-        updateSelectionState();
+        updateEditTarget();
         updateChildrenPanel();
     }
 
@@ -777,14 +777,14 @@ public class LayerGUI extends JToggleButton implements LayerUI {
         DebugNode node = new DebugNode(key, this);
         node.addInt("unique id", uniqueId);
 
-        node.addPresence("dragReorderHandler", dragReorderHandler);
-        node.addPresence("parentUI", parentUI);
+        node.addPresence("drag reorder handler", dragReorderHandler);
+        node.addPresence("parent UI", parentUI);
 
         for (LayerGUI child : children) {
             node.add(child.createDebugNode("child " + child.getLayer().getName()));
         }
 
-        node.addAsString("selectionState", selectionState);
+        node.addAsString("edit target", layerEditTarget);
         node.addString("layer name", layer.getName());
 
         return node;

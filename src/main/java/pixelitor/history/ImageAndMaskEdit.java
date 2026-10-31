@@ -52,14 +52,14 @@ public class ImageAndMaskEdit extends ImageEdit {
     public void undo() throws CannotUndoException {
         super.undo();
         maskImageEdit.undo();
-        updateGUI();
+        updateUI();
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
         maskImageEdit.redo();
-        updateGUI();
+        updateUI();
     }
 
     @Override
@@ -68,9 +68,10 @@ public class ImageAndMaskEdit extends ImageEdit {
         maskImageEdit.die();
     }
 
-    private void updateGUI() {
-        // the two edits are set to embedded, so we update - except
-        // if this edit is also embedded
+    private void updateUI() {
+        // child edits are marked as embedded and will not trigger
+        // UI updates on their own, so update here unless this
+        // compound edit is itself embedded in a parent edit
         if (!embedded) {
             comp.update();
             dr.updateIconImage();

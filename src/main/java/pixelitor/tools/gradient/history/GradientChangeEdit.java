@@ -37,8 +37,9 @@ public class GradientChangeEdit extends PixelitorEdit {
     private ImageEdit imageEdit;
     private final boolean imageEditNeeded;
 
-    public GradientChangeEdit(String editName, Drawable dr, Gradient before, Gradient after) {
-        super(editName == null ? "Change Gradient" : editName, dr.getComp());
+    public GradientChangeEdit(String name, Drawable dr, Gradient before, Gradient after) {
+        super(name == null ? "Change Gradient" : name, dr.getComp());
+
         this.dr = dr;
         this.before = before;
         this.after = after;

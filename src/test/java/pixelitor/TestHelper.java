@@ -223,7 +223,7 @@ public class TestHelper {
         TextSettings settings = new TextSettings(
             "test", font, Color.WHITE, new AreaEffects(),
             AbstractLayoutPainter.HorizontalAlignment.CENTER, AbstractLayoutPainter.VerticalAlignment.CENTER,
-            MlpAlignmentSelector.LEFT, false, 0, 1, 1, 1, 0, 0, null);
+            MlpAlignmentSelector.LEFT, false, 0, 1, 1, 1, 0, 0);
 
         TextLayer textLayer = new TextLayer(comp, name, settings);
         textLayer.applySettings(settings);

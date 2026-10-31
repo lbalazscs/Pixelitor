@@ -55,9 +55,10 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
                               boolean linkable, boolean linked) {
         super(name, RandomizeMode.ALLOW);
 
+        assert names.length == colors.length && colors.length >= 2;
+
         this.names = names;
         this.transparencyMode = transparencyMode;
-
         this.colors = colors;
 
         // it can be the same reference because any color
@@ -66,10 +67,10 @@ public class GroupedColorsParam extends AbstractFilterParam implements Linkable 
 
         this.linkedModel = linkable ? new JToggleButton.ToggleButtonModel() : null;
         this.linkedByDefault = linkable && linked;
-        setLinked(linked);
+        setLinked(linkedByDefault);
 
         // if linked, the default colors must be the same
-        assert !linked || Utils.allElementsEqual(defaultColors);
+        assert !linkedByDefault || Utils.allElementsEqual(defaultColors);
     }
 
     @Override

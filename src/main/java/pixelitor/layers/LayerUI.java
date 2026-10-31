@@ -45,9 +45,9 @@ public interface LayerUI extends Debuggable {
     void updateIconImageAsync(Layer layerOrMask);
 
     /**
-     * Sets the border around the icon according to the selection state
+     * Sets the border around the icon according to the layer editing target.
      */
-    void updateSelectionState();
+    void updateEditTarget();
 
     void updateChildrenPanel();
 

@@ -17,7 +17,6 @@
 
 package pixelitor.history;
 
-import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.layers.Layer;
 import pixelitor.layers.LayerMask;
@@ -28,7 +27,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A {@link PixelitorEdit} that represents the deletion of a layer mask.
+ * Represents the deletion of a {@link LayerMask} from a {@link Layer}.
  */
 public class DeleteLayerMaskEdit extends PixelitorEdit {
     private final LayerMask prevMask;
@@ -39,14 +38,14 @@ public class DeleteLayerMaskEdit extends PixelitorEdit {
         super("Delete Layer Mask", comp);
         this.prevMode = prevMode;
 
-        assert layer.isActive() || AppMode.isUnitTesting();
+        assert layer.checkIsActive();
         this.layer = layer;
         this.prevMask = prevMask;
     }
 
     @Override
     public void undo() throws CannotUndoException {
-        assert layer.isActive() || AppMode.isUnitTesting();
+        assert layer.checkIsActive();
 
         super.undo();
 

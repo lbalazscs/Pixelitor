@@ -85,8 +85,8 @@ public class FgBgColors {
         selector.setDefaultColors();
     }
 
-    public static void maskEditingChanged(boolean maskEditing) {
-        selector.maskEditingChanged(maskEditing);
+    public static void editingMaskChanged(boolean editing) {
+        selector.editingMaskChanged(editing);
     }
 
     public static void saveStateTo(UserPreset preset) {

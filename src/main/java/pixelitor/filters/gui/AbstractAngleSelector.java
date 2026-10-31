@@ -114,10 +114,12 @@ public abstract class AbstractAngleSelector extends JComponent implements MouseL
         repaint();
     }
 
-    private void updateAngle(int mouseX, int mouseY, boolean trigger) {
-        if (!enabled) {
+    private void updateAngle(MouseEvent e, boolean trigger) {
+        if (!isEnabled() || !SwingUtilities.isLeftMouseButton(e)) {
             return;
         }
+        int mouseX = e.getX();
+        int mouseY = e.getY();
         double angle = Math.atan2(mouseY - centerY, mouseX - centerX);
 
         // try to update the selector UI before a potential execution of the filter
@@ -133,12 +135,12 @@ public abstract class AbstractAngleSelector extends JComponent implements MouseL
 
     @Override
     public void mousePressed(MouseEvent e) {
-        updateAngle(e.getX(), e.getY(), false);
+        updateAngle(e, false);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        updateAngle(e.getX(), e.getY(), true);
+        updateAngle(e, true);
     }
 
     @Override
@@ -151,7 +153,7 @@ public abstract class AbstractAngleSelector extends JComponent implements MouseL
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        updateAngle(e.getX(), e.getY(), false);
+        updateAngle(e, false);
     }
 
     @Override

@@ -17,13 +17,13 @@
 
 package pixelitor.filters.painters;
 
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.HorizontalAlignment;
-import org.jdesktop.swingx.painter.AbstractLayoutPainter.VerticalAlignment;
 import org.jdesktop.swingx.painter.TextPainter;
 import org.jdesktop.swingx.util.GraphicsUtilities;
 import pixelitor.Composition;
 import pixelitor.Views;
 import pixelitor.colors.Colors;
+import pixelitor.filters.painters.TextOnPathLayouter.OnPathKey;
+import pixelitor.filters.painters.TextOnPathLayouter.OnPathLayout;
 import pixelitor.gui.utils.BoxAlignment;
 import pixelitor.gui.utils.MlpAlignmentSelector;
 import pixelitor.tools.pen.Path;
@@ -35,7 +35,10 @@ import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.debug.Debuggable;
 
 import java.awt.*;
-import java.awt.font.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.GlyphVector;
+import java.awt.font.LineMetrics;
+import java.awt.font.TextAttribute;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
@@ -64,23 +67,27 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
  *   height and the effects padding, and it is dropped (set to null)
  *   by exactly those setters.</li>
  *   <li><b>Placement</b> (cheap). Uses the cached measurement to
- *   calculate the bounding box, the transformed rectangle, the
- *   placement transform and the render bounds. It depends additionally
+ *   calculate the bounding box, the transformed rectangle, the render
+ *   bounds and the placed shape (the measured shape mapped to canvas
+ *   coordinates by the placement transform). It depends additionally
  *   on the translation, the box alignment, the rotation/scale/shear
  *   and the canvas size.</li>
  * </ol>
  * <p>Everything that needs the text geometry ({@link #paintText},
- * {@link #getTextShape}, {@link #renderArea}) reuses the measured shape
- * instead of recalculating it.</p>
+ * {@link #getTextShape}, {@link #renderArea}) reuses the placed shape
+ * instead of recalculating it. Text on a path also ends up as a shape in
+ * canvas coordinates, so both kinds of text are painted the same way:
+ * the fill and the effects use the same shape.</p>
  *
  * <p>Text on a path is laid out differently, because the path is not
  * owned by this painter, and it can be edited or moved without
  * notifying it. The validity of the layout is therefore checked
  * on every query, by comparing the flattened geometry of the path (and
  * the text parameters) with the ones the glyphs were distributed along
- * (see {@link OnPathLayout}). The expensive distribution of the glyphs is
- * repeated only if something has really changed, and if the path was
- * only moved, then the existing glyph shapes are reused.</p>
+ * (see {@link OnPathLayout}). The expensive distribution of the glyphs
+ * ({@link TextOnPathLayouter}, a pure calculation) is repeated only if
+ * something has really changed, and if the path was only moved, then the
+ * existing glyph shapes are reused. This class only validates and caches.</p>
  *
  * <p>Neither kind of layout uses the {@link Graphics2D} given to
  * {@link #paint}: it is used only for drawing, and it is never modified.</p>
@@ -100,43 +107,6 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     /**
-     * Everything (except the path itself) that the distribution of the
-     * glyphs along a path depends on. The effects padding and the line
-     * height are deliberately missing: they don't change the glyphs.
-     */
-    private record OnPathKey(String text, Font font, int mlpAlignment,
-                             double rotation, double scaleX, double scaleY,
-                             double shearX, double shearY) {
-    }
-
-    /**
-     * The result of distributing the glyphs of the text along a path,
-     * together with the inputs that it was calculated from.
-     *
-     * @param key         the text parameters
-     * @param path        the flattened path that the glyphs were distributed
-     *                    along, which also identifies its geometry
-     * @param glyphs      the outlines of the placed glyphs. It is never
-     *                    modified after creation.
-     * @param glyphBounds the exact bounds of the glyphs
-     */
-    private record OnPathLayout(OnPathKey key, PathSampler path,
-                                Shape glyphs, Rectangle2D glyphBounds) {
-    }
-
-    /**
-     * The layout of text on a path uses this instead of the
-     * {@link FontRenderContext} of whatever {@link Graphics2D} is at
-     * hand, so that the result doesn't depend on the transform or the
-     * hints of the caller. It has the same properties as the one that
-     * {@link #measure()} gets from its private graphics (no transform,
-     * the same text hints), so on a path the glyphs have the same advances
-     * as in normal text.
-     */
-    private static final FontRenderContext LAYOUT_FRC = new FontRenderContext(
-        null, VALUE_TEXT_ANTIALIAS_GASP, VALUE_FRACTIONALMETRICS_ON);
-
-    /**
      * Moving a path by the Move tool recalculates its anchor points
      * from the original ones, so a move that is not an exact translation
      * is a real edit. This is just a tolerance for the floating-point
@@ -144,8 +114,7 @@ public class TransformedTextPainter implements Debuggable {
      */
     private static final double SAME_PATH_TOLERANCE = 1e-6;
 
-    private HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
-    private VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
+    private BoxAlignment boxAlignment = BoxAlignment.CENTER_CENTER;
 
     // alignment for multiline text or text on a path
     private int mlpAlignment = MlpAlignmentSelector.LEFT;
@@ -181,8 +150,12 @@ public class TransformedTextPainter implements Debuggable {
     private TransformedRectangle transformedRect;
     private Rectangle boundingBox;
     private Rectangle renderBounds; // the actual bounds for the cache image
-    // maps the untransformed text shape to the canvas coordinates
-    private AffineTransform placementTransform;
+
+    // The measured text shape mapped to canvas coordinates (normal text only).
+    // It is created once per placement, shared by the bounds calculation,
+    // painting and getTextShape(), and never modified. Null until the
+    // placement is calculated, and again after it is invalidated.
+    private Shape placedShape;
 
     // Text on a path (not used for normal text):
     // the glyphs, distributed along the path as it was when they were
@@ -253,7 +226,8 @@ public class TransformedTextPainter implements Debuggable {
         }
 
         // The layout deliberately doesn't get the Graphics2D: normal text
-        // is measured with a private one, and text on a path uses LAYOUT_FRC.
+        // is measured with a private one, and text on a path uses
+        // TextOnPathLayouter.LAYOUT_FRC.
         // This way the geometry is the same for all callers.
         if (needsLayout()) {
             updateLayout(width, height, comp);
@@ -270,7 +244,7 @@ public class TransformedTextPainter implements Debuggable {
         Graphics2D copy = (Graphics2D) g.create();
         try {
             setHighQualityRendering(copy);
-            paintText(copy, copy.getTransform(), paintColor);
+            paintText(copy, paintColor);
         } finally {
             copy.dispose();
         }
@@ -285,9 +259,8 @@ public class TransformedTextPainter implements Debuggable {
         Graphics2D cacheG = img.createGraphics();
         try {
             setHighQualityRendering(cacheG);
-            AffineTransform origTransform = cacheG.getTransform();
             cacheG.translate(-bounds.x, -bounds.y);
-            paintText(cacheG, origTransform, color);
+            paintText(cacheG, color);
         } finally {
             cacheG.dispose();
         }
@@ -314,15 +287,16 @@ public class TransformedTextPainter implements Debuggable {
      */
     private void invalidateMeasurement() {
         measurement = null;
-        invalidPlacement = true;
+        invalidatePlacement();
     }
 
     /**
      * Only the position or the orientation of the text changes:
-     * the measured shape stays valid.
+     * the measured shape stays valid, but the placed one doesn't.
      */
     private void invalidatePlacement() {
         invalidPlacement = true;
+        placedShape = null;
     }
 
     /**
@@ -331,7 +305,7 @@ public class TransformedTextPainter implements Debuggable {
      */
     private void setCanvasSize(int width, int height) {
         if (width != layoutWidth || height != layoutHeight) {
-            invalidPlacement = true;
+            invalidatePlacement();
         }
     }
 
@@ -387,7 +361,7 @@ public class TransformedTextPainter implements Debuggable {
      */
     public Rectangle getBoundingBox(Composition comp) {
         ensureLayout(comp);
-        return currentBounds();
+        return new Rectangle(currentBounds());
     }
 
     /**
@@ -420,14 +394,16 @@ public class TransformedTextPainter implements Debuggable {
      */
     private Rectangle calcAlignment(int contentWidth, int contentHeight,
                                     int width, int height) {
+        assert !boxAlignment.isPath();
+
         Rectangle rect = new Rectangle();
 
-        rect.x = switch (horizontalAlignment) {
+        rect.x = switch (boxAlignment.getHorizontal()) {
             case LEFT -> 0;
             case CENTER -> (width - contentWidth) / 2;
             case RIGHT -> width - contentWidth;
         };
-        rect.y = switch (verticalAlignment) {
+        rect.y = switch (boxAlignment.getVertical()) {
             case TOP -> 0;
             case CENTER -> (height - contentHeight) / 2;
             case BOTTOM -> height - contentHeight;
@@ -500,50 +476,30 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     /**
-     * Renders the text, with all transformations and effects, onto the given Graphics2D.
-     * This method assumes that the layout is up to date, and it never
-     * measures the text: it only draws the shapes calculated by the layout.
+     * Renders the text, with all effects, onto the given Graphics2D.
+     * Both kinds of text are painted the same way: the fill and the
+     * effects use the same canvas-space shape under the same transform
+     * of the graphics (which is just a translation into the image
+     * being rendered). This method assumes that the layout is up to
+     * date, and it never measures the text.
      */
-    private void paintText(Graphics2D g, AffineTransform origTransform, Color paintColor) {
+    private void paintText(Graphics2D g, Color paintColor) {
         if (text.isBlank()) {
             return;
         }
 
-        g.setColor(paintColor);
-
-        boolean hasEffects = effects != null && effects.hasEnabledEffects();
-
-        if (isOnPath()) {
-            Shape onPathShape = getOnPathShape();
-            if (onPathShape == null) {
-                return; // there is no layout (yet)
-            }
-            g.fill(onPathShape);
-            if (hasEffects) {
-                effects.apply(g, onPathShape);
-            }
-            return;
-        }
-
-        TextMeasurement m = measurement;
-        if (m == null || placementTransform == null) {
+        Shape shape = getCanvasShape();
+        if (shape == null) {
             return; // there is no layout (yet)
         }
-        Shape baseShape = m.shape();
 
-        g.transform(placementTransform);
-        g.fill(baseShape);
+        g.setColor(paintColor);
+        g.fill(shape);
 
-        // paint the effects
-        // (effects that should appear behind the text, such as
-        // a drop shadow, are already clipped to the text shape)
-        var tx = g.getTransform();
-        g.setTransform(origTransform);
-
-        if (hasEffects) {
-            // transform the local shape into the final screen/cache coordinates
-            // and apply the effects to this final, transformed shape
-            effects.apply(g, tx.createTransformedShape(baseShape));
+        // effects that should appear behind the text, such as
+        // a drop shadow, are already clipped to the text shape
+        if (effects != null && effects.hasEnabledEffects()) {
+            effects.apply(g, shape);
         }
     }
 
@@ -553,22 +509,19 @@ public class TransformedTextPainter implements Debuggable {
      * Graphics2D can cause rounding errors in the ORA export).
      */
     public BufferedImage renderArea(Rectangle area, Composition comp) {
-        int w = Math.max(1, area.width);
-        int h = Math.max(1, area.height);
-        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-
         // does nothing if the layout is already up to date
         ensureLayout(comp);
 
+        BufferedImage img = new BufferedImage(
+            Math.max(1, area.width), Math.max(1, area.height), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = img.createGraphics();
-
-        // might not be the identity transform if HiDPI screen is used
-        AffineTransform origTransform = g.getTransform();
-
-        g.translate(-area.x, -area.y);
-        paintText(g, origTransform, color);
-
-        g.dispose();
+        try {
+            setHighQualityRendering(g);
+            g.translate(-area.x, -area.y);
+            paintText(g, color);
+        } finally {
+            g.dispose();
+        }
         return img;
     }
 
@@ -592,18 +545,20 @@ public class TransformedTextPainter implements Debuggable {
     private void place(TextMeasurement m, int width, int height) {
         // calculate the final bounding box, which includes padding for effects
         boundingBox = calcBoundingBox(m.width(), m.height(), width, height);
-        placementTransform = createPlacementTransform();
+
+        // The only place where the measured shape is mapped to the canvas.
+        // The result is kept for painting and getTextShape().
+        Shape shape = createPlacementTransform().createTransformedShape(m.shape());
 
         // calculate actual render bounds to prevent clipping
-        Rectangle actualShapeBounds = placementTransform
-            .createTransformedShape(m.shape())
-            .getBounds();
+        Rectangle actualShapeBounds = shape.getBounds();
         if (effectsPadding > 0) {
             actualShapeBounds.grow(effectsPadding, effectsPadding);
         }
         // save to renderBounds instead of mutating boundingBox
         renderBounds = boundingBox.union(actualShapeBounds);
 
+        placedShape = shape;
         layoutWidth = width;
         layoutHeight = height;
         invalidPlacement = false;
@@ -760,18 +715,12 @@ public class TransformedTextPainter implements Debuggable {
             dx = offset.getX();
             dy = offset.getY();
         } else {
-            layout = createOnPathLayout(key, pathSampler);
+            layout = TextOnPathLayouter.layout(key, pathSampler);
             // the cached image shows the glyphs of the old layout.
             // (This is needed when the path was edited without notification.)
             clearCache();
         }
         placeOnPath(layout, dx, dy);
-    }
-
-    private OnPathLayout createOnPathLayout(OnPathKey key, PathSampler pathSampler) {
-        GlyphVector glyphVector = font.createGlyphVector(LAYOUT_FRC, text);
-        Path2D glyphs = distributeGlyphsAlongPath(glyphVector, pathSampler);
-        return new OnPathLayout(key, pathSampler, glyphs, glyphs.getBounds2D());
     }
 
     /**
@@ -836,118 +785,14 @@ public class TransformedTextPainter implements Debuggable {
         return textShape;
     }
 
-    private double calcTextLength(GlyphVector glyphVector, double tracking) {
-        double totalTextLength = 0;
-        int numGlyphs = glyphVector.getNumGlyphs();
-
-        for (int i = 0; i < numGlyphs; i++) {
-            totalTextLength += glyphVector.getGlyphMetrics(i).getAdvance() * Math.abs(scaleX);
-            if (i < numGlyphs - 1) {
-                totalTextLength += tracking;
-            }
-        }
-        return totalTextLength;
-    }
-
     /**
-     * Arranges the individual glyphs of the text along the given path.
-     *
-     * <p>The start offset can be negative if the text is longer than the
-     * path and is centered or right-aligned. The text is not shifted in
-     * this case: every glyph keeps its true distance along the path, and
-     * the glyphs whose center lies before the start of the path are
-     * skipped. This way centered text stays centered and right-aligned
-     * text ends exactly at the end of the path. The glyphs whose center
-     * lies beyond the end of the path are not drawn either.</p>
+     * Returns the shape of the text in canvas coordinates (the placed
+     * shape for normal text, the glyphs on the current path for text on
+     * a path), or null if there is no layout. The returned shape is shared
+     * and must not be modified.
      */
-    private Path2D distributeGlyphsAlongPath(GlyphVector glyphVector, PathSampler pathSampler) {
-        double tracking = calcTracking();
-
-        // can be negative if the text is longer than the path
-        double initialOffset = calcPathStartOffset(glyphVector, pathSampler.length(), tracking);
-        int numGlyphs = glyphVector.getNumGlyphs();
-
-        Path2D result = new Path2D.Double();
-
-        // the distance along the path where the left edge of the current glyph should be
-        double nextGlyphLeftEdgeDist = initialOffset;
-
-        // iterate through each glyph and find its place on the path.
-        for (int glyphIndex = 0; glyphIndex < numGlyphs; glyphIndex++) {
-            GlyphMetrics metrics = glyphVector.getGlyphMetrics(glyphIndex);
-            double advance = metrics.getAdvance() * Math.abs(scaleX);
-            double halfAdvance = advance / 2.0;
-
-            // calculate the target distance for the glyph's center
-            double centerTargetDist = nextGlyphLeftEdgeDist + halfAdvance;
-
-            // update the position for the next glyph's left edge.
-            // This must happen before skipping, because the skipped
-            // glyphs also take up space along the path.
-            nextGlyphLeftEdgeDist += advance;
-            if (glyphIndex < numGlyphs - 1) {
-                nextGlyphLeftEdgeDist += tracking;
-            }
-
-            // Calculate the anchor point and angle. There is no sample
-            // if the center of the glyph is before the start of the path
-            // or beyond its end: such glyphs are not drawn.
-            PathSampler.Sample sample = pathSampler.pointAndAngleAt(centerTargetDist);
-            if (sample == null) {
-                continue;
-            }
-
-            // build the transformation for the glyph
-            AffineTransform glyphTransform = AffineTransform.getTranslateInstance(sample.x(), sample.y());
-            glyphTransform.rotate(sample.angle() + rotation);
-            if (scaleX != 1.0 || scaleY != 1.0) {
-                glyphTransform.scale(scaleX, scaleY);
-            }
-            if (shearX != 0 || shearY != 0) {
-                glyphTransform.shear(-shearX, -shearY);
-            }
-
-            // translate the glyph locally so its baseline-center is at the origin
-            Point2D origGlyphPos = glyphVector.getGlyphPosition(glyphIndex);
-            double baseHalfAdvance = metrics.getAdvance() / 2.0;
-            glyphTransform.translate(-(origGlyphPos.getX() + baseHalfAdvance), -origGlyphPos.getY());
-
-            Shape glyph = glyphVector.getGlyphOutline(glyphIndex);
-            result.append(glyphTransform.createTransformedShape(glyph), false);
-        }
-        return result;
-    }
-
-    /**
-     * Calculates the distance along the path where the left edge of the
-     * text should be, based on the current alignment setting.
-     *
-     * <p>The result is negative if the text is longer than the path and
-     * is centered or right-aligned. Its absolute value is then the length
-     * of the text that sticks out before the start of the path. For centered
-     * text this is already the overflow on one side (half of the total
-     * overflow), so it must not be halved again.</p>
-     */
-    private double calcPathStartOffset(GlyphVector glyphVector, double pathLength, double tracking) {
-        if (mlpAlignment == MlpAlignmentSelector.LEFT) {
-            return 0;
-        }
-
-        double textLength = calcTextLength(glyphVector, tracking);
-
-        return switch (mlpAlignment) {
-            case MlpAlignmentSelector.CENTER -> (pathLength - textLength) / 2;
-            case MlpAlignmentSelector.RIGHT -> pathLength - textLength;
-            default -> throw new IllegalStateException("Unexpected value: " + mlpAlignment);
-        };
-    }
-
-    // calculates extra spacing between glyphs based on font attributes and scaling
-    private double calcTracking() {
-        Float trackingValue = (Float) font.getAttributes().get(TRACKING);
-        return trackingValue == null
-            ? 0.0
-            : trackingValue * font.getSize() * Math.abs(scaleX);
+    private Shape getCanvasShape() {
+        return isOnPath() ? getOnPathShape() : placedShape;
     }
 
     public Shape getTextShape(Composition comp) {
@@ -957,22 +802,13 @@ public class TransformedTextPainter implements Debuggable {
 
         ensureLayout(comp);
 
-        if (isOnPath()) {
-            // for text on a path, the layout has already computed the final
-            // shape; return a copy, so the cached one can't be modified
-            Shape onPathShape = getOnPathShape();
-            return onPathShape != null
-                ? new Path2D.Double(onPathShape)
-                : new Path2D.Double();
-        }
-
-        TextMeasurement m = measurement;
-        if (m == null || placementTransform == null) {
+        Shape shape = getCanvasShape();
+        if (shape == null) {
             return new Path2D.Double(); // the layout couldn't be calculated
         }
 
-        // returns a new shape, so the cached one can't be modified by the caller
-        return placementTransform.createTransformedShape(m.shape());
+        // return a copy, so the cached shape can't be modified by the caller
+        return new Path2D.Double(shape);
     }
 
     public void setTranslation(int newTranslationX, int newTranslationY) {
@@ -1099,15 +935,10 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     public void setBoxAlignment(BoxAlignment newAlignment) {
-        setBoxAlignment(newAlignment.getHorizontal(), newAlignment.getVertical());
-    }
-
-    public void setBoxAlignment(HorizontalAlignment newHorAlignment, VerticalAlignment newVerAlignment) {
-        boolean change = this.horizontalAlignment != newHorAlignment
-            || this.verticalAlignment != newVerAlignment;
+        Objects.requireNonNull(newAlignment);
+        boolean change = this.boxAlignment != newAlignment;
         if (change) {
-            this.horizontalAlignment = newHorAlignment;
-            this.verticalAlignment = newVerAlignment;
+            this.boxAlignment = newAlignment;
             clearCache();
             invalidatePlacement();
         }
@@ -1172,7 +1003,7 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     public boolean isOnPath() {
-        return horizontalAlignment == null || verticalAlignment == null;
+        return boxAlignment.isPath();
     }
 
     /**
@@ -1217,6 +1048,15 @@ public class TransformedTextPainter implements Debuggable {
         return bumpImage;
     }
 
+    public boolean checkInvariants(int expectedTx, int expectedTy) {
+        if (translationX != expectedTx || translationY != expectedTy) {
+            throw new AssertionError(String.format(
+                "translationX = %d, expectedTx = %d, translationY = %d, expectedTy = %d",
+                translationX, expectedTx, translationY, expectedTy));
+        }
+        return true;
+    }
+
     @Override
     public DebugNode createDebugNode(String key) {
         DebugNode node = new DebugNode(key, this);
@@ -1233,6 +1073,7 @@ public class TransformedTextPainter implements Debuggable {
         node.addNullableDebuggable("renderBounds", renderBounds, DebugNodes::createRectangleNode);
         node.addNullableDebuggable("transformedRect", transformedRect);
         node.addPresence("measuredShape", measurement == null ? null : measurement.shape());
+        node.addPresence("placedShape", placedShape);
         node.addPresence("glyphs (on path)", onPathLayout == null ? null : onPathLayout.glyphs());
         node.addDouble("on path dx", onPathDx);
         node.addDouble("on path dy", onPathDy);

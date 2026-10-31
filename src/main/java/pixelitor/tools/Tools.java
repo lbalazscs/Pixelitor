@@ -260,8 +260,8 @@ public class Tools {
         activeTool.forceFinish();
     }
 
-    public static void maskEditingChanged(boolean maskEditing) {
-        activeTool.maskEditingChanged(maskEditing);
+    public static void editingMaskChanged(boolean editing) {
+        activeTool.editingMaskChanged(editing);
     }
 
     /**

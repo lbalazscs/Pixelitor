@@ -910,7 +910,7 @@ public class ToolTests {
 
         app.clickTool(Tools.GRADIENT);
 
-        if (maskMode.isMaskEditing()) {
+        if (maskMode.isEditingMask()) {
             // reset the default colors, otherwise it might be all gray
             keyboard.fgBgDefaults();
         }

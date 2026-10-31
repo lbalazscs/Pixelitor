@@ -136,7 +136,7 @@ public class SplashImageCreator {
 
         SmartFilter lightsSF = new SmartFilter(lights, so.getContent(), so);
         so.addSmartFilter(lightsSF, true, true);
-        lightsSF.forceRendering();
+        lightsSF.ensureRendered();
 
         addTextLayers(comp);
 
@@ -183,7 +183,7 @@ public class SplashImageCreator {
         AreaEffects effects = createDropShadowEffect();
         TextSettings settings = new TextSettings(text, font, WHITE, effects,
             HorizontalAlignment.CENTER, VerticalAlignment.CENTER, MlpAlignmentSelector.CENTER,
-            false, 0, 1.0, 1.0, 1.0, 0.0, 0.0, null);
+            false, 0, 1.0, 1.0, 1.0, 0.0, 0.0);
         addNewTextLayer(comp, text, settings, translationY);
     }
 

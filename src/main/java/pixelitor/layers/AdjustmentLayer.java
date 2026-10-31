@@ -39,7 +39,7 @@ import java.io.Serial;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * An adjustment layer contains a filter that acts on the result of the layers below it.
+ * An adjustment layer contains a filter that acts on the composite of the layers below it.
  */
 public class AdjustmentLayer extends Layer implements Filterable {
     @Serial
@@ -51,7 +51,8 @@ public class AdjustmentLayer extends Layer implements Filterable {
     // to support "Cancel" and "Show Original" in the filter dialog
     private transient Filter filterBackup;
 
-    // toggles between the current filter and the backup for previewing
+    //  whether the preview is currently showing the original
+    //  (unmodified) filter state rather than the edited filter
     private transient boolean showOriginal = false;
 
     // true if this layer was just added and its configuration dialog
@@ -115,13 +116,13 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void updateIconImage() {
-        // do nothing, the icon is static
+        // do nothing; the icon is static
     }
 
     @Override
     public boolean showEditUI() {
         if (filter instanceof FilterWithGUI) {
-            return startFilter(filter, false);
+            return startFilterInteractively(filter, false);
         }
         return true;
     }
@@ -239,12 +240,14 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void filterWithoutDialogFinished(BufferedImage src, BufferedImage dest, FilterContext context, String filterName) {
+        // filters without dialogs are allowed, but this
+        // method is never called on adjustment layers
         throw new IllegalStateException();
     }
 
     @Override
     public void runFilter(Filter filter, FilterContext context) {
-        startFilter(filter, false);
+        startFilterInteractively(filter, false);
     }
 
     public Filter getFilter() {

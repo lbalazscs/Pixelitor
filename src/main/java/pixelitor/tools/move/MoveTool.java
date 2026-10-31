@@ -112,7 +112,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
             }
         } else { // regular move mode
             if (activeMode.movesLayer() && isAutoSelecting()) {
-                Layer targetLayer = e.getComp().findLayerAtPoint(e.toImPoint());
+                Layer targetLayer = e.getComp().findTopmostOpaqueLayer(e.toImPoint());
 
                 if (targetLayer == null) {
                     drag.cancel();
@@ -160,7 +160,7 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
     private void updateMoveCursor(View view, MouseEvent e) {
         if (isAutoSelecting()) {
             Point p = Geometry.round(view.componentToImageSpace(e.getPoint()));
-            Layer movedLayer = view.getComp().findLayerAtPoint(p);
+            Layer movedLayer = view.getComp().findTopmostOpaqueLayer(p);
             if (movedLayer == null) {
                 view.setCursor(Cursors.DEFAULT);
                 return;

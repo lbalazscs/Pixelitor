@@ -152,7 +152,7 @@ public class RandomGuiTest {
 
         registerHotkeys();
 
-        System.out.printf("RandomGUITest started at %s, the '%s' key stops, the '%s' key exits.%n",
+        System.out.printf("RandomGuiTest started at %s, the '%s' key stops, the '%s' key exits.%n",
             timestampFormatter.format(LocalDateTime.now()), PAUSE_KEY_CHAR, EXIT_KEY_CHAR);
 
         Robot robot = createRobot();
@@ -183,7 +183,7 @@ public class RandomGuiTest {
     private void registerHotkeys() {
         // make sure it can be stopped by pressing a key
         GlobalEvents.registerHotkey(PAUSE_KEY_CHAR, new TaskAction(() -> {
-                System.err.printf("%nRandomGUITest: '%s' pressed.%n", PAUSE_KEY_CHAR);
+            System.err.printf("%nRandomGuiTest: '%s' pressed.%n", PAUSE_KEY_CHAR);
                 stopRunning = true;
             })
         );
@@ -191,7 +191,7 @@ public class RandomGuiTest {
 
         // this key not only stops the testing, but also exits the app
         GlobalEvents.registerHotkey(EXIT_KEY_CHAR, new TaskAction(() -> {
-            System.err.printf("%nRandomGUITest: exiting app because '%s' was pressed.%n",
+            System.err.printf("%nRandomGuiTest: exiting app because '%s' was pressed.%n",
                 EXIT_KEY_CHAR);
             // no need to reset the GUI here, because preferences won't be saved
             System.exit(1);
@@ -239,14 +239,14 @@ public class RandomGuiTest {
                 tryRegainingWindowFocus(3);
 
                 if (!GUIUtils.isAppFocused()) {
-                    System.out.println("\nRandomGUITest app focus lost.");
+                    System.out.println("\nRandomGuiTest app focus lost.");
                     finishRunning();
                     break;
                 }
             }
 
             if (stopRunning) {
-                System.out.println("\nRandomGUITest stopped.");
+                System.out.println("\nRandomGuiTest stopped.");
                 finishRunning();
                 break;
             }
@@ -262,7 +262,7 @@ public class RandomGuiTest {
                 }
             });
         }
-        System.out.println("\nRandomGUITest.runTestLoop FINISHED at " + LocalDateTime.now());
+        System.out.println("\nRandomGuiTest.runTestLoop FINISHED at " + LocalDateTime.now());
         finishRunning();
         Toolkit.getDefaultToolkit().beep();
 
@@ -289,7 +289,7 @@ public class RandomGuiTest {
             return; // give up
         }
 
-        System.out.println("RandomGUITest: trying to regain window focus");
+        System.out.println("RandomGuiTest: trying to regain window focus");
         GUIUtils.invokeAndWait(() -> {
             var pw = PixelitorWindow.get();
             pw.toFront();
@@ -458,12 +458,12 @@ public class RandomGuiTest {
             if (filter instanceof ParametrizedFilter pf) {
                 ParamSet paramSet = pf.getParamSet();
                 System.out.printf(
-                    "RandomGUITest::runGUIFilter: filterName = %s, " +
+                    "RandomGuiTest::runGUIFilter: filterName = %s, " +
                         "src.width = %d, src.height = %d, params = %s%n",
                     filter.getName(), src.getWidth(), src.getHeight(), paramSet);
             } else {
                 System.out.printf(
-                    "RandomGUITest::runGUIFilter: filterName = %s, " +
+                    "RandomGuiTest::runGUIFilter: filterName = %s, " +
                         "src.width = %d, src.height = %d%n",
                     filter.getName(), src.getWidth(), src.getHeight());
             }
@@ -483,7 +483,7 @@ public class RandomGuiTest {
             dr.startFilter(filter, FILTER_WITHOUT_DIALOG);
         } catch (Throwable e) {
             System.out.printf(
-                "RandomGUITest::runNonGUIFilter: name = %s, width = %d, height = %d%n",
+                "RandomGuiTest::runNonGUIFilter: name = %s, width = %d, height = %d%n",
                 filter.getName(), src.getWidth(), src.getHeight());
             throw e;
         }
@@ -540,9 +540,9 @@ public class RandomGuiTest {
             String msg = String.format(
                 "Exception in random tween: filter name = %s, " +
                     "srcWidth = %d, srcHeight = %d, " +
-                    "isMaskEditing = %b, params = %s",
+                    "isEditingMask = %b, params = %s",
                 filterName, src.getWidth(), src.getHeight(),
-                dr.isMaskEditing(), paramSet);
+                dr.isEditingMask(), paramSet);
             throw new IllegalStateException(msg, e);
         }
 
@@ -984,7 +984,7 @@ public class RandomGuiTest {
         Composition comp = view.getComp();
         Layer activeLayerBefore = comp.getActiveLayer();
 
-        TextSettings settings = TextSettings.createRandomized(null);
+        TextSettings settings = TextSettings.createRandomized();
         TextLayer textLayer = TextLayer.createNew(comp, settings);
 
         // has to be called explicitly, since no dialog will be shown

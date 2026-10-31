@@ -24,15 +24,15 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A {@link PixelitorEdit} that represents the changes made to the layer order.
+ * Represents the changes made to the layer order.
  */
 public class LayerOrderChangeEdit extends PixelitorEdit {
     private final LayerHolder holder;
     private final int oldLayerIndex;
     private final int newLayerIndex;
 
-    public LayerOrderChangeEdit(String editName, LayerHolder holder, int oldLayerIndex, int newLayerIndex) {
-        super(editName == null ? "Layer Order Change" : editName, holder.getComp());
+    public LayerOrderChangeEdit(String name, LayerHolder holder, int oldLayerIndex, int newLayerIndex) {
+        super(name == null ? "Layer Order Change" : name, holder.getComp());
 
         this.holder = holder;
         this.oldLayerIndex = oldLayerIndex;

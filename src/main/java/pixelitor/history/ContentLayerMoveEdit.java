@@ -26,8 +26,7 @@ import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 
 /**
- * A {@link PixelitorEdit} representing the movement of a content layer.
- * (Move Tool)
+ * Represents the movement of a {@link ContentLayer} with the Move Tool.
  */
 public class ContentLayerMoveEdit extends PixelitorEdit {
     public static final String NAME = "Move Layer";
@@ -38,7 +37,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     private final ContentLayer layer;
     private final TranslationEdit translationEdit;
 
-    public ContentLayerMoveEdit(ContentLayer layer, BufferedImage backupImage, int oldTx, int oldTy) {
+    public ContentLayerMoveEdit(ContentLayer layer, BufferedImage backupImage, int prevTx, int prevTy) {
         super(NAME, layer.getComp());
 
         this.layer = layer;
@@ -49,7 +48,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
             imageEdit.setEmbedded(true);
         }
 
-        translationEdit = new TranslationEdit(comp, layer, oldTx, oldTy, false);
+        translationEdit = new TranslationEdit(comp, layer, prevTx, prevTy, false);
     }
 
     @Override
@@ -95,7 +94,7 @@ public class ContentLayerMoveEdit extends PixelitorEdit {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.add(translationEdit.createDebugNode("translationEdit"));
+        node.add(translationEdit.createDebugNode("translation edit"));
         node.addNullableDebuggable("image edit", imageEdit);
         node.add(layer.createDebugNode("layer"));
 

@@ -27,7 +27,7 @@ import java.awt.image.BufferedImage;
 import java.lang.ref.SoftReference;
 
 /**
- * A {@link PixelitorEdit} that represents the changes made to an image.
+ * Represents the changes made to an image.
  */
 public class ImageEdit extends FadeableEdit {
     // selections are ignored for example when the image is enlarged by the move tool
@@ -47,7 +47,7 @@ public class ImageEdit extends FadeableEdit {
 
 //        Utils.debugImage(backupImage, "Backup for " + name);
 
-        // the backup image is stored in an SoftReference
+        // the backup image is stored in a SoftReference
         imgRef = new SoftReference<>(backupImage);
         this.dr = dr;
 
@@ -55,7 +55,7 @@ public class ImageEdit extends FadeableEdit {
     }
 
     // the backup should never be identical to the active image
-    // otherwise the backup might be also edited
+    // otherwise the backup might also be edited
     private void checkBackupDifferentFromActive() {
         BufferedImage layerImage = dr.getImage();
         if (layerImage == imgRef.get()) {
@@ -64,7 +64,7 @@ public class ImageEdit extends FadeableEdit {
     }
 
     public static ImageEdit createEmbedded(Drawable dr) {
-        // If there is a selection, only the bounds of the selected area is saved.
+        // if there is a selection, only the selected area is saved
         BufferedImage backup = dr.getSelectedSubImage(true);
 
         ImageEdit edit = new ImageEdit("", dr.getComp(),
@@ -94,7 +94,8 @@ public class ImageEdit extends FadeableEdit {
     }
 
     /**
-     * Returns true if successful
+     * Swaps the active image with the backup image. Returns true if
+     * successful, or false if the backup image was garbage-collected.
      */
     private boolean swapImages() {
         BufferedImage backupImage = imgRef.get();
@@ -151,7 +152,7 @@ public class ImageEdit extends FadeableEdit {
             node.addInt("backup image height", img.getHeight());
         }
 
-        node.addBoolean("ignoreSelection", ignoreSelection);
+        node.addBoolean("ignore selection", ignoreSelection);
 
         return node;
     }

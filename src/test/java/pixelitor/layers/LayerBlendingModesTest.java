@@ -297,7 +297,7 @@ class LayerBlendingModesTest {
             new AreaEffects(),
             HorizontalAlignment.CENTER, VerticalAlignment.CENTER,
             MlpAlignmentSelector.LEFT,
-            false, 0, 1, 1, 1, 0, 0, null);
+            false, 0, 1, 1, 1, 0, 0);
 
         var layer = new TextLayer(comp, "T", settings);
         layer.createUI();

@@ -590,8 +590,8 @@ public class WorkflowTest {
 
         boolean activeIsSmart = EDT.queryActiveLayer(layer ->
             (layer instanceof SmartObject) || (layer instanceof SmartFilter));
-        boolean maskEditing = EDT.activeLayerIsMaskEditing();
-        boolean smartFilter = activeIsSmart && !maskEditing;
+        boolean editingMask = EDT.activeLayerIsEditingMask();
+        boolean smartFilter = activeIsSmart && !editingMask;
 
         String expectedEditName = smartFilter ? "Add Smart " + filterName : filterName;
         keyboard.undoRedo(expectedEditName);

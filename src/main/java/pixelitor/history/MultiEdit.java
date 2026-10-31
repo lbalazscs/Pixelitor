@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -22,14 +22,14 @@ import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.CompoundEdit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * A {@link PixelitorEdit} that represents multiple edits
- * that need to be undone/redone together.
- * Similar in purpose to javax.swing.undo.CompoundEdit
+ * Represents multiple edits that need to be undone/redone together.
+ * Similar in purpose to {@link CompoundEdit}.
  */
 public class MultiEdit extends PixelitorEdit {
     private final List<PixelitorEdit> children;
@@ -47,11 +47,11 @@ public class MultiEdit extends PixelitorEdit {
         // child edits will be added later via add
     }
 
-    public MultiEdit(String name, Composition comp, PixelitorEdit[] array) {
+    public MultiEdit(String name, Composition comp, PixelitorEdit[] edits) {
         super(name, comp);
 
-        children = new ArrayList<>(array.length);
-        Collections.addAll(children, array);
+        children = new ArrayList<>(edits.length);
+        Collections.addAll(children, edits);
     }
 
     /**

@@ -29,59 +29,55 @@ import static java.awt.font.TextAttribute.*;
 /**
  * Wraps a {@link Font} to provide a more usable API.
  */
-public class FontInfo {
-    // basic properties
-    private int size;
-    private String name;
-    private boolean bold;
-    private boolean italic;
+public record FontInfo(
+    // basic properties, edited in the text settings dialog
+    String name,
+    int size,
+    boolean bold,
+    boolean italic,
 
-    // advanced properties
-    private boolean strikethrough = false;
-    private boolean kerning = false;
-    private boolean underline = false;
-    private boolean ligatures = false;
-    private int tracking = 0; // stored as a percentage (e.g., 100 = 1.0)
-
+    // advanced properties, edited in the advanced text settings dialog
+    boolean strikethrough,
+    boolean kerning,
+    boolean underline,
+    boolean ligatures,
+    int tracking // stored as a percentage (e.g., 100 = 1.0)
+) {
     public FontInfo(Font font) {
-        size = font.getSize();
-        name = font.getName();
-        bold = font.isBold();
-        italic = font.isItalic();
+        this(font, font.hasLayoutAttributes() ? font.getAttributes() : Map.of());
+    }
 
-        if (font.hasLayoutAttributes()) {
-            extractLayoutAttributes(font);
-        }
+    private FontInfo(Font font, Map<TextAttribute, ?> attributes) {
+        this(
+            font.getName(),
+            font.getSize(),
+            font.isBold(),
+            font.isItalic(),
+            STRIKETHROUGH_ON.equals(attributes.get(STRIKETHROUGH)),
+            KERNING_ON.equals(attributes.get(KERNING)),
+            UNDERLINE_ON.equals(attributes.get(UNDERLINE)),
+            LIGATURES_ON.equals(attributes.get(LIGATURES)),
+            extractTracking(attributes)
+        );
     }
 
     public FontInfo(UserPreset preset) {
-        size = preset.getInt("font_size");
-        name = preset.get("font_type");
-        bold = preset.getBoolean("bold");
-        italic = preset.getBoolean("italic");
-
-        strikethrough = preset.getBoolean("strikethrough");
-        kerning = preset.getBoolean("kerning");
-        underline = preset.getBoolean("underline");
-        ligatures = preset.getBoolean("ligatures");
-        tracking = preset.getInt("tracking", 0);
+        this(
+            preset.get("font_type"),
+            preset.getInt("font_size"),
+            preset.getBoolean("bold"),
+            preset.getBoolean("italic"),
+            preset.getBoolean("strikethrough"),
+            preset.getBoolean("kerning"),
+            preset.getBoolean("underline"),
+            preset.getBoolean("ligatures"),
+            preset.getInt("tracking", 0)
+        );
     }
 
-    /**
-     * Extracts advanced typography attributes from a Font's attribute map.
-     */
-    private void extractLayoutAttributes(Font font) {
-        Map<TextAttribute, ?> map = font.getAttributes();
-
-        strikethrough = STRIKETHROUGH_ON.equals(map.get(STRIKETHROUGH));
-        kerning = KERNING_ON.equals(map.get(KERNING));
-        underline = UNDERLINE_ON.equals(map.get(UNDERLINE));
-        ligatures = LIGATURES_ON.equals(map.get(LIGATURES));
-
+    private static int extractTracking(Map<TextAttribute, ?> map) {
         Float trackingValue = (Float) map.get(TRACKING);
-        if (trackingValue != null) {
-            tracking = Math.round(100 * trackingValue);
-        }
+        return trackingValue != null ? Math.round(100 * trackingValue) : 0;
     }
 
     public void saveStateTo(UserPreset preset) {
@@ -97,20 +93,15 @@ public class FontInfo {
         preset.putInt("tracking", tracking);
     }
 
-    public void updateBasicProperties(String name, int size, boolean bold, boolean italic) {
-        this.name = name;
-        this.size = size;
-        this.bold = bold;
-        this.italic = italic;
+    public FontInfo withBasic(String name, int size, boolean bold, boolean italic) {
+        return new FontInfo(name, size, bold, italic,
+            strikethrough, kerning, underline, ligatures, tracking);
     }
 
-    public void updateAdvancedProperties(boolean strikethrough, boolean kerning, boolean ligatures,
-                                         boolean underline, int tracking) {
-        this.strikethrough = strikethrough;
-        this.kerning = kerning;
-        this.ligatures = ligatures;
-        this.underline = underline;
-        this.tracking = tracking;
+    public FontInfo withAdvanced(boolean strikethrough, boolean kerning, boolean ligatures,
+                                 boolean underline, int tracking) {
+        return new FontInfo(name, size, bold, italic,
+            strikethrough, kerning, underline, ligatures, tracking);
     }
 
     public Font createFont() {
@@ -139,25 +130,5 @@ public class FontInfo {
             style |= Font.ITALIC;
         }
         return new Font(family, style, size);
-    }
-
-    public boolean hasStrikethrough() {
-        return strikethrough;
-    }
-
-    public boolean hasKerning() {
-        return kerning;
-    }
-
-    public boolean hasUnderline() {
-        return underline;
-    }
-
-    public boolean hasLigatures() {
-        return ligatures;
-    }
-
-    public int getTracking() {
-        return tracking;
     }
 }

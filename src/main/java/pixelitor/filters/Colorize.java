@@ -37,18 +37,18 @@ import static pixelitor.utils.Texts.i18n;
 /**
  * The "Colorize" filter.
  * <p>
- * It supports two methods:
- * <ul>
- *   <li>{@link Method#MULTIPLY}: the original behavior. The luma of each pixel
- *   selects a color on a black-to-target-color ramp (the target color is
- *   the color of white).</li>
- *   <li>{@link Method#PRESERVE_LIGHTNESS}: the Oklab lightness of each pixel
- *   is kept, and its hue and chroma are replaced with the hue and chroma
- *   of the target color. If that chroma doesn't fit into the sRGB gamut
- *   at a given lightness, it is reduced (keeping the hue), so the
- *   shadows fade to black and the highlights fade to white.</li>
- * </ul>
- * In both methods the result depends only on a single lightness value per
+ * By default, the luma of each pixel selects a color on a ramp from black
+ * to the chosen color, which is the color of white. This is similar to
+ * multiplying a grayscale version of the image with the chosen color.
+ * <p>
+ * If the "Preserve Lightness" checkbox is selected, the Oklab lightness
+ * of each pixel is kept, and its hue and chroma are replaced with the hue
+ * and chroma of the chosen color (the lightness of the chosen color is
+ * ignored). If that chroma doesn't fit into the sRGB gamut at a given
+ * lightness, it is reduced (keeping the hue), so the shadows fade to
+ * black and the highlights fade to white.
+ * <p>
+ * In both cases the result depends only on a single lightness value per
  * pixel, so the target colors are precomputed into a lookup table (the ramp).
  */
 public class Colorize extends ParametrizedFilter {
@@ -57,7 +57,7 @@ public class Colorize extends ParametrizedFilter {
     @Serial
     private static final long serialVersionUID = 7036946857972080432L;
 
-    // The resolution of the ramp in the PRESERVE_LIGHTNESS method.
+    // The resolution of the ramp when "Preserve Lightness" is selected.
     // An Oklab lightness step of 1/1023 is below one sRGB level everywhere.
     private static final int OKLCH_RAMP_SIZE = 1024;
 
@@ -101,7 +101,7 @@ public class Colorize extends ParametrizedFilter {
     }
 
     /**
-     * The common part of the two methods: a pixel is mapped to an index
+     * The common part of both modes: a pixel is mapped to an index
      * in a precomputed color ramp, and the result is blended with the source.
      * The ramp is read-only after construction, so processPixel is thread-safe.
      */
@@ -217,7 +217,7 @@ public class Colorize extends ParametrizedFilter {
         protected int rampIndex(int srcRGB) {
             float l = srgbToOklabL(srcRGB);
 
-            // the same kind of brightness shift as in the MULTIPLY method,
+            // the same kind of brightness shift as in the default mode,
             // but applied to the Oklab lightness (in the range 0..1)
             if (briShift > 0) {
                 l += (1.0f - l) * briShift; // towards white

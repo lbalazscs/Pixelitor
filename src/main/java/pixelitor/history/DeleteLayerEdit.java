@@ -26,7 +26,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A {@link PixelitorEdit} that represents the deletion of a layer.
+ * Represents the deletion of a {@link Layer} from a {@link LayerHolder}.
  */
 public class DeleteLayerEdit extends PixelitorEdit {
     private final LayerHolder holder;

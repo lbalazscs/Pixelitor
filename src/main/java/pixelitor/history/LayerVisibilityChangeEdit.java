@@ -24,7 +24,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A {@link PixelitorEdit} that represents the hiding or showing of a layer.
+ * Represents the hiding or showing of a layer.
  */
 public class LayerVisibilityChangeEdit extends PixelitorEdit {
     private final Layer layer;

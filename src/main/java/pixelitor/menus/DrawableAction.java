@@ -80,7 +80,7 @@ public class DrawableAction extends AbstractViewEnabledAction {
 
     private void startOnLayer(Layer layer) {
         // if we are editing a mask, the action applies to the mask
-        if (layer.isMaskEditing()) {
+        if (layer.isEditingMask()) {
             action.accept(layer.getMask());
             return;
         }

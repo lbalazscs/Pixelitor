@@ -476,7 +476,7 @@ public class MenuBar extends JMenuBar {
             comp -> comp.forEachNestedSmartObject(SmartObject::showEditUI), CTRL_ALT_O);
 
         sub.add(new RestrictedLayerAction("Edit Smart Filter", isSmartObject,
-            layer -> ((SmartObject) layer).editSelectedSmartFilter()), CTRL_SHIFT_E);
+            layer -> ((SmartObject) layer).editActiveSmartFilter()), CTRL_SHIFT_E);
 
         sub.addViewEnabled("Add Linked...", Composition::addLinkedSmartObject);
 

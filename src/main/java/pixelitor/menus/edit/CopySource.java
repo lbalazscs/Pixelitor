@@ -42,7 +42,7 @@ public enum CopySource {
         Result<BufferedImage, String> getImage(Composition comp) {
             // use the active layer, or its mask if mask editing is active
             Layer src = comp.getActiveLayer();
-            if (src.isMaskEditing()) {
+            if (src.isEditingMask()) {
                 src = src.getMask();
             }
 

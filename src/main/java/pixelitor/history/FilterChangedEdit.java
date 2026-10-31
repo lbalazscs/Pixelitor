@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -30,14 +30,17 @@ import javax.swing.undo.CannotUndoException;
  */
 public class FilterChangedEdit extends PixelitorEdit {
     private final AdjustmentLayer layer;
-    private Filter prevFilter;
-    private String prevName;
 
-    public FilterChangedEdit(String editName, AdjustmentLayer layer, Filter prevFilter, String prevName) {
-        super(editName, layer.getComp());
+    // the state not currently applied to the layer
+    private Filter inactiveFilter;
+    private String inactiveName; // null if only filter parameters were modified
+
+    public FilterChangedEdit(String name, AdjustmentLayer layer, Filter prevFilter, String prevName) {
+        super(name, layer.getComp());
+
         this.layer = layer;
-        this.prevFilter = prevFilter;
-        this.prevName = prevName;
+        this.inactiveFilter = prevFilter;
+        this.inactiveName = prevName;
     }
 
     @Override
@@ -56,14 +59,14 @@ public class FilterChangedEdit extends PixelitorEdit {
 
     private void swapState() {
         Filter currentFilter = layer.getFilter();
-        layer.setFilterFromHistory(prevFilter);
-        prevFilter = currentFilter;
+        layer.setFilterFromHistory(inactiveFilter);
+        inactiveFilter = currentFilter;
 
         // if the layer name also changed (e.g., filter replacement), swap it too
-        if (prevName != null) {
-            String tmpName = layer.getName();
-            layer.setName(prevName, false);
-            prevName = tmpName;
+        if (inactiveName != null) {
+            String currentName = layer.getName();
+            layer.setName(inactiveName, false);
+            inactiveName = currentName;
         }
     }
 
@@ -71,7 +74,7 @@ public class FilterChangedEdit extends PixelitorEdit {
     public DebugNode createDebugNode(String key) {
         DebugNode node = super.createDebugNode(key);
 
-        node.add(prevFilter.createDebugNode("backupFilter"));
+        node.add(inactiveFilter.createDebugNode("inactive filter"));
 
         return node;
     }

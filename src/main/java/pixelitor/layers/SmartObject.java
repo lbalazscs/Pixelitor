@@ -79,7 +79,7 @@ public class SmartObject extends CompositeLayer {
     // timestamp of the last known modification to the linked content file
     private transient long linkedContentTimestamp;
 
-    // "legacy" fields from Pixelitor 4.3.0, they are only
+    // "legacy" fields from Pixelitor 4.3.0, which are only
     // used for automatic migration of old pxc files
     private boolean smartFilterIsVisible = true;
     private List<Filter> smartFilters = new ArrayList<>();
@@ -90,18 +90,20 @@ public class SmartObject extends CompositeLayer {
     // transformer from old pxc files, used for migration
     private AffineTransform contentTransform;
 
-    // the transformer for non-destructive transforms
+    // the transformer for non-destructive transforms:
+    // it is null until the first transform (resize, flip, etc.),
+    // and it then replaces the content as the chain's input
     private ImageTransformer imageTransformer;
 
     // the cached final image of this smart object
     private transient BufferedImage image = null;
 
-    private transient boolean invalidImageCache = false;
+    private transient boolean imageCacheStale = false;
 
     // it's important to call updateIconImage() only when we are
     // sure that the smart object's image is up-to-date, because otherwise
     // the filters could be started concurrently on different threads
-    private transient boolean invalidIconImageCache = false;
+    private transient boolean iconCacheStale = false;
 
     // constructor for converting a layer into a smart object
     public SmartObject(Layer layer) {
@@ -116,7 +118,7 @@ public class SmartObject extends CompositeLayer {
 
     // constructor for creating a smart object with a given content
     public SmartObject(Composition parent, Composition content) {
-        super(parent, "Smart " + content.getName());
+        super(parent, NAME_PREFIX + content.getName());
         setContent(content);
 
         assert checkInvariants();
@@ -132,7 +134,7 @@ public class SmartObject extends CompositeLayer {
         assert checkInvariants();
     }
 
-    // constructor for duplication.
+    // constructor for duplication
     private SmartObject(SmartObject orig, CopyOptions copyOptions, Composition newComp) {
         super(newComp, copyOptions.createLayerCopyName(orig.getName()));
         assert orig.content.checkInvariants();
@@ -175,7 +177,7 @@ public class SmartObject extends CompositeLayer {
             smartFilterIsVisible = true;
         }
 
-        this.invalidImageCache = false;
+        this.imageCacheStale = false;
         // further initialization happens in afterDeserialization()
     }
 
@@ -284,7 +286,7 @@ public class SmartObject extends CompositeLayer {
         Composition newContent = Composition.createEmpty(comp.getCanvasWidth(), comp.getCanvasHeight(), comp.getMode());
         // the layer's mask stays outside the content and becomes the smart object's mask
         if (srcLayer instanceof LayerGroup group) {
-            // flatten the contents of the group
+            // copy the group's children into the new content
             int numLayers = group.getNumLayers();
             assert numLayers > 0;
             for (int i = 0; i < numLayers; i++) {
@@ -304,19 +306,19 @@ public class SmartObject extends CompositeLayer {
     }
 
     private void recalcImage() {
-        ImageSource output = filters.isEmpty() ? baseSource() : filters.getLast();
-        image = output.getImage();
-        invalidImageCache = false;
+        ImageSource finalSource = filters.isEmpty() ? baseSource() : filters.getLast();
+        image = finalSource.getImage();
+        imageCacheStale = false;
 
-        if (invalidIconImageCache) {
+        if (iconCacheStale) {
             updateIconImage();
-            invalidIconImageCache = false;
+            iconCacheStale = false;
         }
     }
 
     @Override
     public void update() {
-        if (invalidImageCache) {
+        if (imageCacheStale) {
             recalcImage();
         }
         super.update();
@@ -324,11 +326,11 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public void invalidateImageCache() {
-        invalidImageCache = true;
+        imageCacheStale = true;
     }
 
     public void invalidateIconImageCache() {
-        invalidIconImageCache = true;
+        iconCacheStale = true;
     }
 
     /**
@@ -367,7 +369,7 @@ public class SmartObject extends CompositeLayer {
     }
 
     public BufferedImage getVisibleImage() {
-        if (invalidImageCache) {
+        if (imageCacheStale) {
             recalcImage();
         }
         return image;
@@ -420,7 +422,6 @@ public class SmartObject extends CompositeLayer {
         View contentView = content.getView();
         if (contentView == null) {
             Views.addNew(content);
-            content.setDirty(false);
         } else { // if the view is already open, just activate it
             Views.activate(contentView);
         }
@@ -446,6 +447,9 @@ public class SmartObject extends CompositeLayer {
     // but if the user cancels the dialog, the filter is removed
     public void addSmartFilterWithDialog(Filter filter) {
         SmartFilter smartFilter = new SmartFilter(filter, baseSource(), this);
+
+        // if the filter has a dialog, then adding to history
+        // is deferred until the dialog is accepted
         boolean hasDialog = filter instanceof FilterWithGUI;
         addSmartFilter(smartFilter, !hasDialog, true);
 
@@ -499,12 +503,12 @@ public class SmartObject extends CompositeLayer {
             }
 
             // the new filter itself keeps its cache, which is important for undo
-            newFilter.invalidateSubsequent();
+            newFilter.invalidateDownstream();
             
             invalidateImageCache();
             invalidateIconImageCache();
             holder.update();
-            layerCountChanged();
+            fireSmartFilterCountChanged();
         } else if (activate) {
             comp.setActiveLayer(newFilter);
         }
@@ -521,7 +525,7 @@ public class SmartObject extends CompositeLayer {
 
         filter.setNext(null);
 
-        layerCountChanged();
+        fireSmartFilterCountChanged();
         if (addToHistory) {
             History.add(new DeleteLayerEdit(this, filter, index));
         }
@@ -556,19 +560,17 @@ public class SmartObject extends CompositeLayer {
         }
     }
 
-    private void layerCountChanged() {
-        // notify the delete action only if the whole smart
-        // object is not selected and not during construction
+    private void fireSmartFilterCountChanged() {
         if (!isActive() && hasUI()) {
             LayerEvents.fireLayerCountChanged(this, filters.size());
         }
     }
 
-    public View findParentView() {
+    public View findNearestOpenView() {
         if (isContentOpen()) {
             return content.getView();
         }
-        return comp.findParentView();
+        return comp.findNearestOpenView();
     }
 
     public CompletableFuture<Composition> checkAutoReload() {
@@ -580,7 +582,7 @@ public class SmartObject extends CompositeLayer {
             if (currentTimestamp > linkedContentTimestamp) {
                 linkedContentTimestamp = currentTimestamp;
 
-                Views.activate(findParentView());
+                Views.activate(findNearestOpenView());
                 boolean shouldReload = Messages.showReloadFileQuestion(linkedContentFile);
                 if (shouldReload) {
                     // if this content is reloaded, then return because
@@ -603,7 +605,7 @@ public class SmartObject extends CompositeLayer {
             .thenApplyAsync(loadedContent -> {
                 setContent(loadedContent);
                 propagateContentChanges(loadedContent, true);
-                findParentView().repaint();
+                findNearestOpenView().repaint();
                 return loadedContent;
             }, onEDT)
             .exceptionally(Messages::showExceptionOnEDT);
@@ -625,7 +627,7 @@ public class SmartObject extends CompositeLayer {
         }
 
         if (filters != null) { // null only while migrating old pxc files
-            rewireFilterChain(); // replaces the manual "first filter" wiring
+            rewireFilterChain();
             invalidateFilterCaches();
         }
         invalidateImageCache();
@@ -658,7 +660,7 @@ public class SmartObject extends CompositeLayer {
         String path = linkedContentFile.getAbsolutePath();
         linkedContentFile = null;
         Messages.showInfo("Embedded Content",
-            "<html>The file <b>" + path + "</b> isn't used anymore.");
+            "<html>The file <b>" + path + "</b> is no longer used.");
     }
 
     // the source of the starting image for the smart filters:
@@ -683,7 +685,7 @@ public class SmartObject extends CompositeLayer {
         SmartObject currentSO = this;
 
         // traverse up through potentially multiple levels of nesting
-        // until it finds either a linked content or a top-level composition
+        // until it finds either linked content or a top-level composition
         while (true) {
             // if the content is linked (saved as a separate file),
             // then the content is responsible for saving itself
@@ -790,16 +792,16 @@ public class SmartObject extends CompositeLayer {
         return new ContentLayerMoveEdit(this, null, prevTx, prevTy);
     }
 
-    public SmartObject shallowDuplicate() {
-        CopyOptions options = CopyOptions.smartObjectShallowDuplicate();
-        SmartObject d = new SmartObject(this, options, comp);
-        copyMaskTo(d, options, comp);
-        return d;
+    public SmartObject createShallowCopy() {
+        CopyOptions options = CopyOptions.smartObjectShallowCopy();
+        SmartObject copy = new SmartObject(this, options, comp);
+        copyMaskTo(copy, options, comp);
+        return copy;
     }
 
     @Override
     public void reorderActiveLayer(LayerMoveDirection direction) {
-        SmartFilter smartFilter = getSelectedSmartFilter();
+        SmartFilter smartFilter = getActiveSmartFilter();
         if (smartFilter != null) {
             move(smartFilter, direction);
         }
@@ -849,23 +851,23 @@ public class SmartObject extends CompositeLayer {
         return filters.contains(filter);
     }
 
-    public void editSelectedSmartFilter() {
+    public void editActiveSmartFilter() {
         if (filters.isEmpty()) {
             Messages.showInfo("No Smart Filters",
                 "<html>There are no smart filters in the smart object <b>" + getName() + "</b>.");
             return;
         }
 
-        SmartFilter selected = getSelectedSmartFilter();
-        if (selected != null) {
-            selected.showEditUI();
+        SmartFilter active = getActiveSmartFilter();
+        if (active != null) {
+            active.showEditUI();
         } else {
-            // edit the last smart filter if none is selected
+            // edit the last smart filter if none is activated
             filters.getLast().showEditUI();
         }
     }
 
-    private SmartFilter getSelectedSmartFilter() {
+    private SmartFilter getActiveSmartFilter() {
         for (SmartFilter filter : filters) {
             if (filter.isActive()) {
                 return filter;
@@ -917,7 +919,7 @@ public class SmartObject extends CompositeLayer {
         }
 
         if (!content.isSmartObjectContent()) {
-            throw new IllegalStateException("content of %s (%s) is broken"
+            throw new AssertionError("content of %s (%s) is not marked as smart object content"
                 .formatted(getName(), content.getDebugName()));
         }
         if (!content.getOwners().contains(this)) {
@@ -975,7 +977,7 @@ public class SmartObject extends CompositeLayer {
             }
         }
         for (SmartFilter filter : filters) {
-            BufferedImage filterCache = filter.getOutputCache();
+            BufferedImage filterCache = filter.getCachedImage();
             if (filterCache != null) {
                 Debug.debugImage(filterCache, "filterCache for " + filter.getName());
             }
@@ -1020,7 +1022,7 @@ public class SmartObject extends CompositeLayer {
 
         insertSmartFilter(newSmartFilter, index, false, false);
 
-        // update() and setActiveLayer() will be called later, but this is necessary.
+        // the caller updates and activates later, but the caches must be invalidated now
         invalidateImageCache();
         invalidateIconImageCache();
     }
@@ -1134,7 +1136,7 @@ public class SmartObject extends CompositeLayer {
         boolean linked = isContentLinked();
         node.addBoolean("linked", linked);
         if (linked) {
-            node.addString("link file", linkedContentFile.getAbsolutePath());
+            node.addString("linked content file", linkedContentFile.getAbsolutePath());
         }
         node.add(content.createDebugNode("content"));
 
@@ -1142,7 +1144,7 @@ public class SmartObject extends CompositeLayer {
             node.add(filter.createDebugNode("smart filter"));
         }
         if (imageTransformer != null) {
-            node.add(imageTransformer.createDebugNode("imageTransformer"));
+            node.add(imageTransformer.createDebugNode("image transformer"));
         }
 
         return node;

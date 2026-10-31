@@ -27,9 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.Serial;
 import java.io.Serializable;
 
-import static java.awt.RenderingHints.KEY_INTERPOLATION;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-import static java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+import static java.awt.RenderingHints.*;
 import static java.awt.image.BufferedImage.TYPE_INT_ARGB;
 
 /**
@@ -41,7 +39,11 @@ public class ImageTransformer implements ImageSource, Serializable {
     private static final long serialVersionUID = 1L;
 
     private Composition content;
+
+    // maps content pixels to output pixels, modified in-place
     private final AffineTransform transform;
+
+    // the output size
     private int targetWidth;
     private int targetHeight;
 
@@ -88,7 +90,7 @@ public class ImageTransformer implements ImageSource, Serializable {
      * @see AffineTransform#preConcatenate(AffineTransform)
      */
     public void chainTransform(AffineTransform newTransform, int targetWidth, int targetHeight) {
-        // maintain the correct logical order by preconcatenating
+        // preconcatenate, so that the new transform is applied after the existing transform
         transform.preConcatenate(newTransform);
 
         setTargetSize(targetWidth, targetHeight);
@@ -120,6 +122,7 @@ public class ImageTransformer implements ImageSource, Serializable {
         return newImage;
     }
 
+    // used only for debugging
     public BufferedImage getCachedImage() {
         return cachedImage;
     }

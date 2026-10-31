@@ -26,7 +26,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * Saves and restores the translation of a ContentLayer.
+ * Saves and restores the translation of a {@link ContentLayer}.
  * Not to be confused with {@link ContentLayerMoveEdit}:
  * this one is used only internally by other edits.
  */
@@ -39,7 +39,7 @@ public class TranslationEdit extends PixelitorEdit {
 
     /**
      * This constructor must be called before the change because
-     * the current translation is considered the old value
+     * the current translation is considered the old value.
      */
     public TranslationEdit(Composition comp, ContentLayer layer, boolean considerMask) {
         this(comp, layer, layer.getTx(), layer.getTy(), considerMask);
@@ -47,16 +47,17 @@ public class TranslationEdit extends PixelitorEdit {
 
     /**
      * This constructor can be called after the change
-     * if the mask can be ignored
+     * if the mask can be ignored.
      */
-    public TranslationEdit(Composition comp, ContentLayer layer, int oldTx, int oldTy, boolean considerMask) {
+    public TranslationEdit(Composition comp, ContentLayer layer,
+                           int prevTx, int prevTy, boolean considerMask) {
         // needs no name, because this is always embedded into another edit
         super("", comp);
         embedded = true;
 
         this.layer = layer;
-        backupTx = oldTx;
-        backupTy = oldTy;
+        backupTx = prevTx;
+        backupTy = prevTy;
 
         if (considerMask && layer.hasMask()) {
             LayerMask mask = layer.getMask();

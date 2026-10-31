@@ -41,8 +41,9 @@ import static pixelitor.gui.utils.SliderSpinner.LabelPosition.BORDER;
  * can also be used as a model of a JSlider.
  */
 public class RangeParam extends AbstractFilterParam implements BoundedRangeModel {
-    // there are max 2 decimal places in the GUI
-    public static final double EPSILON = 0.001;
+    // half a unit of the second decimal place, so values
+    // that are displayed identically count as equal
+    public static final double EPSILON = 0.005;
 
     private int minValue;
     private int maxValue;
@@ -58,13 +59,16 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     private boolean hasResetButton;
     private SliderSpinner.LabelPosition labelPosition;
 
-    private ChangeEvent changeEvent = null;
+    private final ChangeEvent changeEvent = new ChangeEvent(this);
     private final EventListenerList listenerList = new EventListenerList();
 
     // image-size dependent range adjustment
     private boolean adjustRangeToCanvasSize = false;
     private double maxToCanvasSizeRatio;
     private double defaultToMaxRatio;
+
+    // explicitly configured ticks, null means that they are calculated automatically
+    private SliderSpinner.TickSpacing explicitTicks;
 
     public RangeParam(String name, int min, double def, int max) {
         this(name, min, def, max, true, BORDER);
@@ -121,8 +125,8 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
      * greater than or equal to another {@link RangeParam}'s value.
      */
     public void ensureNotLowerThan(RangeParam other) {
-        // if the value is not higher, then make it equal
-        linkWith(other, () -> other.getValue() > getValue());
+        // if the other value is higher, then make this equal to it
+        linkWith(other, () -> other.getValueAsDouble() - getValueAsDouble() > EPSILON);
     }
 
     /**
@@ -194,9 +198,44 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         return this;
     }
 
+    /**
+     * Configures the major ticks of the slider (see {@link #withTicks(int, int)}).
+     */
+    public RangeParam withTicks(int major) {
+        return withTicks(major, 0);
+    }
+
+    /**
+     * Configures the ticks of the slider explicitly, in the units of the value.
+     * The minimum always gets a tick. The other major ticks are the multiples
+     * of the major spacing (counted from 0, not from the minimum), and the minor
+     * ticks are the multiples of the minor spacing (0 means no minor ticks).
+     * The maximum must be a multiple of the major spacing.
+     * Can't be combined with {@link #withAdjustedRange(double)}.
+     */
+    public RangeParam withTicks(int major, int minor) {
+        if (adjustRangeToCanvasSize) {
+            throw new IllegalStateException("'%s': the ticks can't be configured if the range is adjusted to the canvas size"
+                .formatted(getName()));
+        }
+
+        // fails if the max value doesn't get a tick
+        SliderSpinner.calcMajorTickPositions(minValue, maxValue, major);
+
+        explicitTicks = new SliderSpinner.TickSpacing(major, minor);
+        return this;
+    }
+
+    /**
+     * Returns the explicitly configured ticks, or null if they are calculated automatically.
+     */
+    public SliderSpinner.TickSpacing getExplicitTicks() {
+        return explicitTicks;
+    }
+
     @Override
     public boolean isAtDefault() {
-        return Math.abs(getValueAsDouble() - defaultValue) < 0.005;
+        return Math.abs(getValueAsDouble() - defaultValue) < EPSILON;
     }
 
     public double getDefaultValue() {
@@ -209,7 +248,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     /**
-     * Returns the value as a percentage.
+     * Returns the value divided by 100 (for a range of 0–100, 100 → 1.0).
      */
     public double getPercentage() {
         return getValueAsDouble() / 100.0;
@@ -233,14 +272,14 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public void increaseValue() {
-        int intValue = (int) value;
+        int intValue = getValue();
         if (intValue < maxValue) {
             setValue(intValue + 1);
         }
     }
 
     public void decreaseValue() {
-        int intValue = (int) value;
+        int intValue = getValue();
         if (intValue > minValue) {
             setValue(intValue - 1);
         }
@@ -294,18 +333,14 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     // accepts an int so that the class can implement BoundedRangeModel
     @Override
     public void setValue(int n) {
-        setValue(n, true, true);
+        setValue(n, true);
     }
 
     public void setValueNoTrigger(double n) {
-        setValue(n, true, false);
+        setValue(n, false);
     }
 
     public void setValue(double v, boolean trigger) {
-        setValue(v, true, trigger);
-    }
-
-    public void setValue(double v, boolean updateGUI, boolean trigger) {
         if (paramGUI != null || trigger) {
             // While loading a smart filter, it can happen that
             // the value is out of range (if the range is adjusted
@@ -319,13 +354,9 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         if (Math.abs(v - value) > EPSILON) {
             value = v;
 
-            if (updateGUI) {
-                fireStateChanged(); // updates the GUI, as this is the model of the slider
-
-                // ensures fractional values are also updated in
-                // the spinner (since the slider is integer-based)
-                updateGUI();
-            }
+            // this is the model of the slider, so this updates the GUI
+            // (the spinner is synchronized from the slider's change event)
+            fireStateChanged();
 
             if (!adjusting && trigger) {
                 triggerFilter();
@@ -388,17 +419,13 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         Object[] listeners = listenerList.getListenerList();
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             if (listeners[i] == ChangeListener.class) {
-                if (changeEvent == null) {
-                    changeEvent = new ChangeEvent(this);
-                }
-                ChangeListener listener = (ChangeListener) listeners[i + 1];
-                listener.stateChanged(changeEvent);
+                ((ChangeListener) listeners[i + 1]).stateChanged(changeEvent);
             }
         }
     }
 
     @Override
-    public void setEmbedded(FilterParam.Layout layout) {
+    public void setEmbedded(Layout layout) {
         if (layout == Layout.VERTICAL) {
             labelPosition = SliderSpinner.LabelPosition.NONE_WITH_TICKS;
         }
@@ -449,14 +476,23 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     }
 
     public RangeParam withAdjustedRange(double ratio) {
+        if (explicitTicks != null) {
+            throw new IllegalStateException("'%s': the range can't be adjusted to the canvas size if the ticks are configured"
+                .formatted(getName()));
+        }
+
         maxToCanvasSizeRatio = ratio;
         adjustRangeToCanvasSize = true;
-        defaultToMaxRatio = maxValue != 0 ? defaultValue / maxValue : 0;
+        updateDefaultToMaxRatio();
         return this;
     }
 
     public void setDefaultValue(double newDefault) {
         setDefaultValueInternal(newDefault);
+        updateDefaultToMaxRatio();
+    }
+
+    private void updateDefaultToMaxRatio() {
         defaultToMaxRatio = maxValue != 0 ? defaultValue / maxValue : 0;
     }
 
@@ -488,7 +524,7 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
         if (updateGUI) {
             setValueNoTrigger(newValue);
         } else {
-            value = newValue;
+            setValueSilently(newValue);
         }
     }
 
@@ -538,63 +574,6 @@ public class RangeParam extends AbstractFilterParam implements BoundedRangeModel
     public String toString() {
         return String.format(Locale.ROOT, "%s[name = '%s', value = %.2f]",
             getClass().getSimpleName(), getName(), value);
-    }
-
-    public static class Builder {
-        private final String name;
-        private int min;
-        private double def;
-        private int max;
-        private boolean hasResetButton = true;
-        private int decimalPlaces = 0;
-        private SliderSpinner.LabelPosition labelPosition = BORDER;
-        private RandomizeMode randomizeMode = RandomizeMode.ALLOW;
-
-        public Builder(String name) {
-            this.name = name;
-        }
-
-        public Builder min(int min) {
-            this.min = min;
-            return this;
-        }
-
-        public Builder def(double def) {
-            this.def = def;
-            return this;
-        }
-
-        public Builder max(int max) {
-            this.max = max;
-            return this;
-        }
-
-        public Builder withDecimalPlaces(int dp) {
-            decimalPlaces = dp;
-            return this;
-        }
-
-        public Builder hasResetButton(boolean hasResetButton) {
-            this.hasResetButton = hasResetButton;
-            return this;
-        }
-
-        public Builder labelPosition(SliderSpinner.LabelPosition labelPosition) {
-            this.labelPosition = labelPosition;
-            return this;
-        }
-
-        public Builder randomizeMode(RandomizeMode randomizeMode) {
-            this.randomizeMode = randomizeMode;
-            return this;
-        }
-
-        public RangeParam build() {
-            RangeParam rp = new RangeParam(name, min, def, max,
-                hasResetButton, labelPosition, randomizeMode);
-            rp.setDecimalPlaces(decimalPlaces);
-            return rp;
-        }
     }
 
     /**

@@ -69,6 +69,9 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     private transient TransformedTextPainter painter;
     private TextSettings settings;
 
+    // set only while a settings dialog is open for this layer
+    private transient Consumer<TextSettings> settingsUiUpdater;
+
     public TextLayer(Composition comp) {
         this(comp, "", new TextSettings(comp));
     }
@@ -117,7 +120,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         holder.add(textLayer);
 
         var settingsPanel = new TextSettingsPanel(textLayer);
-        new DialogBuilder()
+        boolean accepted = new DialogBuilder()
             .title("Create Text Layer")
             .menuBar(textLayer.getMenuBar())
             .content(settingsPanel)
@@ -126,8 +129,10 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             .okAction(() ->
                 textLayer.finalizeCreation(prevActiveLayer, prevViewMode))
             .cancelAction(() -> holder.deleteLayer(textLayer, false))
-            .show();
-        return textLayer;
+            .closeAction(settingsPanel::dispose)
+            .show()
+            .wasAccepted();
+        return accepted ? textLayer : null;
     }
 
     /**
@@ -141,21 +146,20 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             this, prevActiveLayer, prevViewMode));
     }
 
-    /**
-     * Shows a dialog to edit the settings of this text layer.
-     */
     @Override
     public boolean showEditUI() {
         TextSettings prevSettings = getSettings();
+        var settingsPanel = new TextSettingsPanel(this);
 
         return new DialogBuilder()
             .title("Edit Text Layer")
             .menuBar(getMenuBar())
-            .content(new TextSettingsPanel(this))
+            .content(settingsPanel)
             .withScrollbars()
             .align(FRAME_RIGHT)
             .okAction(() -> commitSettings(prevSettings))
             .cancelAction(() -> restorePrevSettings(prevSettings))
+            .closeAction(settingsPanel::dispose)
             .show()
             .wasAccepted();
     }
@@ -177,6 +181,43 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     private void restorePrevSettings(TextSettings prevSettings) {
         applySettings(prevSettings);
         update();
+    }
+
+    /**
+     * Applies the given text settings to this layer and reconfigures the painter.
+     */
+    public void applySettings(TextSettings settings) {
+        this.settings = settings;
+
+        // Dynamically changes the rendering behavior of a text layer
+        // based on whether the user has configured it as a watermark.
+        // A watermarking text layer doesn't just draw text; it adjusts
+        // the underlying image to embed the text as a watermark.
+        isAdjustment = settings.hasWatermark();
+
+        settings.configurePainter(painter);
+    }
+
+    public TextSettings getSettings() {
+        return settings;
+    }
+
+    /**
+     * Registers the callback of the open settings dialog, which receives
+     * settings loaded from outside the dialog (presets). The callback
+     * refreshes the dialog's GUI and applies the settings to this layer.
+     */
+    public void setSettingsUiUpdater(Consumer<TextSettings> updater) {
+        this.settingsUiUpdater = updater;
+    }
+
+    /**
+     * Unregisters the given updater, unless another one has been registered since.
+     */
+    public void clearSettingsUiUpdater(Consumer<TextSettings> updater) {
+        if (settingsUiUpdater == updater) {
+            settingsUiUpdater = null;
+        }
     }
 
     @Override
@@ -212,7 +253,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public int getPixelAtPoint(Point p) {
         if (painter.getBoundingShape(comp).contains(p)) {
-            if (hasMask() && mask.isMaskEnabled()) {
+            if (usesMask()) {
                 BufferedImage maskImage = mask.getImage();
                 int ix = p.x - mask.getTx();
                 int iy = p.y - mask.getTy();
@@ -254,11 +295,10 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public void moveWhileDragging(double imDx, double imDy) {
         super.moveWhileDragging(imDx, imDy);
+        painter.setTranslation(getTx(), getTy());
         if (painter.isOnPath()) {
             AffineTransform at = AffineTransform.getTranslateInstance(imDx, imDy);
             comp.getActivePath().getSubPath(0).imTransform(at);
-        } else {
-            painter.setTranslation(getTx(), getTy());
         }
     }
 
@@ -271,25 +311,6 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public void setTranslation(int tx, int ty) {
         super.setTranslation(tx, ty);
         painter.setTranslation(tx, ty);
-    }
-
-    /**
-     * Applies the given text settings to this layer and reconfigures the painter.
-     */
-    public void applySettings(TextSettings settings) {
-        this.settings = settings;
-
-        // Dynamically changes the rendering behavior of a text layer
-        // based on whether the user has configured it as a watermark.
-        // A watermarking text layer doesn't just draw text; it adjusts
-        // the underlying image to embed the text as a watermark.
-        isAdjustment = settings.hasWatermark();
-
-        settings.configurePainter(painter);
-    }
-
-    public TextSettings getSettings() {
-        return settings;
     }
 
     private void initPainter(TextSettings s) {
@@ -450,12 +471,12 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        Consumer<TextSettings> cb = settings.getGuiUpdateCallback();
-        TextSettings newSettings = new TextSettings(preset, cb);
-        applySettings(newSettings);
-        if (cb != null) {
-            // propagate changes visually to the open dialog
-            cb.accept(newSettings);
+        TextSettings newSettings = new TextSettings(preset);
+        if (settingsUiUpdater != null) {
+            // the open dialog refreshes its GUI and applies the settings to this layer
+            settingsUiUpdater.accept(newSettings);
+        } else {
+            applySettings(newSettings);
         }
     }
 
@@ -479,7 +500,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
             painter.pathChanged();
         }
 
-        holder.update();
+        update();
     }
 
     /**
@@ -488,7 +509,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public void usePathEditing() {
         applySettings(settings.withAlignment(BoxAlignment.PATH));
         painter.pathChanged();
-        holder.invalidateImageCache();
+        update();
     }
 
     /**
@@ -496,6 +517,12 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
      */
     public boolean isOnPath() {
         return painter.isOnPath();
+    }
+
+    @Override
+    public boolean checkInvariants() {
+        painter.checkInvariants(getTx(), getTy());
+        return super.checkInvariants();
     }
 
     @Override

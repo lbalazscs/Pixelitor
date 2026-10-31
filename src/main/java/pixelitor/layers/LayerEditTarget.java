@@ -31,10 +31,10 @@ import static javax.swing.BorderFactory.createLineBorder;
 /**
  * The visual selection state of the layer and mask icons.
  */
-public enum SelectionState {
-    INACTIVE(false, false), // inactive layer
-    LAYER_SELECTED(true, false), // active layer, not in mask editing mode
-    MASK_SELECTED(false, true); // active layer, in mask editing mode
+public enum LayerEditTarget {
+    NONE(false, false), // inactive layer
+    LAYER(true, false), // active layer, not in mask editing mode
+    MASK(false, true); // active layer, in mask editing mode
 
     private final boolean layerSelected;
     private final boolean maskSelected;
@@ -51,7 +51,7 @@ public enum SelectionState {
         Themes.addThemeChangeListener(theme -> setupBorders(theme.isDark()));
     }
 
-    SelectionState(boolean layerSelected, boolean maskSelected) {
+    LayerEditTarget(boolean layerSelected, boolean maskSelected) {
         this.layerSelected = layerSelected;
         this.maskSelected = maskSelected;
     }

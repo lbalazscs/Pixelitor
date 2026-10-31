@@ -298,21 +298,21 @@ public class EDT {
         assertActiveLayerHasMask(false);
     }
 
-    public static boolean activeLayerIsMaskEditing() {
-        return queryActiveLayer(Layer::isMaskEditing);
+    public static boolean activeLayerIsEditingMask() {
+        return queryActiveLayer(Layer::isEditingMask);
     }
 
-    public static void assertActiveLayerIsMaskEditing(boolean expected) {
-        boolean actual = activeLayerIsMaskEditing();
+    public static void assertActiveLayerIsEditingMask(boolean expected) {
+        boolean actual = activeLayerIsEditingMask();
         assertThat(actual).isEqualTo(expected);
     }
 
-    public static void assertActiveLayerIsMaskEditing() {
-        assertActiveLayerIsMaskEditing(true);
+    public static void assertActiveLayerIsEditingMask() {
+        assertActiveLayerIsEditingMask(true);
     }
 
-    public static void assertActiveLayerIsNotMaskEditing() {
-        assertActiveLayerIsMaskEditing(false);
+    public static void assertActiveLayerIsNotEditingMask() {
+        assertActiveLayerIsEditingMask(false);
     }
 
     public static void assertMaskViewModeIs(MaskViewMode expected) {

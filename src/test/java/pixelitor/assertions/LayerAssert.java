@@ -187,15 +187,15 @@ public class LayerAssert<S extends LayerAssert<S, T>, T extends Layer> extends A
         return myself;
     }
 
-    public S isMaskEditing() {
+    public S isEditingMask() {
         isNotNull();
-        assertThat(actual.isMaskEditing()).isTrue();
+        assertThat(actual.isEditingMask()).isTrue();
         return myself;
     }
 
-    public S isNotMaskEditing() {
+    public S isNotEditingMask() {
         isNotNull();
-        assertThat(actual.isMaskEditing()).isFalse();
+        assertThat(actual.isEditingMask()).isFalse();
         return myself;
     }
 

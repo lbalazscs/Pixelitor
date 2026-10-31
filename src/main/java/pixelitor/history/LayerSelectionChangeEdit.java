@@ -30,8 +30,8 @@ public class LayerSelectionChangeEdit extends PixelitorEdit {
     private final Layer oldLayer;
     private final Layer newLayer;
 
-    public LayerSelectionChangeEdit(String editName, Composition comp, Layer oldLayer, Layer newLayer) {
-        super(editName == null ? "Layer Selection Change" : editName, comp);
+    public LayerSelectionChangeEdit(String name, Composition comp, Layer oldLayer, Layer newLayer) {
+        super(name == null ? "Layer Selection Change" : name, comp);
 
         this.oldLayer = oldLayer;
         this.newLayer = newLayer;

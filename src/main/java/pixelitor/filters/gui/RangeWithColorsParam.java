@@ -21,6 +21,7 @@ import pixelitor.gui.utils.SliderSpinner;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.util.Objects;
 
 /**
  * A range where the endpoints correspond to colors.
@@ -32,8 +33,9 @@ public class RangeWithColorsParam extends RangeParam {
 
     public RangeWithColorsParam(Color leftColor, Color rightColor, String name, int min, int def, int max) {
         super(name, min, def, max);
-        this.leftColor = leftColor;
-        this.rightColor = rightColor;
+
+        this.leftColor = Objects.requireNonNull(leftColor);
+        this.rightColor = Objects.requireNonNull(rightColor);
     }
 
     @Override
@@ -45,15 +47,18 @@ public class RangeWithColorsParam extends RangeParam {
         return leftColor;
     }
 
-    public void setLeftColor(Color leftColor) {
-        this.leftColor = leftColor;
-    }
-
     public Color getRightColor() {
         return rightColor;
     }
 
-    public void setRightColor(Color rightColor) {
-        this.rightColor = rightColor;
+    /**
+     * Changes the name and both colors.
+     */
+    public void reconfigure(String displayName, Color left, Color right) {
+        setName(displayName);
+        this.leftColor = Objects.requireNonNull(left);
+        this.rightColor = Objects.requireNonNull(right);
+
+        updateGUIAppearance(true);
     }
 }

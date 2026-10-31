@@ -65,13 +65,13 @@ public class AdvancedTextSettingsPanel extends JPanel {
 
     private void addCheckboxes(FontInfo font) {
         strikethroughCB = addCheckBox("Strikethrough:",
-            "strikethroughCB", font.hasStrikethrough());
+            "strikethroughCB", font.strikethrough());
         underlineCB = addCheckBox("Underline:",
-            "underlineCB", font.hasUnderline());
+            "underlineCB", font.underline());
         kerningCB = addCheckBox("Kerning:",
-            "kerningCB", font.hasKerning());
+            "kerningCB", font.kerning());
         ligaturesCB = addCheckBox("Ligatures:",
-            "ligaturesCB", font.hasLigatures());
+            "ligaturesCB", font.ligatures());
     }
 
     private JCheckBox addCheckBox(String labelText, String name, boolean selected) {
@@ -85,7 +85,7 @@ public class AdvancedTextSettingsPanel extends JPanel {
     private void addTrackingGUI(FontInfo font) {
         trackingParam = new RangeParam("Tracking (Letter-spacing)",
             -20, 0, 70, true, LabelPosition.NONE_WITH_TICKS);
-        trackingParam.setValue(font.getTracking());
+        trackingParam.setValue(font.tracking());
         trackingParam.addChangeListener(_ -> actionListener.actionPerformed(null));
         gbh.addParam(trackingParam, "trackingGUI");
     }
@@ -129,8 +129,8 @@ public class AdvancedTextSettingsPanel extends JPanel {
         gbh.addParam(shearYParam);
     }
 
-    public void updateFontInfo(FontInfo fontInfo) {
-        fontInfo.updateAdvancedProperties(
+    public FontInfo updateFontInfo(FontInfo fontInfo) {
+        return fontInfo.withAdvanced(
             strikethroughCB.isSelected(),
             kerningCB.isSelected(),
             ligaturesCB.isSelected(),
@@ -141,12 +141,12 @@ public class AdvancedTextSettingsPanel extends JPanel {
     public void setUIValues(FontInfo font, double lineHeightRatio,
                             double scaleX, double scaleY,
                             double shearX, double shearY) {
-        strikethroughCB.setSelected(font.hasStrikethrough());
-        underlineCB.setSelected(font.hasUnderline());
+        strikethroughCB.setSelected(font.strikethrough());
+        underlineCB.setSelected(font.underline());
 
-        kerningCB.setSelected(font.hasKerning());
-        ligaturesCB.setSelected(font.hasLigatures());
-        trackingParam.setValue(font.getTracking());
+        kerningCB.setSelected(font.kerning());
+        ligaturesCB.setSelected(font.ligatures());
+        trackingParam.setValue(font.tracking());
 
         lineHeightParam.setValueNoTrigger(100 * lineHeightRatio);
 

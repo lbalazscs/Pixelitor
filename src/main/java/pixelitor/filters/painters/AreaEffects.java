@@ -32,6 +32,7 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * A collection of effects that can be applied to a shape.
@@ -157,48 +158,38 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
      */
     @Override
     public AreaEffects interpolate(AreaEffects endState, double progress) {
-        float progressFloat = (float) progress;
+        assert endState != null;
+        assert (glowEffect != null) == (endState.glowEffect != null);
+        assert (innerGlowEffect != null) == (endState.innerGlowEffect != null);
+        assert (neonBorderEffect != null) == (endState.neonBorderEffect != null);
+        assert (dropShadowEffect != null) == (endState.dropShadowEffect != null);
+
         AreaEffects interpolatedEffects = new AreaEffects();
 
         if (dropShadowEffect != null) {
-            var endEffect = endState.getDropShadow();
-            float newOpacity = dropShadowEffect.interpolateOpacity(
-                endEffect.getOpacity(), progressFloat);
-            var newDropShadow = new ShadowPathEffect(newOpacity);
-            Color newBrushColor = dropShadowEffect.interpolateBrushColor(
-                endEffect.getBrushColor(), progress);
-            newDropShadow.setBrushColor(newBrushColor);
+            ShadowPathEffect endEffect = endState.dropShadowEffect;
+            ShadowPathEffect newDropShadow = interpolateEffect(
+                dropShadowEffect, endEffect, ShadowPathEffect::new, progress);
+            newDropShadow.setOffset(dropShadowEffect.interpolateOffset(
+                endEffect.getOffset(), progress));
             interpolatedEffects.setDropShadow(newDropShadow);
         }
         if (glowEffect != null) {
-            var endEffect = endState.getGlow();
-            float newOpacity = glowEffect.interpolateOpacity(
-                endEffect.getOpacity(), progressFloat);
-            var newGlow = new GlowPathEffect(newOpacity);
-            Color newBrushColor = glowEffect.interpolateBrushColor(
-                endEffect.getBrushColor(), progress);
-            newGlow.setBrushColor(newBrushColor);
-
-            interpolatedEffects.setGlow(newGlow);
+            interpolatedEffects.setGlow(interpolateEffect(
+                glowEffect, endState.glowEffect, GlowPathEffect::new, progress));
         }
         if (innerGlowEffect != null) {
-            var endEffect = endState.getInnerGlow();
-            float newOpacity = innerGlowEffect.interpolateOpacity(
-                endEffect.getOpacity(), progressFloat);
-            var newInnerGlow = new InnerGlowPathEffect(newOpacity);
-            Color newBrushColor = innerGlowEffect.interpolateBrushColor(
-                endEffect.getBrushColor(), progress);
-            newInnerGlow.setBrushColor(newBrushColor);
-            interpolatedEffects.setInnerGlow(newInnerGlow);
+            interpolatedEffects.setInnerGlow(interpolateEffect(
+                innerGlowEffect, endState.innerGlowEffect, InnerGlowPathEffect::new, progress));
         }
         if (neonBorderEffect != null) {
-            var endEffect = endState.getNeonBorder();
+            NeonBorderEffect endEffect = endState.neonBorderEffect;
             Color newEdgeColor = neonBorderEffect.interpolateEdgeColor(
                 endEffect.getEdgeColor(), progress);
             Color newCenterColor = neonBorderEffect.interpolateCenterColor(
                 endEffect.getCenterColor(), progress);
             float newOpacity = neonBorderEffect.interpolateOpacity(
-                endEffect.getOpacity(), progressFloat);
+                endEffect.getOpacity(), (float) progress);
             double newWidth = neonBorderEffect.interpolateEffectWidth(
                 endEffect.getEffectWidth(), progress);
             var newNeonBorder = new NeonBorderEffect(newEdgeColor, newCenterColor,
@@ -206,6 +197,15 @@ public class AreaEffects implements ParamState<AreaEffects>, Debuggable {
             interpolatedEffects.setNeonBorder(newNeonBorder);
         }
         return interpolatedEffects;
+    }
+
+    private static <T extends AbstractAreaEffect> T interpolateEffect(
+        T startEffect, T endEffect, Supplier<T> factory, double progress) {
+        T newEffect = factory.get();
+        newEffect.setOpacity(startEffect.interpolateOpacity(endEffect.getOpacity(), (float) progress));
+        newEffect.setBrushColor(startEffect.interpolateBrushColor(endEffect.getBrushColor(), progress));
+        newEffect.setEffectWidth(startEffect.interpolateEffectWidth(endEffect.getEffectWidth(), progress));
+        return newEffect;
     }
 
     @Override

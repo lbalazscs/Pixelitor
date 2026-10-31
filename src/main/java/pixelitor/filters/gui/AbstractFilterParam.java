@@ -68,6 +68,7 @@ public abstract class AbstractFilterParam implements FilterParam {
             throw new IllegalStateException("no gui in " + getName());
         }
         adjustmentListener = null;
+        paramGUI.dispose();
         paramGUI = null;
         if (sideButtonModel != null) {
             sideButtonModel.guiDisposed();

@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class FontNames {
+public final class FontNames {
     private FontNames() {
     }
 
@@ -59,7 +59,8 @@ public class FontNames {
                 throw new RuntimeException("Timeout: the font names could not be loaded");
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
         }
 
         return fontNames;

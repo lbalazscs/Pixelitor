@@ -493,7 +493,7 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
      */
     public void setMaskViewMode(MaskViewMode maskViewMode, Layer layer) {
         assert layer.getComp() == comp;
-        assert layer.isActive();
+        assert layer.checkIsActive();
         assert maskViewMode.isApplicableTo(layer);
 
         boolean changed = this.maskViewMode != maskViewMode;
@@ -501,21 +501,21 @@ public class View extends JComponent implements MouseListener, MouseMotionListen
             this.maskViewMode = maskViewMode;
             repaint();
         }
-        boolean maskEditing = maskViewMode.isEditingMask();
-        layer.setMaskEditing(maskEditing);
+        boolean editingMask = maskViewMode.isEditingMask();
+        layer.setEditingMask(editingMask);
         if (changed) {
-            notifyMaskEditingChanged(maskEditing, layer);
+            notifyEditingMaskChanged(editingMask, layer);
         }
     }
 
-    private void notifyMaskEditingChanged(boolean maskEditing, Layer layer) {
-        FgBgColors.maskEditingChanged(maskEditing);
+    private void notifyEditingMaskChanged(boolean editing, Layer layer) {
+        FgBgColors.editingMaskChanged(editing);
 
         if (!isMock()) {
-            Tools.maskEditingChanged(maskEditing);
+            Tools.editingMaskChanged(editing);
         }
 
-        boolean canFade = maskEditing
+        boolean canFade = editing
             ? History.canFade(layer.getMask())
             : (layer instanceof ImageLayer imageLayer && History.canFade(imageLayer));
         FadeAction.INSTANCE.updateGUI(canFade);

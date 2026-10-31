@@ -37,14 +37,14 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     private final BlendingModePanel blendingModePanel;
 
     // whether this tool is currently editing a layer mask
-    private boolean maskEditing;
+    private boolean editingMask;
 
     protected BlendingModeBrushTool(String name, char hotkey, String statusBarMessage,
                                     Cursor cursor, boolean supportsSymmetry) {
         super(name, hotkey, statusBarMessage, cursor, supportsSymmetry);
 
         drawTarget = DrawTarget.DIRECT;
-        maskEditing = false;
+        editingMask = false;
 
         blendingModePanel = new BlendingModePanel(true);
         blendingModePanel.addActionListener(_ -> updateDrawTarget());
@@ -55,16 +55,16 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     }
 
     @Override
-    public void maskEditingChanged(boolean maskEditing) {
-        if (maskEditing == this.maskEditing) {
+    public void editingMaskChanged(boolean editing) {
+        if (editing == this.editingMask) {
             return;
         }
-        this.maskEditing = maskEditing;
+        this.editingMask = editing;
         updateDrawTarget();
     }
 
     private void updateDrawTarget() {
-        if (maskEditing) {
+        if (editingMask) {
             // in mask editing mode, always use direct drawing
             // with disabled blending controls
             drawTarget = DrawTarget.DIRECT;
@@ -90,7 +90,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
 
         if (view != null) {
             Layer activeLayer = view.getComp().getActiveLayer();
-            maskEditingChanged(activeLayer.isMaskEditing());
+            editingMaskChanged(activeLayer.isEditingMask());
         }
     }
 
@@ -98,7 +98,7 @@ public abstract class BlendingModeBrushTool extends AbstractBrushTool {
     public void trace(Shape shape, Drawable dr) {
         // ensure mask editing state is correct before tracing
         // (necessary because this could be called when a path tool is active)
-        maskEditingChanged(dr instanceof LayerMask);
+        editingMaskChanged(dr instanceof LayerMask);
         super.trace(shape, dr);
     }
 

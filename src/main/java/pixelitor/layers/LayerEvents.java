@@ -42,7 +42,7 @@ public class LayerEvents {
     }
 
     public static void fireMaskAdded(Layer layer) {
-        assert layer.isActive();
+        assert layer.checkIsActive();
 
         for (var listener : maskListeners) {
             listener.maskAdded(layer);
@@ -50,7 +50,7 @@ public class LayerEvents {
     }
 
     public static void fireMaskDeleted(Layer layer) {
-        assert layer.isActive();
+        assert layer.checkIsActive();
 
         for (var listener : maskListeners) {
             listener.maskDeleted(layer);
@@ -71,7 +71,7 @@ public class LayerEvents {
 
     public static void fireLayerActivated(Layer layer, boolean resetMaskViewMode) {
         assert layer != null;
-        assert layer.isActive();
+        assert layer.checkIsActive();
         assert layer.getComp().isActive();
 
         for (var listener : holderListeners) {

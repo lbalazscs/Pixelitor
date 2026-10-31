@@ -26,7 +26,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A {@link PixelitorEdit} that represents the creation of a new layer.
+ * Represents the addition of a new {@link Layer} to a {@link LayerHolder}.
  */
 public class NewLayerEdit extends PixelitorEdit {
     private final LayerHolder holder;
@@ -35,10 +35,10 @@ public class NewLayerEdit extends PixelitorEdit {
     private final int layerIndex;
     private final MaskViewMode prevMaskViewMode;
 
-    public NewLayerEdit(String editName,
+    public NewLayerEdit(String name,
                         Layer layer, Layer prevActiveLayer,
                         MaskViewMode prevMaskViewMode) {
-        super(editName, layer.getComp());
+        super(name, layer.getComp());
 
         assert prevActiveLayer != layer;
 

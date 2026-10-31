@@ -305,9 +305,9 @@ public class AnchorPoint extends DraggablePoint {
         try {
             popup.show(view, (int) e.getCoX(), (int) e.getCoY());
         } catch (IllegalComponentStateException ex) {
-            // ignore: happens in RandomGUITest, but works OK otherwise
+            // ignore: happens in RandomGuiTest, but works OK otherwise
             // ("component must be showing on the screen to determine its location")
-            // probably related to the always-on-top state of RandomGUITest,
+            // probably related to the always-on-top state of RandomGuiTest,
             // see https://bugs.openjdk.java.net/browse/JDK-8179665
         }
     }

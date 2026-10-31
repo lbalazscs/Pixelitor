@@ -79,7 +79,7 @@ public abstract class Layer implements Serializable, Debuggable {
      * Whether the mask is currently being edited.
      * Related to {@link MaskViewMode}.
      */
-    private transient boolean maskEditing = false;
+    private transient boolean editingMask = false;
 
     // true if this layer modifies the image created by the layers
     // below it rather than painting its own content
@@ -126,7 +126,7 @@ public abstract class Layer implements Serializable, Debuggable {
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         // defaults for transient fields
-        maskEditing = false;
+        editingMask = false;
         ui = null;
         cachedMaskedImage = null;
 
@@ -173,7 +173,7 @@ public abstract class Layer implements Serializable, Debuggable {
     // redraws the UI to reflect changes in layer activation
     public void updateUI() {
         if (ui != null) {
-            ui.updateSelectionState();
+            ui.updateEditTarget();
 
             // the whole GUI must be repainted when switching to another layer
             LayerUI topLevelUI = getTopLevelLayer().getUI();
@@ -251,7 +251,7 @@ public abstract class Layer implements Serializable, Debuggable {
         visible = newVisibility;
 
         if (update) {
-            holder.update();
+            propertyChangeUpdate();
         }
 
         if (hasUI()) {
@@ -262,7 +262,6 @@ public abstract class Layer implements Serializable, Debuggable {
             History.add(new LayerVisibilityChangeEdit(comp, this, newVisibility));
         }
     }
-
 
     /**
      * Isolates this layer, making all other layers temporarily invisible.
@@ -290,11 +289,11 @@ public abstract class Layer implements Serializable, Debuggable {
         opacity = newOpacity;
 
         if (hasUI()) {
-            LayerBlendingModePanel.get().opacityChangedForLayer(newOpacity);
+            LayerBlendingModePanel.get().opacityChangedForLayer(newOpacity, this);
         }
 
         if (update) {
-            holder.update();
+            propertyChangeUpdate();
         }
 
         if (addToHistory) {
@@ -325,12 +324,21 @@ public abstract class Layer implements Serializable, Debuggable {
         }
 
         if (update) {
-            holder.update();
+            propertyChangeUpdate();
         }
 
         if (addToHistory) {
             History.add(new LayerBlendingModeEdit(this, prevMode));
         }
+    }
+
+    /**
+     * Updates the holder when a layer property (visibility, opacity,
+     * blending mode) changes. Subclasses can override this to perform
+     * additional cache invalidation or UI updates.
+     */
+    protected void propertyChangeUpdate() {
+        holder.update();
     }
 
     public String getName() {
@@ -372,7 +380,7 @@ public abstract class Layer implements Serializable, Debuggable {
     }
 
     public boolean isDirectChildOf(LayerHolder parent) {
-        return holder == parent;
+        return getHolder() == parent;
     }
 
     /**
@@ -441,12 +449,12 @@ public abstract class Layer implements Serializable, Debuggable {
         return mask;
     }
 
-    public void addMask(boolean inverted) {
+    public void addMask(boolean hide) {
         MaskInitMethod initMethod;
         if (comp.hasSelection()) {
-            initMethod = inverted ? HIDE_SELECTION : REVEAL_SELECTION;
+            initMethod = hide ? HIDE_SELECTION : REVEAL_SELECTION;
         } else {
-            initMethod = inverted ? HIDE_ALL : REVEAL_ALL;
+            initMethod = hide ? HIDE_ALL : REVEAL_ALL;
         }
         addMask(initMethod);
     }
@@ -582,7 +590,7 @@ public abstract class Layer implements Serializable, Debuggable {
      */
     public void deleteMask(boolean addToHistory) {
         assert hasMask();
-        assert isActive() || AppMode.isUnitTesting();
+        assert checkIsActive();
 
         LayerMask prevMask = mask;
         MaskViewMode prevMode = comp.getMaskViewMode();
@@ -598,7 +606,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
         // call this only after ActiveMaskListener (via LayerEvents.fireMaskDeleted)
         // is notified, because in some cases it might trigger a consistency check
-        setMaskEditing(false);
+        setEditingMask(false);
 
         if (addToHistory) {
             History.add(new DeleteLayerMaskEdit(comp, this, prevMask, prevMode));
@@ -612,30 +620,25 @@ public abstract class Layer implements Serializable, Debuggable {
         holder.update();
     }
 
+    // called when the presence or the pixels of a mask changes
     protected void maskChanged() {
+        // can be overridden in subclasses to invalidate additional caches
         invalidateMaskedImageCache();
     }
 
-    /**
-     * Called when the content of this layer's mask has changed.
-     */
-    public void maskContentChanged() {
-        maskChanged();
+    public boolean isEditingMask() {
+        assert !editingMask || hasMask();
+
+        return editingMask;
     }
 
-    public boolean isMaskEditing() {
-        assert !maskEditing || hasMask();
-
-        return maskEditing;
-    }
-
-    public void setMaskEditing(boolean newValue) {
+    public void setEditingMask(boolean newValue) {
         assert !newValue || hasMask();
 
-        if (maskEditing != newValue) {
-            maskEditing = newValue;
+        if (editingMask != newValue) {
+            editingMask = newValue;
             if (hasUI()) {
-                ui.updateSelectionState();
+                ui.updateEditTarget();
             }
             Tools.editingTargetChanged(this);
         }
@@ -696,7 +699,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
             newOwner.mask = mask;
             newOwner.maskEnabled = maskEnabled;
-            newOwner.maskEditing = maskEditing;
+            newOwner.editingMask = editingMask;
             mask = null;
         }
 
@@ -901,7 +904,7 @@ public abstract class Layer implements Serializable, Debuggable {
     protected Layer getLinked() {
         // Returns the mask if it is linked.
         // Overridden for masks to return their owner layer.
-        if (hasMask() && !maskEditing && mask.isLinked()) {
+        if (hasMask() && !editingMask && mask.isLinked()) {
             return mask;
         }
         return null;
@@ -1221,6 +1224,15 @@ public abstract class Layer implements Serializable, Debuggable {
         return true;
     }
 
+    // utility method to be used in assertions and tests
+    public boolean checkIsActive() {
+        if (isActive() || AppMode.isUnitTesting()) {
+            return true;
+        }
+        throw new AssertionError("%s '%s' in '%s' is not active".formatted(
+            getTypeString(), getName(), comp.getName()));
+    }
+
     public final DebugNode createDebugNode() {
         return createDebugNode(getTypeStringLC());
     }
@@ -1239,7 +1251,7 @@ public abstract class Layer implements Serializable, Debuggable {
         node.addBoolean("has mask", hasMask());
         if (hasMask()) {
             node.addBoolean("mask enabled", isMaskEnabled());
-            node.addBoolean("mask editing", isMaskEditing());
+            node.addBoolean("mask editing", isEditingMask());
             node.add(getMask().createDebugNode());
         }
 

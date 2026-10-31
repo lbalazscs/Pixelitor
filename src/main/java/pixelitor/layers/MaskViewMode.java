@@ -85,7 +85,7 @@ public enum MaskViewMode {
     }
 
     public void activateOn(Layer activeLayer) {
-        assert activeLayer.isActive();
+        assert activeLayer.checkIsActive();
 
         activeLayer.getComp().setMaskViewMode(this, activeLayer);
     }

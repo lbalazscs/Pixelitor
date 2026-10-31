@@ -83,12 +83,8 @@ public class NewtonFractal extends ParametrizedFilter {
     public NewtonFractal() {
         super(false);
 
-        iterationsParam = new RangeParam.Builder("Iterations")
-            .min(1)
-            .def(50)
-            .max(1000)
-            .randomizeMode(RandomizeMode.IGNORE)
-            .build();
+        iterationsParam = new RangeParam("Iterations", 1, 50, 1000).withTicks(250);
+        iterationsParam.setRandomizeMode(RandomizeMode.IGNORE);
 
         zoomParam.setPresetKey("Zoom");
         zoomCenterParam = new ImagePositionParam("Zoom Center", 0.5f, 0.5f);

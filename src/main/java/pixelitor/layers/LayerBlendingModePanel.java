@@ -102,6 +102,10 @@ public class LayerBlendingModePanel extends BlendingModePanel
     }
 
     public void blendingModeChangedForLayer(BlendingMode bm, Layer layer) {
+        if (!layer.isActive()) {
+            return;
+        }
+
         try {
             userInteractionChange = false;
             setBlendingMode(bm, layer);
@@ -114,10 +118,6 @@ public class LayerBlendingModePanel extends BlendingModePanel
 
     @Override
     public void setBlendingMode(BlendingMode bm, Layer newLayer) {
-        if (newLayer == null) {
-            newLayer = Views.getActiveLayer();
-        }
-
         if (newLayer.isGroup()) {
             if (!lastActiveWasGroup) {
                 bmCombo.setModel(groupModel);
@@ -132,7 +132,11 @@ public class LayerBlendingModePanel extends BlendingModePanel
         bmCombo.setSelectedItem(bm);
     }
 
-    public void opacityChangedForLayer(float newOpacity) {
+    public void opacityChangedForLayer(float newOpacity, Layer layer) {
+        if (!layer.isActive()) {
+            return;
+        }
+
         try {
             userInteractionChange = false;
             opacityDDSlider.setValue(toPercentage(newOpacity));

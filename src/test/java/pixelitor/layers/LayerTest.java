@@ -492,13 +492,13 @@ class LayerTest {
             return; // only test if a mask exists
         }
 
-        assertThat(layer).isNotMaskEditing();
+        assertThat(layer).isNotEditingMask();
 
-        layer.setMaskEditing(true);
-        assertThat(layer).isMaskEditing();
+        layer.setEditingMask(true);
+        assertThat(layer).isEditingMask();
 
-        layer.setMaskEditing(false);
-        assertThat(layer).isNotMaskEditing();
+        layer.setEditingMask(false);
+        assertThat(layer).isNotEditingMask();
 
         iconChecker.verifyUpdateCounts(0, 0);
         History.assertNumEditsIs(0);

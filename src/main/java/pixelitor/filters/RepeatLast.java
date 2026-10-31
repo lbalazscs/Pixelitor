@@ -72,7 +72,7 @@ public class RepeatLast extends DrawableAction {
         getLastFilter().ifPresent(filter -> {
             if (showDialog) {
                 // shows the filter's configuration dialog before applying
-                dr.startFilter(filter, false);
+                dr.startFilterInteractively(filter, false);
             } else {
                 // re-applies the filter with the last used settings
                 dr.startFilter(filter, FilterContext.REPEAT_LAST);

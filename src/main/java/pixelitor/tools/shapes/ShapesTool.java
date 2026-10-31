@@ -873,7 +873,7 @@ public class ShapesTool extends DragTool {
 
     private void layerActivated(Layer layer) {
         // check if we should enter the dedicated shapes layer editing mode
-        if (layer instanceof ShapesLayer newShapesLayer && !layer.isMaskEditing()) {
+        if (layer instanceof ShapesLayer newShapesLayer && !layer.isEditingMask()) {
             if (newShapesLayer == shapesLayer) {
                 return; // already editing this layer
             }

@@ -526,18 +526,17 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public ContentLayer findOpaqueLayerAtPoint(Point p) {
+    public ContentLayer findTopmostOpaqueLayer(Point p) {
         // a small opacity makes the layer effectively invisible for hit-testing.
         if (!isVisible() || getOpacity() < 0.05f) {
             return null;
         }
 
         if (isPassThrough()) {
-            // iterate in reverse order to search layers from top to bottom
-            return ContentLayer.findOpaqueInList(layers, p);
+            return ContentLayer.findTopmostOpaqueLayer(layers, p);
         } else {
             // for an isolated group, treat it as a single entity
-            return super.findOpaqueLayerAtPoint(p);
+            return super.findTopmostOpaqueLayer(p);
         }
     }
 

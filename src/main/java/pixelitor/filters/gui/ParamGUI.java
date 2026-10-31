@@ -31,6 +31,12 @@ public interface ParamGUI {
     void setToolTip(String tip);
 
     /**
+     * Detaches this component from the model, which outlives the GUI.
+     */
+    default void dispose() {
+    }
+
+    /**
      * Returns the number of layout columns, either 1 or 2.
      * If 2 is returned, then a label based on the name is added to the GUI.
      */

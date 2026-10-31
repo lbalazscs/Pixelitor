@@ -25,32 +25,22 @@ import java.awt.*;
  * A {@link Border} implementation that draws a gradient-filled border.
  */
 public class GradientBorder extends AbstractBorder {
-    private static final int WIDTH = 4;
+    private static final int THICKNESS = 4;
 
     private final Color leftColor;
     private final Color rightColor;
-    private Insets insets;
 
     public GradientBorder(Color leftColor, Color rightColor) {
+        assert leftColor.getAlpha() == 255 && rightColor.getAlpha() == 255;
+
         this.leftColor = leftColor;
         this.rightColor = rightColor;
     }
 
     @Override
-    public Insets getBorderInsets(Component c) {
-        //noinspection SuspiciousNameCombination
-        return new Insets(WIDTH, WIDTH, WIDTH, WIDTH);
-    }
-
-    @SuppressWarnings("SuspiciousNameCombination")
-    @Override
-    public Insets getBorderInsets(Component c, Insets i) {
-        i.left = WIDTH;
-        i.right = WIDTH;
-        i.top = WIDTH;
-        i.bottom = WIDTH;
-
-        return i;
+    public Insets getBorderInsets(Component c, Insets insets) {
+        insets.set(THICKNESS, THICKNESS, THICKNESS, THICKNESS);
+        return insets;
     }
 
     @Override
@@ -61,20 +51,16 @@ public class GradientBorder extends AbstractBorder {
     @Override
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
         Graphics2D g2 = (Graphics2D) g;
-        Paint paint = new GradientPaint(x, y, leftColor, width, 0, rightColor);
-
-        if (insets == null) {
-            insets = getBorderInsets(c);
-        } else {
-            insets = getBorderInsets(c, insets);
-        }
-
-        g2.setPaint(paint);
+        Paint prevPaint = g2.getPaint();
+        g2.setPaint(new GradientPaint(x, y, leftColor, x + width, y, rightColor));
 
         // draw rectangles to create the border, leaving the component's area untouched
-        g2.fillRect(x, y, width, insets.top);
-        g2.fillRect(x, y, insets.left, height);
-        g2.fillRect(x + width - insets.right, y, insets.right, height);
-        g2.fillRect(x, y + height - insets.bottom, width, insets.bottom);
+        int sideHeight = height - 2 * THICKNESS;
+        g2.fillRect(x, y, width, THICKNESS); // top
+        g2.fillRect(x, y + height - THICKNESS, width, THICKNESS); // bottom
+        g2.fillRect(x, y + THICKNESS, THICKNESS, sideHeight); // left
+        g2.fillRect(x + width - THICKNESS, y + THICKNESS, THICKNESS, sideHeight); // right
+
+        g2.setPaint(prevPaint);
     }
 }

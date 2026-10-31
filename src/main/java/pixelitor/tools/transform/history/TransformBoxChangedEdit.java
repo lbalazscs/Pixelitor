@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -33,10 +33,11 @@ public class TransformBoxChangedEdit extends PixelitorEdit {
     private final TransformBox.Memento before;
     private final TransformBox.Memento after;
 
-    public TransformBoxChangedEdit(String editName, Composition comp, TransformBox box,
+    public TransformBoxChangedEdit(String name, Composition comp, TransformBox box,
                                    TransformBox.Memento before,
                                    TransformBox.Memento after) {
-        super(editName, comp);
+        super(name, comp);
+
         this.box = box;
         this.before = before;
         this.after = after;

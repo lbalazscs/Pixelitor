@@ -138,10 +138,10 @@ public class Colors {
 
     public static String toHtmlHex(Color c, boolean includeAlpha) {
         if (includeAlpha) {
-            // RRGGBBAA format
-            return String.format(Locale.ROOT, "%02X%02X%02X%02X", c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+            // rotating the packed ARGB int left by 8 bits gives RGBA
+            return String.format(Locale.ROOT, "%08X", Integer.rotateLeft(c.getRGB(), 8));
         } else {
-            // RRGGBB format
+            // RGB format
             return String.format(Locale.ROOT, "%06X", 0x00_FF_FF_FF & c.getRGB());
         }
     }
@@ -202,19 +202,17 @@ public class Colors {
 
     // returns true if the dialog was accepted
     public static boolean selectColorWithDialog(Window owner, String title,
-                                                Color defaultColor, boolean allowTransparency,
+                                                Color initialColor, boolean allowTransparency,
                                                 Consumer<Color> colorSetter) {
         if (RandomGuiTest.isRunning()) {
             return false;
         }
         assert colorSetter != null;
 
-        Color prevColor = defaultColor;
-
         GlobalEvents.modalDialogOpened();
         Color color;
         try {
-            color = ColorPicker.showDialog(owner, title, defaultColor,
+            color = ColorPicker.showDialog(owner, title, initialColor,
                 allowTransparency, colorSetter);
         } finally {
             GlobalEvents.modalDialogClosed();
@@ -222,7 +220,7 @@ public class Colors {
 
         if (color == null) {
             // cancel was pressed, reset the previous color
-            colorSetter.accept(prevColor);
+            colorSetter.accept(initialColor);
             return false;
         } else {
             // it's the color selector's responsibility to ensure that any
@@ -324,7 +322,7 @@ public class Colors {
         JPopupMenu popup = new JPopupMenu();
 
         ColorSwatchClickHandler clickHandler = ColorSwatchClickHandler.forFilter(colorSetter);
-        Window owner = SwingUtilities.windowForComponent(parent);
+        Window owner = SwingUtilities.getWindowAncestor(parent);
 
         popup.add(new TaskAction("Color Variations...", () ->
             PalettePanel.showFilterVariationsDialog(owner, colorSource.get(), clickHandler)));
@@ -407,9 +405,8 @@ public class Colors {
     /**
      * Formats a color's value in the format expected by G'MIC.
      */
-    public static String formatGmic(Color color) {
-        return String.format(Locale.ROOT, "%d,%d,%d,%d",
-            color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    public static String formatGmic(Color c) {
+        return c.getRed() + "," + c.getGreen() + "," + c.getBlue() + "," + c.getAlpha();
     }
 
     public static String formatForDebugging(Color color) {
@@ -423,18 +420,18 @@ public class Colors {
             .collect(Collectors.joining(", ", "[", "]"));
     }
 
-    public static ColorSwatch createFilterSwatch(JComponent owner, Color initial, String title,
-                                                 Supplier<Color> getter, boolean allowAlpha,
-                                                 Consumer<Color> modelSetter) {
+    public static ColorSwatch createFilterSwatch(JComponent parent, Color initial, String title,
+                                                 Supplier<Color> colorSource, boolean allowAlpha,
+                                                 Consumer<Color> colorSetter) {
         ColorSwatch swatch = new ColorSwatch(initial, SWATCH_BUTTON_SIZE);
         Consumer<Color> apply = c -> {
             swatch.setForeground(c);
             swatch.paintImmediately(0, 0, SWATCH_BUTTON_SIZE, SWATCH_BUTTON_SIZE);
-            modelSetter.accept(c);
+            colorSetter.accept(c);
         };
         GUIUtils.addClickAction(swatch, () ->
-            selectColorWithDialog(owner, title, getter.get(), allowAlpha, apply));
-        setupFilterColorPopupMenu(owner, swatch, getter, apply);
+            selectColorWithDialog(parent, title, colorSource.get(), allowAlpha, apply));
+        setupFilterColorPopupMenu(parent, swatch, colorSource, apply);
         return swatch;
     }
 }

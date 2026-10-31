@@ -38,7 +38,7 @@ import static java.awt.Color.*;
 import static pixelitor.utils.Texts.i18n;
 
 /**
- * Color balance filter
+ * The "Color Balance" filter.
  */
 public class ColorBalance extends ParametrizedFilter {
     @Serial
@@ -95,38 +95,20 @@ public class ColorBalance extends ParametrizedFilter {
             case SRGB -> updateSlidersForSRGB();
             case OKLAB -> updateSlidersForOKLAB();
         }
-
-        range1.updateGUIAppearance(true);
-        range2.updateGUIAppearance(true);
-        range3.updateGUIAppearance(true);
     }
 
     private void updateSlidersForSRGB() {
-        range1.setName(CYAN_RED_TEXT);
-        range1.setLeftColor(CYAN);
-        range1.setRightColor(RED);
-
-        range2.setName(MAGENTA_GREEN_TEXT);
-        range2.setLeftColor(MAGENTA);
-        range2.setRightColor(GREEN);
-
-        range3.setName(YELLOW_BLUE_TEXT);
-        range3.setLeftColor(YELLOW);
-        range3.setRightColor(BLUE);
+        range1.reconfigure(CYAN_RED_TEXT, CYAN, RED);
+        range2.reconfigure(MAGENTA_GREEN_TEXT, MAGENTA, GREEN);
+        range3.reconfigure(YELLOW_BLUE_TEXT, YELLOW, BLUE);
     }
 
     private void updateSlidersForOKLAB() {
-        range1.setName(GUIText.RED_GREEN_A);
-        range1.setLeftColor(Channel.OK_A.getDarkColor());
-        range1.setRightColor(Channel.OK_A.getLightColor());
-
-        range2.setName(GUIText.BLUE_YELLOW_B);
-        range2.setLeftColor(Channel.OK_B.getDarkColor());
-        range2.setRightColor(Channel.OK_B.getLightColor());
-
-        range3.setName("Dark-Light (L)");
-        range3.setLeftColor(BLACK);
-        range3.setRightColor(WHITE);
+        range1.reconfigure(GUIText.RED_GREEN_A,
+            Channel.OK_A.getDarkColor(), Channel.OK_A.getLightColor());
+        range2.reconfigure(GUIText.BLUE_YELLOW_B,
+            Channel.OK_B.getDarkColor(), Channel.OK_B.getLightColor());
+        range3.reconfigure("Dark-Light (L)", BLACK, WHITE);
     }
 
     @Override

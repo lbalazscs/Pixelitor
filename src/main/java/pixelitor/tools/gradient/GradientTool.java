@@ -485,8 +485,8 @@ public class GradientTool extends DragTool {
     }
 
     private void layerActivated(Layer layer) {
-        if (layer.isMaskEditing()) {
-            maskEditingChanged(true);
+        if (layer.isEditingMask()) {
+            editingMaskChanged(true);
             gradientLayer = null;
         } else {
             if (layer instanceof GradientFillLayer gfl) {
@@ -505,7 +505,7 @@ public class GradientTool extends DragTool {
     }
 
     @Override
-    public void maskEditingChanged(boolean editing) {
+    public void editingMaskChanged(boolean editing) {
         blendingModePanel.setEnabled(!editing);
     }
 

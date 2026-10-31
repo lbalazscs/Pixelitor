@@ -25,7 +25,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
 /**
- * A {@link PixelitorEdit} that represents the linking or unlinking of a layer mask.
+ * Represents the linking or unlinking of a layer mask.
  */
 public class LinkLayerMaskEdit extends PixelitorEdit {
     private final LayerMask mask;

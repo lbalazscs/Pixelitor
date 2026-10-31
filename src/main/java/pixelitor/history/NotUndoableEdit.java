@@ -22,8 +22,8 @@ import pixelitor.Composition;
  * Actions that are not undoable, such as flatten image.
  */
 public class NotUndoableEdit extends PixelitorEdit {
-    public NotUndoableEdit(String presentationName, Composition comp) {
-        super(presentationName, comp);
+    public NotUndoableEdit(String name, Composition comp) {
+        super(name, comp);
     }
 
     @Override

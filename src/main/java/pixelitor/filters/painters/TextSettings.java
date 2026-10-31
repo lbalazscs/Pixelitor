@@ -41,7 +41,6 @@ import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import static java.awt.Color.WHITE;
 import static java.awt.font.TextAttribute.KERNING;
@@ -50,8 +49,11 @@ import static java.awt.font.TextAttribute.KERNING_ON;
 /**
  * All the configurable properties of text layers and the text filter.
  * Edited by the {@link TextSettingsPanel}.
- * This is an immutable object, since {@link TextSettingsPanel}
- * creates new objects for every change.
+ * <p>
+ * Instances are treated as immutable: {@link TextSettingsPanel} creates
+ * a new object for every change, and the {@code withX} methods return
+ * modified copies. The few fields that are not final are the ones
+ * that {@code readObject} must assign when migrating old PXC files.
  */
 public class TextSettings implements Serializable, Debuggable {
     @Serial
@@ -74,16 +76,18 @@ public class TextSettings implements Serializable, Debuggable {
     private static final String PRESET_KEY_HOR_ALIGN = "hor_align";
     private static final String PRESET_KEY_VER_ALIGN = "ver_align";
 
-    private String text;
+    private final String text;
     private final Font font;
     private final AreaEffects areaEffects;
     private final Color color;
-    private VerticalAlignment verticalAlignment;
-    private HorizontalAlignment horizontalAlignment;
-    private boolean watermark;
-    private int mlpAlignment; // alignment for multiline text or text on a path
-
+    private final VerticalAlignment verticalAlignment;
+    private final HorizontalAlignment horizontalAlignment;
+    private final boolean watermark;
     private final double rotation;
+
+    // the following fields are not final only because readObject()
+    // has to assign them when loading old PXC files that lack them
+    private int mlpAlignment; // alignment for multiline text or text on a path
     private double sx;
     private double sy;
     private double shx;
@@ -94,8 +98,6 @@ public class TextSettings implements Serializable, Debuggable {
     // (sx, sy, etc.) are present in the serialized PXC file
     private boolean transformFieldsInPxc = true;
 
-    private transient Consumer<TextSettings> guiUpdateCallback;
-
     public TextSettings(String text, Font font, Color color,
                         AreaEffects effects,
                         HorizontalAlignment horizontalAlignment,
@@ -104,8 +106,7 @@ public class TextSettings implements Serializable, Debuggable {
                         boolean watermark, double rotation,
                         double relLineHeight,
                         double sx, double sy,
-                        double shx, double shy,
-                        Consumer<TextSettings> guiUpdateCallback) {
+                        double shx, double shy) {
         assert effects != null;
 
         this.text = text;
@@ -122,7 +123,6 @@ public class TextSettings implements Serializable, Debuggable {
         this.sy = sy;
         this.shx = shx;
         this.shy = shy;
-        this.guiUpdateCallback = guiUpdateCallback;
     }
 
     /**
@@ -147,31 +147,22 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     /**
-     * Copy constructor
+     * Copies the other settings (deep-copying the effects),
+     * overriding the given properties.
      */
-    private TextSettings(TextSettings other) {
-        text = other.text;
-        font = other.font;
-        areaEffects = other.areaEffects.copy();
-        color = other.color;
-        verticalAlignment = other.verticalAlignment;
-        horizontalAlignment = other.horizontalAlignment;
-        mlpAlignment = other.mlpAlignment;
-        watermark = other.watermark;
-        rotation = other.rotation;
-        relLineHeight = other.relLineHeight;
-        sx = other.sx;
-        sy = other.sy;
-        shx = other.shx;
-        shy = other.shy;
+    private TextSettings(TextSettings other, String text,
+                         HorizontalAlignment horizontalAlignment,
+                         VerticalAlignment verticalAlignment,
+                         boolean watermark) {
+        this(text, other.font, other.color, other.areaEffects.copy(),
+            horizontalAlignment, verticalAlignment, other.mlpAlignment,
+            watermark, other.rotation, other.relLineHeight,
+            other.sx, other.sy, other.shx, other.shy);
 
-        this.transformFieldsInPxc = true; // always true for new objects
-        assert other.transformFieldsInPxc; // should be set by now anyway
+        assert other.transformFieldsInPxc; // readObject() should have set it by now
     }
 
-    public TextSettings(UserPreset preset, Consumer<TextSettings> guiUpdateCallback) {
-        this.guiUpdateCallback = guiUpdateCallback;
-
+    public TextSettings(UserPreset preset) {
         text = Utils.decodeNewlines(preset.get(PRESET_KEY_TEXT));
         color = preset.getColor(PRESET_KEY_COLOR);
         rotation = preset.getFloat(PRESET_KEY_ROTATION);
@@ -182,7 +173,10 @@ public class TextSettings implements Serializable, Debuggable {
             horizontalAlignment = HorizontalAlignment.values()[preset.getInt(PRESET_KEY_HOR_ALIGN)];
             verticalAlignment = VerticalAlignment.values()[preset.getInt(PRESET_KEY_VER_ALIGN)];
         } else {
-            BoxAlignment alignment = BoxAlignment.values()[alignIndex];
+            BoxAlignment[] boxAlignments = BoxAlignment.values();
+            BoxAlignment alignment = (alignIndex >= 0 && alignIndex < boxAlignments.length)
+                ? boxAlignments[alignIndex]
+                : BoxAlignment.CENTER_CENTER;
             if (alignment.isPath() && !Views.getActiveComp().hasActivePath()) {
                 alignment = BoxAlignment.CENTER_CENTER;
             }
@@ -204,7 +198,7 @@ public class TextSettings implements Serializable, Debuggable {
         shy = preset.getDouble(PRESET_KEY_SHY, 0.0);
     }
 
-    public static TextSettings createRandomized(Consumer<TextSettings> guiUpdateCallback) {
+    public static TextSettings createRandomized() {
         return new TextSettings(
             Rnd.createRandomString(10), // text
             Rnd.createRandomFont(),
@@ -223,15 +217,13 @@ public class TextSettings implements Serializable, Debuggable {
             0.5 + Rnd.nextDouble(), // sx
             0.5 + Rnd.nextDouble(), // sy
             -0.5 + Rnd.nextDouble(), // shx
-            -0.5 + Rnd.nextDouble(), // shy
-            guiUpdateCallback
+            -0.5 + Rnd.nextDouble() // shy
         );
     }
 
     @Serial
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        guiUpdateCallback = null;
         if (!transformFieldsInPxc) {
             // migrate old pxc files
             relLineHeight = 1.0;
@@ -248,7 +240,7 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     public TextSettings copy() {
-        return new TextSettings(this);
+        return new TextSettings(this, text, horizontalAlignment, verticalAlignment, watermark);
     }
 
     /**
@@ -259,7 +251,7 @@ public class TextSettings implements Serializable, Debuggable {
         painter.setFont(font);
         painter.setColor(color);
         painter.setEffects(areaEffects);
-        painter.setBoxAlignment(horizontalAlignment, verticalAlignment);
+        painter.setBoxAlignment(getAlignment());
         painter.setMLPAlignment(mlpAlignment);
         painter.setRotation(rotation);
         painter.setAdvancedSettings(relLineHeight, sx, sy, shx, shy);
@@ -279,22 +271,18 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     public TextSettings withAlignment(BoxAlignment newAlignment) {
-        TextSettings copy = new TextSettings(this);
-        copy.horizontalAlignment = newAlignment.getHorizontal();
-        copy.verticalAlignment = newAlignment.getVertical();
-        return copy;
+        return new TextSettings(this, text,
+            newAlignment.getHorizontal(), newAlignment.getVertical(), watermark);
     }
 
     public TextSettings withText(String newText) {
-        TextSettings copy = new TextSettings(this);
-        copy.text = newText;
-        return copy;
+        return new TextSettings(this, newText,
+            horizontalAlignment, verticalAlignment, watermark);
     }
 
     public TextSettings withWatermark(boolean newWatermark) {
-        TextSettings copy = new TextSettings(this);
-        copy.watermark = newWatermark;
-        return copy;
+        return new TextSettings(this, text,
+            horizontalAlignment, verticalAlignment, newWatermark);
     }
 
     /**
@@ -390,14 +378,6 @@ public class TextSettings implements Serializable, Debuggable {
 
     public double getRotation() {
         return rotation;
-    }
-
-    public void setGuiUpdateCallback(Consumer<TextSettings> guiUpdateCallback) {
-        this.guiUpdateCallback = guiUpdateCallback;
-    }
-
-    public Consumer<TextSettings> getGuiUpdateCallback() {
-        return guiUpdateCallback;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -18,10 +18,15 @@
 package pixelitor.history;
 
 import pixelitor.layers.SmartObject;
+import pixelitor.utils.debug.DebugNode;
 
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 
+/**
+ * Represents the swapping of two adjacent smart filters
+ * within a {@link SmartObject}'s filter stack.
+ */
 public class SwapSmartFiltersEdit extends PixelitorEdit {
     private final SmartObject smartObject;
     private final int indexA;
@@ -39,13 +44,29 @@ public class SwapSmartFiltersEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        smartObject.swapSmartFilters(indexA, indexB, null);
+        swap();
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
+        swap();
+    }
+
+    private void swap() {
+        // toggles between the two states without adding new history edits
         smartObject.swapSmartFilters(indexA, indexB, null);
+    }
+
+    @Override
+    public DebugNode createDebugNode(String key) {
+        DebugNode node = super.createDebugNode(key);
+
+        node.add(smartObject.createDebugNode());
+        node.addInt("index A", indexA);
+        node.addInt("index B", indexB);
+
+        return node;
     }
 }

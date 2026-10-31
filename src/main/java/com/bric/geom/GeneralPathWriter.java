@@ -34,7 +34,6 @@ public class GeneralPathWriter extends PathWriter {
     private float moveX;
     private float moveY;
     private boolean dataWritten = false;
-    private boolean eliminateRedundantLines = true;
 
     public GeneralPathWriter(GeneralPath path) {
         this.path = path;
@@ -55,7 +54,8 @@ public class GeneralPathWriter extends PathWriter {
 
     @Override
     public void lineTo(float x, float y) {
-        if (eliminateRedundantLines && approxEqual(lastX, x) && approxEqual(lastY, y)) {
+        if (approxEqual(lastX, x) && approxEqual(lastY, y)) {
+            // eliminate redundant lines
             return;
         }
         path.lineTo(x, y);

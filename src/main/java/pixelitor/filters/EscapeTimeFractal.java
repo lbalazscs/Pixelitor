@@ -127,12 +127,8 @@ public abstract class EscapeTimeFractal extends ParametrizedFilter {
     protected EscapeTimeFractal(int defaultIterations, float defaultZoomCenterX) {
         super(false);
 
-        iterationsParam = new RangeParam.Builder("Iterations")
-            .min(2)
-            .def(defaultIterations)
-            .max(998)
-            .randomizeMode(RandomizeMode.IGNORE)
-            .build();
+        iterationsParam = new RangeParam("Iterations", 1, defaultIterations, 1001);
+        iterationsParam.setRandomizeMode(RandomizeMode.IGNORE);
 
         zoomParam.setPresetKey("Zoom");
 

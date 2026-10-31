@@ -59,7 +59,7 @@ public class FgBgColorSelector extends JLayeredPane {
     private Color bgColor = WHITE;
 
     // in layer mask editing mode only grayscale colors are shown
-    private boolean layerMaskEditing = false;
+    private boolean editingMask = false;
 
     // the grayscale colors used while in mask editing mode
     private Color maskFgColor = BLACK;
@@ -228,14 +228,14 @@ public class FgBgColorSelector extends JLayeredPane {
      * Returns the currently visible foreground color.
      */
     public Color getFgColor() {
-        return layerMaskEditing ? maskFgColor : fgColor;
+        return editingMask ? maskFgColor : fgColor;
     }
 
     /**
      * Returns the currently visible background color.
      */
     public Color getBgColor() {
-        return layerMaskEditing ? maskBgColor : bgColor;
+        return editingMask ? maskBgColor : bgColor;
     }
 
     /**
@@ -271,7 +271,7 @@ public class FgBgColorSelector extends JLayeredPane {
     private void setColor(Color color, boolean fg,
                           boolean notifyListeners, boolean addToHistory) {
         Color displayColor;
-        if (layerMaskEditing) {
+        if (editingMask) {
             displayColor = Colors.toGray(color);
             if (fg) {
                 maskFgColor = displayColor;
@@ -323,13 +323,13 @@ public class FgBgColorSelector extends JLayeredPane {
     }
 
     /**
-     * Notifies this component that layer-mask editing mode has changed.
+     * Notifies this component that the layer's mask editing mode has changed.
      */
-    public void maskEditingChanged(boolean maskEditing) {
-        if (this.layerMaskEditing == maskEditing) {
+    public void editingMaskChanged(boolean editingMask) {
+        if (this.editingMask == editingMask) {
             return;
         }
-        this.layerMaskEditing = maskEditing;
+        this.editingMask = editingMask;
 
         // update the button colors to reflect the new mode and notify listeners
         updateFgButtonColor(getFgColor());

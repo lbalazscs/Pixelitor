@@ -107,8 +107,8 @@ public class LayerMask extends ImageLayer {
      * Applies this mask to the given image, modifying its alpha channel.
      * Expects canvas-sized images.
      */
-    public void applyTo(BufferedImage in) {
-        applyTo(in, getTx(), getTy());
+    public void applyTo(BufferedImage target) {
+        applyTo(target, getTx(), getTy());
     }
 
     /**
@@ -116,8 +116,8 @@ public class LayerMask extends ImageLayer {
      * (dx, dy) is the position of the mask image's top-left corner
      * in the pixel coordinates of the given image.
      */
-    public void applyTo(BufferedImage in, int dx, int dy) {
-        Graphics2D g = in.createGraphics();
+    public void applyTo(BufferedImage target, int dx, int dy) {
+        Graphics2D g = target.createGraphics();
         g.setComposite(DstIn);
         g.drawImage(getTransparencyImage(), dx, dy, null);
         g.dispose();
@@ -238,14 +238,14 @@ public class LayerMask extends ImageLayer {
      * potentially including a preview of active shape tool drawing.
      */
     public BufferedImage getTransparencyImage() {
-        if (!owner.isMaskEditing() || !Tools.isDrawingShapes()) {
+        if (!owner.isEditingMask() || !Tools.isDrawingShapes()) {
             // simple case
             return transparencyImage;
         }
 
         // if drawing with the shapes tool while editing the mask:
-        // create a temporary image that shows how the image would look like
-        // if the shapes tool would draw directly into the mask image
+        // create a temporary image that shows what the image would look like
+        // if the shapes tool were drawing directly into the mask image
 
         // we can use `image` instead of `getVisibleImage()` because shapes
         // tool drawing and filter preview can't happen at the same time
@@ -307,7 +307,7 @@ public class LayerMask extends ImageLayer {
     @Override
     protected Layer getLinked() {
         // returns the parent layer if this mask is linked
-        if (owner.isMaskEditing() && isLinked()) {
+        if (owner.isEditingMask() && isLinked()) {
             return owner;
         }
         return null;
@@ -344,28 +344,45 @@ public class LayerMask extends ImageLayer {
         return owner.getTopLevelLayer();
     }
 
+    @Override
     public LayerUI createUI() {
         // should only be called on the owner
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void updateUI() {
         // should only be called on the owner
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void setVisible(boolean newVisibility, boolean addToHistory, boolean update) {
         // layer masks have no independent visibility
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void setOpacity(float newOpacity, boolean addToHistory, boolean update) {
         // layer masks have no independent opacity
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void setBlendingMode(BlendingMode newMode, boolean addToHistory, boolean update) {
         // layer masks have no independent blending mode
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isEditingMask() {
+        // a mask can't have its own mask
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isMaskEnabled() {
+        // a mask can't have its own mask
         throw new UnsupportedOperationException();
     }
 

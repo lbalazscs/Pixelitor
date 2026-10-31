@@ -71,7 +71,7 @@ public class ImagePositionSelector extends JComponent {
             // no active drawable, e.g. when editing an adjustment layer
             return ImageUtils.createSysCompatibleImage(THUMBNAIL_SIZE, THUMBNAIL_SIZE);
         } else {
-            BufferedImage sourceImage = dr.getImageForFilterDialogs();
+            BufferedImage sourceImage = dr.getFilterSourceImage();
             return Thumbnails.createThumbnail(sourceImage, THUMBNAIL_SIZE, null);
         }
     }

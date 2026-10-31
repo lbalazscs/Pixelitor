@@ -59,7 +59,7 @@ public record CopyOptions(
         return new CopyOptions(false, copySelection, copyGuides, true, true, true, SAME_NAME, SAME_NAME);
     }
 
-    public static CopyOptions smartObjectShallowDuplicate() {
+    public static CopyOptions smartObjectShallowCopy() {
         return new CopyOptions(false, false, false, true, true, false, SAME_NAME, name -> name + " clone");
     }
 

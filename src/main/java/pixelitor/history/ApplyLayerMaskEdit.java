@@ -28,9 +28,9 @@ import javax.swing.undo.CannotUndoException;
 import java.awt.image.BufferedImage;
 
 /**
- * A {@link PixelitorEdit} that represents the application of a layer mask.
+ * Represents the application of a layer mask.
  * (The layer mask is deleted, but its effect is transferred
- * to the transparency of the layer)
+ * to the transparency of the layer.)
  */
 public class ApplyLayerMaskEdit extends PixelitorEdit {
     private final LayerMask mask;
@@ -60,6 +60,9 @@ public class ApplyLayerMaskEdit extends PixelitorEdit {
         assert prevMaskViewMode != null;
         prevMaskViewMode.restoreOn(layer);
         layer.updateIconImage();
+
+        // ensure that die() never flushes a live image
+        prevLayerImage = null;
     }
 
     @Override

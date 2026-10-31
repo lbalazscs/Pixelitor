@@ -39,6 +39,9 @@ public class TextFilter extends FilterWithGUI {
 
     private TextSettings settings;
 
+    // set only while a settings dialog is open for this filter
+    private transient Consumer<TextSettings> settingsUiUpdater;
+
     @Serial
     private static final long serialVersionUID = -2525209248829018779L;
 
@@ -79,7 +82,7 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public void randomize() {
-        setSettings(TextSettings.createRandomized(settings.getGuiUpdateCallback()));
+        setSettings(TextSettings.createRandomized());
     }
 
     public TextSettings getSettings() {
@@ -88,6 +91,24 @@ public class TextFilter extends FilterWithGUI {
 
     public void setSettings(TextSettings settings) {
         this.settings = settings;
+    }
+
+    /**
+     * Registers the callback of the open settings dialog, which receives
+     * settings loaded from outside the dialog (presets). The callback
+     * refreshes the dialog's GUI, sets the settings and restarts the preview.
+     */
+    public void setSettingsUiUpdater(Consumer<TextSettings> updater) {
+        this.settingsUiUpdater = updater;
+    }
+
+    /**
+     * Unregisters the given updater, unless another one has been registered since.
+     */
+    public void clearSettingsUiUpdater(Consumer<TextSettings> updater) {
+        if (settingsUiUpdater == updater) {
+            settingsUiUpdater = null;
+        }
     }
 
     @Override
@@ -102,11 +123,12 @@ public class TextFilter extends FilterWithGUI {
 
     @Override
     public void loadUserPreset(UserPreset preset) {
-        Consumer<TextSettings> cb = settings.getGuiUpdateCallback();
-        TextSettings newSettings = new TextSettings(preset, cb);
-        setSettings(newSettings);
-        if (cb != null) {
-            cb.accept(newSettings);
+        TextSettings newSettings = new TextSettings(preset);
+        if (settingsUiUpdater != null) {
+            // the open dialog refreshes its GUI, sets the settings and restarts the preview
+            settingsUiUpdater.accept(newSettings);
+        } else {
+            setSettings(newSettings);
         }
     }
 

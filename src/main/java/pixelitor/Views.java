@@ -172,9 +172,9 @@ public class Views {
         // assume that the new view has a proper mask view mode set up
         LayerEvents.fireActiveCompChanged(comp, false);
 
-        boolean maskEditing = view.getMaskViewMode().isEditingMask();
-        Tools.maskEditingChanged(maskEditing);
-        FgBgColors.maskEditingChanged(maskEditing);
+        boolean editingMask = view.getMaskViewMode().isEditingMask();
+        Tools.editingMaskChanged(editingMask);
+        FgBgColors.editingMaskChanged(editingMask);
 
         Canvas.activeCanvasSizeChanged(comp.getCanvas());
         PixelitorWindow.get().updateTitle(comp);

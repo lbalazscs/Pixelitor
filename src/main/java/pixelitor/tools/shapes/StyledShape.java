@@ -318,7 +318,7 @@ public class StyledShape implements Transformable, Serializable, Cloneable {
     @Override
     public void updateUI(View view) {
         Layer activeLayer = view.getComp().getActiveLayer();
-        if (activeLayer.isMaskEditing() && activeLayer instanceof SmartFilter smartFilter) {
+        if (activeLayer.isEditingMask() && activeLayer instanceof SmartFilter smartFilter) {
             smartFilter.shapeDraggedOnMask();
         }
         activeLayer.update();
