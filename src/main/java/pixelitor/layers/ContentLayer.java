@@ -31,8 +31,6 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serial;
-import java.util.List;
-import java.util.ListIterator;
 
 /**
  * Base class for layers with content that can be manipulated
@@ -61,9 +59,8 @@ public abstract class ContentLayer extends Layer {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
 
-        // defaults for transient fields
-        dragOffsetX = 0;
-        dragOffsetY = 0;
+        // sets defaults for transient fields
+        resetDragOffsets();
     }
 
     /**
@@ -98,45 +95,6 @@ public abstract class ContentLayer extends Layer {
      */
     public abstract int getPixelAtPoint(Point p);
 
-    /**
-     * Finds the topmost opaque layer at a given image-space point.
-     * For simple content layers, this method checks the layer itself.
-     * Subclasses like layer groups may override this to descend into child layers.
-     */
-    public ContentLayer findTopmostOpaqueLayer(Point p) {
-        // a small opacity makes the layer effectively invisible for hit-testing
-        if (!isVisible() || getOpacity() < 0.05f) {
-            return null;
-        }
-
-        int pixel = getPixelAtPoint(p);
-
-        int pixelAlphaThreshold = 30;
-        if (((pixel >> 24) & 0xFF) > pixelAlphaThreshold) {
-            return this;
-        }
-
-        return null;
-    }
-
-    /**
-     * Finds the first opaque layer at the given image-space point,
-     * in the given list, searching from top to bottom.
-     */
-    public static ContentLayer findTopmostOpaqueLayer(List<Layer> layers, Point p) {
-        ListIterator<Layer> li = layers.listIterator(layers.size());
-        while (li.hasPrevious()) {
-            Layer layer = li.previous();
-            if (layer instanceof ContentLayer contentLayer) {
-                ContentLayer found = contentLayer.findTopmostOpaqueLayer(p);
-                if (found != null) {
-                    return found;
-                }
-            }
-        }
-        return null;
-    }
-
     @Override
     public void prepareMovement() {
         setDragOffset(0, 0);
@@ -153,9 +111,14 @@ public abstract class ContentLayer extends Layer {
         if (dx != dragOffsetX || dy != dragOffsetY) {
             dragOffsetX = dx;
             dragOffsetY = dy;
-            // getTx()/getTy() changed, and a cached masked image bakes them in
+            // the cached masked image bakes in the translation
             invalidateMaskedImageCache();
         }
+    }
+
+    protected final void resetDragOffsets() {
+        dragOffsetX = 0;
+        dragOffsetY = 0;
     }
 
     @Override
@@ -167,8 +130,7 @@ public abstract class ContentLayer extends Layer {
         // and now they can be committed to the final value
         translationX += dragOffsetX;
         translationY += dragOffsetY;
-        dragOffsetX = 0;
-        dragOffsetY = 0;
+        resetDragOffsets();
 
         // possibly null if there is no linked mask
         PixelitorEdit linkedEdit = createLinkedMovementEdit();
@@ -189,8 +151,13 @@ public abstract class ContentLayer extends Layer {
      * enlargement checks and without affecting linked layers.
      */
     public void setTranslation(int tx, int ty) {
+        if (tx == translationX && ty == translationY) {
+            return;
+        }
         translationX = tx;
         translationY = ty;
+        // the cached masked image bakes in the translation
+        invalidateMaskedImageCache();
     }
 
     @Override

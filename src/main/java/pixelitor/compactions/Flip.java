@@ -37,11 +37,6 @@ public class Flip extends SimpleCompAction {
     }
 
     @Override
-    public boolean supportsSmartObjects() {
-        return true;
-    }
-
-    @Override
     protected void updateCanvasSize(Canvas newCanvas, View view) {
         // a flip doesn't change the canvas size
         throw new UnsupportedOperationException();

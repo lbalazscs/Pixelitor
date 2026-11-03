@@ -51,16 +51,6 @@ public class Straighten extends SimpleCompAction {
     }
 
     @Override
-    public boolean supportsSmartObjects() {
-        return false;
-    }
-
-    @Override
-    protected boolean supportsTextLayers() {
-        return false;
-    }
-
-    @Override
     protected void updateCanvasSize(Canvas newCanvas, View view) {
         // straighten keeps the canvas size unchanged
         throw new UnsupportedOperationException();

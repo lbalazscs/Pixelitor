@@ -44,7 +44,7 @@ public class RepeatLast extends DrawableAction {
 
     private RepeatLast(boolean showDialog) {
         super(showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME,
-            showDialog, true,
+            showDialog,
             dr -> applyToDrawable(dr, showDialog),
             so -> applyToSmartObject(so, showDialog ? SHOW_LAST_DEFAULT_NAME : REPEAT_LAST_DEFAULT_NAME));
         this.showDialog = showDialog;

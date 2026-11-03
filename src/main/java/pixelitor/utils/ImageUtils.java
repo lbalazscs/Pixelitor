@@ -18,50 +18,36 @@
 package pixelitor.utils;
 
 import com.jhlabs.composite.OverlayComposite;
-import com.jhlabs.composite.ScreenComposite;
 import com.jhlabs.image.AbstractBufferedImageOp;
-import com.jhlabs.image.BoxBlurFilter;
 import com.jhlabs.image.EmbossFilter;
 import com.jhlabs.image.ImageMath;
 import com.twelvemonkeys.image.ImageUtil;
 import org.jdesktop.swingx.graphics.BlendComposite;
 import org.jdesktop.swingx.painter.CheckerboardPainter;
 import pixelitor.Canvas;
-import pixelitor.colors.Colors;
 import pixelitor.filters.Invert;
-import pixelitor.layers.ContentLayer;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
-import pixelitor.progress.ProgressTracker;
 import pixelitor.selection.Selection;
 import pixelitor.tools.Tools;
 import pixelitor.utils.debug.Debug;
 import pixelitor.utils.test.Assertions;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.color.ColorSpace;
-import java.awt.color.ICC_ColorSpace;
-import java.awt.color.ICC_Profile;
 import java.awt.geom.AffineTransform;
 import java.awt.image.*;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 
 import static java.awt.AlphaComposite.SRC_OVER;
 import static java.awt.Color.BLACK;
 import static java.awt.Color.WHITE;
-import static java.awt.RenderingHints.*;
+import static java.awt.RenderingHints.KEY_ANTIALIASING;
+import static java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
 import static java.awt.image.BufferedImage.*;
 import static java.awt.image.DataBuffer.TYPE_INT;
 import static java.lang.String.format;
-import static pixelitor.utils.Threads.onPool;
 
 /**
  * Static image-related utility methods.
@@ -160,191 +146,6 @@ public class ImageUtils {
             cm.isAlphaPremultiplied(), null);
     }
 
-    public static CompletableFuture<BufferedImage> resizeAsync(BufferedImage img,
-                                                               int targetWidth,
-                                                               int targetHeight) {
-        return CompletableFuture.supplyAsync(() ->
-            resize(img, targetWidth, targetHeight), onPool);
-    }
-
-    public static BufferedImage resize(BufferedImage img, int targetWidth, int targetHeight) {
-        boolean progressiveBilinear = targetWidth < img.getWidth() / 2
-            || targetHeight < img.getHeight() / 2;
-        return scaleImage(img, targetWidth, targetHeight, VALUE_INTERPOLATION_BICUBIC, progressiveBilinear);
-    }
-
-    // From the Filthy Rich Clients book
-
-    /**
-     * Convenience method that returns a scaled instance of the
-     * provided BufferedImage.
-     *
-     * @param img                 the original image to be scaled
-     * @param targetWidth         the desired width of the scaled instance,
-     *                            in pixels
-     * @param targetHeight        the desired height of the scaled instance,
-     *                            in pixels
-     * @param hint                one of the rendering hints that corresponds to
-     *                            RenderingHints.KEY_INTERPOLATION (e.g.
-     *                            RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR,
-     *                            RenderingHints.VALUE_INTERPOLATION_BILINEAR,
-     *                            RenderingHints.VALUE_INTERPOLATION_BICUBIC)
-     * @param progressiveBilinear if true, this method will use a multi-step
-     *                            scaling technique that provides higher quality than the usual
-     *                            one-step technique (only useful in down-scaling cases, where
-     *                            targetWidth or targetHeight is
-     *                            smaller than the original dimensions)
-     * @return a scaled version of the original BufferedImage
-     */
-    private static BufferedImage scaleImage(BufferedImage img,
-                                            int targetWidth, int targetHeight,
-                                            Object hint,
-                                            boolean progressiveBilinear) {
-        assert img != null;
-
-        int prevW = img.getWidth();
-        int prevH = img.getHeight();
-
-        if (targetWidth >= prevW || targetHeight >= prevH) {
-            progressiveBilinear = false;
-        }
-
-        int type = img.getType();
-
-        BufferedImage ret = img;
-        int w, h;
-        boolean isTranslucent = img.getTransparency() != Transparency.OPAQUE;
-
-        if (progressiveBilinear) {
-            // use multi-step technique: start with original size, then
-            // scale down in multiple passes with drawImage()
-            // until the target size is reached
-            w = img.getWidth();
-            h = img.getHeight();
-        } else {
-            // use one-step technique: scale directly from original
-            // size to target size with a single drawImage() call
-            w = targetWidth;
-            h = targetHeight;
-        }
-
-        BufferedImage scratchImage = null;
-        Graphics2D g = null;
-        do {
-            if (progressiveBilinear && w > targetWidth) {
-                w /= 2;
-                if (w < targetWidth) {
-                    w = targetWidth;
-                }
-            }
-
-            if (progressiveBilinear && h > targetHeight) {
-                h /= 2;
-                if (h < targetHeight) {
-                    h = targetHeight;
-                }
-            }
-
-            if (scratchImage == null || isTranslucent) {
-                // use a single scratch buffer for all iterations
-                // and then copy to the final, correctly-sized image
-                // before returning
-                scratchImage = new BufferedImage(w, h, type);
-                g = scratchImage.createGraphics();
-            }
-            g.setRenderingHint(KEY_INTERPOLATION, hint);
-            g.drawImage(ret, 0, 0, w, h, 0, 0, prevW, prevH, null);
-            prevW = w;
-            prevH = h;
-
-            ret = scratchImage;
-        } while (w != targetWidth || h != targetHeight);
-
-        if (g != null) {
-            g.dispose();
-        }
-
-        // if we used a scratch buffer that is larger than our target size,
-        // create an image of the right size and copy the results into it
-        if (targetWidth != ret.getWidth() || targetHeight != ret.getHeight()) {
-            scratchImage = new BufferedImage(targetWidth, targetHeight, type);
-            g = scratchImage.createGraphics();
-            g.drawImage(ret, 0, 0, null);
-            g.dispose();
-            ret = scratchImage;
-        }
-
-        return ret;
-    }
-
-    /**
-     * Also an iterative approach, but using even smaller steps.
-     */
-    public static BufferedImage enlargeSmoothly(BufferedImage src,
-                                                int targetWidth, int targetHeight,
-                                                Object hint, double step, ProgressTracker pt) {
-        int srcWidth = src.getWidth();
-        int srcHeight = src.getHeight();
-        double factorX = targetWidth / (double) srcWidth;
-        double factorY = targetHeight / (double) srcHeight;
-
-        // they should be the same, but rounding errors can cause small discrepancies
-        assert Math.abs(factorX - factorY) < 0.05;
-
-        double factor = (factorX + factorY) / 2.0;
-        assert factor > 1.0; // this only makes sense for enlarging
-        double progress = 1.0;
-        double lastStep = factor / step;
-        BufferedImage last = src;
-        AffineTransform stepScale = AffineTransform.getScaleInstance(step, step);
-        while (progress < lastStep) {
-            progress = progress * step;
-            int newSrcWidth = (int) (srcWidth * progress);
-            int newSrcHeight = (int) (srcHeight * progress);
-            BufferedImage tmp = new BufferedImage(newSrcWidth, newSrcHeight, src.getType());
-            Graphics2D g = tmp.createGraphics();
-            if (hint != null) {
-                g.setRenderingHint(KEY_INTERPOLATION, hint);
-            }
-
-            g.drawImage(last, stepScale, null);
-            g.dispose();
-
-            BufferedImage willBeForgotten = last;
-            last = tmp;
-            willBeForgotten.flush();
-            pt.unitDone();
-        }
-
-        // do the last step: resize exactly to the target values
-        BufferedImage retVal = new BufferedImage(targetWidth, targetHeight, src.getType());
-        Graphics2D g = retVal.createGraphics();
-        if (hint != null) {
-            g.setRenderingHint(KEY_INTERPOLATION, hint);
-        }
-
-        g.drawImage(last, 0, 0, targetWidth, targetHeight, null);
-        g.dispose();
-        pt.unitDone();
-
-        return retVal;
-    }
-
-    /**
-     * Returns the number of steps (progress tracking work units)
-     * required for smooth enlargement.
-     */
-    public static int calcEnlargeSmoothlySteps(double resizeFactor, double step) {
-        double progress = 1.0;
-        double lastStep = resizeFactor / step;
-        int retVal = 1; // for the final step
-        while (progress < lastStep) {
-            progress = progress * step;
-            retVal++;
-        }
-        return retVal;
-    }
-
     public static boolean hasPackedIntArray(BufferedImage image) {
         assert image != null;
 
@@ -400,49 +201,6 @@ public class ImageUtils {
 
     public static boolean isGrayscale(BufferedImage img) {
         return img.getType() == TYPE_BYTE_GRAY;
-    }
-
-    public static BufferedImage createGrayscaleImage(byte[] pixels, int width, int height) {
-        assert pixels.length == width * height;
-
-        DataBuffer data = new DataBufferByte(pixels, 1);
-        WritableRaster raster = Raster.createInterleavedRaster(data,
-            width, height, width, 1, new int[]{0}, new Point(0, 0));
-
-        ColorSpace cs = new ICC_ColorSpace(ICC_Profile.getInstance(ColorSpace.CS_GRAY));
-        ColorModel cm = new ComponentColorModel(cs,
-            false, false,
-            Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
-
-        return new BufferedImage(cm, raster, false, null);
-    }
-
-    /**
-     * Converts an image filename to a resource URL within the 'images' directory.
-     */
-    public static URL findImageURL(String fileName) {
-        assert fileName != null;
-
-        String path = "/images/" + fileName;
-        URL imgURL = ImageUtils.class.getResource(path);
-        if (imgURL == null) {
-            Messages.showError("Error", path + " not found");
-        }
-
-        return imgURL;
-    }
-
-    public static BufferedImage loadResourceImage(String fileName) {
-        assert fileName != null;
-
-        URL imgURL = findImageURL(fileName);
-        BufferedImage image = null;
-        try {
-            image = ImageIO.read(imgURL);
-        } catch (IOException e) {
-            Messages.showException(e);
-        }
-        return image;
     }
 
     public static BufferedImage convertToARGB_PRE(BufferedImage src, boolean flushSrc) {
@@ -613,24 +371,6 @@ public class ImageUtils {
         return dest;
     }
 
-    /**
-     * A hack so that Fade can work with PartialImageEdit rasters.
-     * It would be better if Fade could work with rasters directly.
-     */
-    public static BufferedImage rasterToImage(Raster raster) {
-        assert raster != null;
-
-        int minX = raster.getMinX();
-        int minY = raster.getMinY();
-        int width = raster.getWidth();
-        int height = raster.getHeight();
-        Raster startingFrom00 = raster.createChild(minX, minY, width, height, 0, 0, null);
-        BufferedImage image = new BufferedImage(width, height, TYPE_INT_ARGB_PRE);
-        image.setData(startingFrom00);
-
-        return image;
-    }
-
     public static BufferedImage crop(BufferedImage input, Rectangle bounds) {
         return crop(input, bounds.x, bounds.y, bounds.width, bounds.height);
     }
@@ -679,15 +419,6 @@ public class ImageUtils {
         return alpha << 24 | red << 16 | green << 8 | blue;
     }
 
-    public static void screenWithItself(BufferedImage src, float opacity) {
-        assert src != null;
-
-        Graphics2D g = src.createGraphics();
-        g.setComposite(new ScreenComposite(opacity));
-        g.drawImage(src, 0, 0, null);
-        g.dispose();
-    }
-
     // See https://graphicdesign.stackexchange.com/questions/89969/what-does-photoshops-high-pass-filter-actually-do-under-the-hood
     public static BufferedImage toHighPassFilteredImage(BufferedImage original, BufferedImage blurred) {
         assert original != null;
@@ -715,88 +446,6 @@ public class ImageUtils {
         g.dispose();
 
         return highPass;
-    }
-
-    public static BufferedImage createGrayRandomPointsBrushImage(int diameter, float density) {
-        if (density < 0.0f || density > 1.0f) {
-            throw new IllegalArgumentException("density is " + density);
-        }
-
-        BufferedImage brushImage = new BufferedImage(diameter, diameter, TYPE_BYTE_GRAY);
-
-        int radius = diameter / 2;
-        int radiusSq = radius * radius;
-        Random random = new Random();
-
-        byte[] pixels = getGrayPixels(brushImage);
-        for (int x = 0; x < diameter; x++) {
-            for (int y = 0; y < diameter; y++) {
-                int dx = x - radius;
-                int dy = y - radius;
-                int centerDistSq = dx * dx + dy * dy;
-                int index = x + y * diameter;
-                if (centerDistSq < radiusSq) {
-                    float rn = random.nextFloat();
-                    if (density > rn) {
-                        pixels[index] = (byte) random.nextInt(256);
-                    } else {
-                        // (byte) 255 is -1 in signed representation, but the ComponentColorModel
-                        // for grayscale treats it as unsigned, ensuring that it is interpreted as white
-                        pixels[index] = (byte) 255;  // white
-                    }
-                } else {
-                    pixels[index] = (byte) 255; // white
-                }
-            }
-        }
-
-        return brushImage;
-    }
-
-    public static BufferedImage createSoftGrayBrushImage(int size) {
-        BufferedImage brushImage = new BufferedImage(size, size, TYPE_BYTE_GRAY);
-        Graphics2D g = brushImage.createGraphics();
-
-        // fill a black circle over the white background
-        Colors.fillWith(WHITE, g, size, size);
-        g.setColor(BLACK);
-        int softness = size / 4;
-        g.fillOval(softness, softness, size - 2 * softness, size - 2 * softness);
-        g.dispose();
-
-        // blur it
-        var blur = new BoxBlurFilter("Blur", softness, softness, 1);
-        blur.setProgressTracker(ProgressTracker.NO_OP_TRACKER);
-        brushImage = blur.filter(brushImage, brushImage);
-
-        return brushImage;
-    }
-
-    public static BufferedImage createSoftTransparencyImage(int size) {
-        BufferedImage mask = createSoftGrayBrushImage(size);
-
-        // the color doesn't matter, as only the alpha channel will be used
-        return maskToTransparency(mask, 0);
-    }
-
-    /**
-     * Converts a grayscale mask image into an ARGB image with the
-     * corresponding alpha channel. The color argument must have 0 alpha.
-     */
-    public static BufferedImage maskToTransparency(BufferedImage mask, int colorNoAlpha) {
-        BufferedImage dest = new BufferedImage(mask.getWidth(), mask.getHeight(), TYPE_INT_ARGB);
-        byte[] srcPixels = getGrayPixels(mask);
-        int[] destPixels = getPixels(dest);
-
-        for (int i = 0; i < destPixels.length; i++) {
-            int srcGray = srcPixels[i] & 0xFF; // convert signed byte to unsigned int
-
-            // the color comes from the given color, the alpha from the
-            // mask's gray value (white => transparent, black => opaque)
-            int alpha = 0xFF - srcGray;
-            destPixels[i] = alpha << 24 | colorNoAlpha;
-        }
-        return dest;
     }
 
     public static BufferedImage bumpMap(BufferedImage src,
@@ -1137,147 +786,6 @@ public class ImageUtils {
      */
     public static boolean isWithinBounds(int x, int y, BufferedImage img) {
         return x >= 0 && y >= 0 && x < img.getWidth() && y < img.getHeight();
-    }
-
-    /**
-     * Checks if two colors are within the given tolerance (per channel).
-     */
-    public static boolean isSimilar(int color1, int color2, int tolerance) {
-        if (color1 == color2) {
-            return true;
-        }
-
-        int a1 = color1 >>> 24;
-        int r1 = (color1 >>> 16) & 0xFF;
-        int g1 = (color1 >>> 8) & 0xFF;
-        int b1 = color1 & 0xFF;
-
-        int a2 = color2 >>> 24;
-        int r2 = (color2 >>> 16) & 0xFF;
-        int g2 = (color2 >>> 8) & 0xFF;
-        int b2 = color2 & 0xFF;
-
-        return (r2 <= r1 + tolerance) && (r2 >= r1 - tolerance) &&
-            (g2 <= g1 + tolerance) && (g2 >= g1 - tolerance) &&
-            (b2 <= b1 + tolerance) && (b2 >= b1 - tolerance) &&
-            (a2 <= a1 + tolerance) && (a2 >= a1 - tolerance);
-    }
-
-    public static int getPixelAt(ContentLayer layer, BufferedImage image, Point p) {
-        int x = p.x - layer.getTx();
-        int y = p.y - layer.getTy();
-
-        if (!isWithinBounds(x, y, image)) {
-            return 0x00_00_00_00;
-        }
-
-        if (layer.hasMask() && layer.isMaskEnabled()) {
-            int maskPixel = layer.getMask().getPixelAtPoint(p);
-            int imagePixel = image.getRGB(x, y);
-            float maskAlpha = (maskPixel & 0xFF) / 255.0f;
-            int imageAlpha = (imagePixel >> 24) & 0xFF;
-            int effectiveAlpha = (int) (imageAlpha * maskAlpha);
-            return Colors.setAlpha(imagePixel, effectiveAlpha);
-        }
-
-        return image.getRGB(x, y);
-    }
-
-    /**
-     * An interface for processing a horizontal line segment of pixels.
-     */
-    @FunctionalInterface
-    public interface SegmentProcessor {
-        /**
-         * Processes a horizontal segment.
-         *
-         * @param y  The y-coordinate of the segment.
-         * @param x1 The starting x-coordinate (inclusive).
-         * @param x2 The ending x-coordinate (inclusive).
-         */
-        void process(int y, int x1, int x2);
-    }
-
-    /**
-     * Handles the traversal of a color-bounded area.
-     * The actual action performed on each segment of the area
-     * is defined by the given {@link SegmentProcessor}.
-     */
-    public static void floodFill(int[] pixels, int width, int height,
-                                 int startX, int startY, int tolerance,
-                                 SegmentProcessor processor) {
-        if (startX < 0 || startX >= width || startY < 0 || startY >= height) {
-            return;
-        }
-
-        boolean[] visited = new boolean[width * height];
-        // stack of horizontal line segments to process: {y, x1, x2}
-        Deque<int[]> stack = new ArrayDeque<>();
-
-        int startColor = pixels[startY * width + startX];
-
-        // 1. find the initial horizontal line segment around the starting point
-        int x1 = startX;
-        int x2 = startX;
-
-        // scan left
-        while (x1 > 0 && isSimilar(startColor, pixels[startY * width + x1 - 1], tolerance)) {
-            x1--;
-        }
-        // scan right
-        while (x2 < width - 1 && isSimilar(startColor, pixels[startY * width + x2 + 1], tolerance)) {
-            x2++;
-        }
-
-        // process the initial segment and push it onto the stack
-        processor.process(startY, x1, x2);
-        for (int x = x1; x <= x2; x++) {
-            visited[startY * width + x] = true;
-        }
-        stack.push(new int[]{startY, x1, x2});
-
-        // 2. process segments from the stack until it's empty
-        while (!stack.isEmpty()) {
-            int[] segment = stack.pop();
-            int y = segment[0];
-            int left = segment[1];
-            int right = segment[2];
-
-            // 3. scan the rows directly above (dy = -1) and below (dy = 1) the current segment
-            for (int dy = -1; dy <= 1; dy += 2) {
-                int nextY = y + dy;
-                if (nextY < 0 || nextY >= height) {
-                    continue;
-                }
-
-                for (int x = left; x <= right; x++) {
-                    int index = nextY * width + x;
-                    // if we find an unvisited, similar-colored pixel, start a new horizontal scan
-                    if (!visited[index] && isSimilar(startColor, pixels[index], tolerance)) {
-                        int newX1 = x;
-                        int newX2 = x;
-                        // scan left
-                        while (newX1 > 0 && !visited[nextY * width + newX1 - 1] && isSimilar(startColor, pixels[nextY * width + newX1 - 1], tolerance)) {
-                            newX1--;
-                        }
-                        // scan right
-                        while (newX2 < width - 1 && !visited[nextY * width + newX2 + 1] && isSimilar(startColor, pixels[nextY * width + newX2 + 1], tolerance)) {
-                            newX2++;
-                        }
-
-                        // process the new segment, mark its pixels as visited, and push it
-                        processor.process(nextY, newX1, newX2);
-                        for (int i = newX1; i <= newX2; i++) {
-                            visited[nextY * width + i] = true;
-                        }
-                        stack.push(new int[]{nextY, newX1, newX2});
-
-                        // advance x to the end of the new segment to avoid redundant checks
-                        x = newX2;
-                    }
-                }
-            }
-        }
     }
 
     // maximizes the contrast in the given image

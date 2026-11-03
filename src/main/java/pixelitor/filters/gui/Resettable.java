@@ -29,8 +29,9 @@ public interface Resettable {
     /**
      * Resets this {@link Resettable} to its default value.
      *
-     * @param trigger If true, then the resetting can trigger a GUI update
-     *                such as the recalculating of a filter preview
+     * @param trigger If true, the reset also notifies the adjustment listener
+     *                (for example, to recalculate the filter preview).
+     *                If false, only the value (and the GUI) is changed.
      */
     void reset(boolean trigger);
 

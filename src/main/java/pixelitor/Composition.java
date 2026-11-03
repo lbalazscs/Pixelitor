@@ -47,20 +47,20 @@ import pixelitor.utils.*;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static pixelitor.layers.LayerAdder.Position.ABOVE_ACTIVE;
@@ -219,8 +219,14 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
 
         // perform actions that need a full canvas and also
-        // (re)load the contents of linked smart objects
-        forEachNestedLayerOfType(CompositeLayer.class, CompositeLayer::afterDeserialization);
+        // (re)load the contents of linked smart objects.
+        // Each composite layer is responsible for initializing
+        // its own nested composite layers before itself.
+        for (Layer layer : layerList) {
+            if (layer instanceof CompositeLayer composite) {
+                composite.afterDeserialization();
+            }
+        }
 
         initDebugName();
         assert checkAllSOInvariants();
@@ -269,7 +275,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
 
         compCopy.initDebugName();
 
-        assert checkInvariants();
         assert compCopy.checkInvariants();
 
         return compCopy;
@@ -354,12 +359,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             view.setMaskViewMode(maskViewMode, activeLayer);
         } else if (activeLayer != null) {
             activeLayer.setEditingMask(maskViewMode.isEditingMask());
-        }
-    }
-
-    public void restoreMaskViewMode(MaskViewMode maskViewMode, Layer layer) {
-        if (maskViewMode != null) {
-            maskViewMode.restoreOn(layer);
         }
     }
 
@@ -674,12 +673,13 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
      * Creates a new layer by merging all currently visible layers.
      */
     public void addNewLayerFromVisible() {
-        var newLayer = new ImageLayer(this,
-            getCompositeImage(), "Composite");
+        BufferedImage visibleCopy = ImageUtils.copyImage(getCompositeImage());
+        var newLayer = new ImageLayer(this, visibleCopy, "Composite");
 
+        // the update can't be skipped when the visible
+        // composite contains translucent pixels
         adder()
             .withHistory("New Layer from Visible")
-            .skipCompUpdate()
             .atIndex(layerList.size())
             .add(newLayer);
     }
@@ -703,8 +703,10 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             return;
         }
 
-        // create the new flattened layer from the composite of visible layers
+        // the flattened layer takes over the cached composite image,
+        // so the cache forgets it to avoid sharing pixels
         BufferedImage flattenedImg = getCompositeImage();
+        compositeImage = null;
         Layer flattenedLayer = new ImageLayer(this, flattenedImg, "flattened");
 
         // clear old layers
@@ -750,64 +752,33 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         }
     }
 
-    @Override
-    public void insertLayer(Layer newLayer, int index, boolean update) {
-        if (update) {
-            adder().atIndex(index).add(newLayer);
-        } else {
-            insertDirectChild(newLayer, index);
-        }
-    }
-
     public void deleteActiveLayer(boolean addToHistory) {
         getActiveHolder().deleteLayer(activeLayer, addToHistory);
     }
 
     @Override
-    public void deleteLayer(Layer layer, boolean addToHistory) {
-        deleteLayer(layer, addToHistory, true);
-    }
-
-    public void deleteLayer(Layer layer, boolean addToHistory, boolean updateUI) {
-        assert layer.getComp() == this;
-        assert layer.isDirectChildOf(this);
-        assert layerList.size() >= 2;
-
-        int deletedIndex = layerList.indexOf(layer);
-        if (addToHistory) {
-            History.add(new DeleteLayerEdit(this, layer, deletedIndex));
-        }
-
-        layerList.remove(deletedIndex);
-
-        if (layer.contains(activeLayer)) {
-            // the active layer was deleted, a new one must be activated
-            setActiveLayer(layerList.get(Math.max(0, deletedIndex - 1)));
-        }
-
-        if (updateUI) {
-            updateUIAfterLayerDeletion(layer);
-        }
-    }
-
-    private void updateUIAfterLayerDeletion(Layer deletedLayer) {
-        assert deletedLayer.isTopLevel();
-
-        LayerUI ui = deletedLayer.getUI();
-        if (ui == null) { // can be null if part of layer rasterization
-            return;
-        }
-
-        view.removeLayerUI(ui);
-        if (isActive()) {
-            LayerEvents.fireLayerCountChanged(this, layerList.size());
-        }
-        update();
+    public void reorderLayerUI(int oldIndex, int newIndex) {
+        view.reorderLayerUI(oldIndex, newIndex);
     }
 
     @Override
-    public void reorderLayerUI(int oldIndex, int newIndex) {
-        view.reorderLayerUI(oldIndex, newIndex);
+    public void updateUIAfterLayerInsertion(Layer newLayer, int index) {
+        view.addLayerUI(newLayer, index);
+        fireLayerUICountChanged();
+    }
+
+    @Override
+    public void updateUIAfterLayerDeletion(Layer deletedLayer) {
+        assert deletedLayer.isTopLevel();
+
+        // only the view-related parts depend on the presence of a view and a UI
+        if (!isOpen()) {
+            return;
+        }
+        if (deletedLayer.hasUI()) { // can be missing, for example during layer rasterization
+            view.removeLayerUI(deletedLayer.getUI());
+        }
+        fireLayerUICountChanged();
     }
 
     @Override
@@ -825,31 +796,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         return false;
     }
 
-    @Override
-    public void replaceLayer(Layer before, Layer after) {
-        boolean containedActive = before.contains(activeLayer);
-
-        before.transferMaskAndUITo(after);
-
-        int layerIndex = layerList.indexOf(before);
-        assert layerIndex != -1;
-        layerList.set(layerIndex, after);
-
-        if (containedActive) {
-            // Avoids calling setActiveLayer, because it would set the mask view mode to NORMAL.
-
-            // This means that after a rasterization undo, the active layer status
-            // won't be restored correctly if a container of the active layer was
-            // rasterized. However, normally rasterization is called on the active layer.
-            activeLayer = after;
-
-            after.updateUI(); // the UI was transferred while 'before' was still the active layer
-        }
-
-        assert checkInvariants();
-    }
-
-    // only sets the active layer reference directly
+    // only sets the active layer reference directly,
+    // skipping events, UI updates and history
     public void setActiveLayerRef(Layer activeLayer) {
         this.activeLayer = activeLayer;
     }
@@ -910,8 +858,8 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     @Override
-    public Stream<? extends Layer> directChildrenStream() {
-        return layerList.stream();
+    public Iterable<? extends Layer> directChildren() {
+        return layerList;
     }
 
     @Override
@@ -987,62 +935,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
         layerList.forEach(action);
     }
 
-    public void forEachNestedLayerAndMask(Consumer<Layer> action) {
-        forEachNestedLayer(action, true);
-    }
-
-    /**
-     * Applies an action to all nested layers, traversing groups and smart objects.
-     */
-    public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
-        for (Layer layer : layerList) {
-            layer.forEachNestedLayer(action, includeMasks);
-        }
-    }
-
-    /**
-     * Applies an action to all nested layers of a specific type.
-     */
-    public <T extends Layer> void forEachNestedLayerOfType(Class<T> layerType, Consumer<T> action) {
-        forEachNestedLayer(layer -> {
-            if (layerType.isInstance(layer)) {
-                action.accept(layerType.cast(layer));
-            }
-        }, false);
-    }
-
     /**
      * Applies the given action to all nested smart objects recursively.
      */
     public void forEachNestedSmartObject(Consumer<SmartObject> action) {
         forEachNestedLayerOfType(SmartObject.class, so -> so.forEachNestedSmartObject(action));
-    }
-
-    /**
-     * Recursively searches for any layer that satisfies the given predicate.
-     */
-    public Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
-        for (Layer layer : layerList) {
-            Layer foundLayer = layer.findFirstLayerWhere(predicate, includeMasks);
-            if (foundLayer != null) {
-                return foundLayer;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Finds the topmost layer that is opaque at a given image-space point.
-     */
-    public Layer findTopmostOpaqueLayer(Point p) {
-        assert isOpen();
-
-        // in mask editing mode never auto-select another layer
-        if (getMaskViewMode().isShowingMask()) {
-            return getActiveLayer();
-        }
-
-        return ContentLayer.findTopmostOpaqueLayer(layerList, p);
     }
 
     public Rectangle2D calcContentBounds(boolean includeTransparent) {
@@ -1488,35 +1385,6 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
     }
 
     /**
-     * Recursively checks if this composition contains
-     * the given layer at any nesting level.
-     */
-    @Override
-    public boolean contains(Layer searched) {
-        for (Layer layer : layerList) {
-            if (layer.contains(searched)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Recursively checks if this composition contains
-     * a layer of the given type at any nesting level.
-     * Content compositions inside smart objects are not checked.
-     */
-    @Override
-    public boolean containsLayerOfType(Class<? extends Layer> type) {
-        for (Layer layer : layerList) {
-            if (layer.containsLayerOfType(type)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Saves the current composition asynchronously.
      * A false in the return value indicates that saving failed.
      */
@@ -1735,7 +1603,11 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             if (!so.isContentOpen()) {
                 reloadFuture = reloadFuture
                     .thenComposeAsync(_ -> so.checkAutoReload(), onEDT)
-                    .exceptionally(_ -> null);
+                    .exceptionally(e -> {
+                        // a failing reload must not stop the others, but it must be visible
+                        Messages.showExceptionOnEDT(e);
+                        return null;
+                    });
             }
         }
         return reloadFuture;
@@ -1826,13 +1698,7 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
             throw new AssertionError("active layer '%s' not contained in '%s'"
                 .formatted(activeLayer.getName(), getDebugName()));
         }
-        for (Layer layer : layerList) {
-            if (!layer.isDirectChildOf(this)) {
-                throw new AssertionError(
-                    "bad holder in layer '%s' (that holder='%s', this='%s')".formatted(
-                        layer.getName(), layer.getHolder().getName(), getDebugName()));
-            }
-        }
+        checkDirectChildLinks();
 
         forEachNestedLayerAndMask(layer -> {
             layer.checkInvariants();
@@ -1842,6 +1708,15 @@ public class Composition implements Serializable, ImageSource, LayerHolder {
                         layer.getName(), layer.getComp().getDebugName(), getDebugName()));
             }
         });
+
+        // every layer must occur exactly once in the layer tree
+        Set<Layer> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        forEachNestedLayer(layer -> {
+            if (!seen.add(layer)) {
+                throw new AssertionError("layer '%s' occurs more than once in %s"
+                    .formatted(layer.getName(), getDebugName()));
+            }
+        }, false);
 
         // view consistency
         if (isOpen() && !view.isMock()) {

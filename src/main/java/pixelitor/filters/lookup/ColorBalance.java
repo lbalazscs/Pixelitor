@@ -98,17 +98,18 @@ public class ColorBalance extends ParametrizedFilter {
     }
 
     private void updateSlidersForSRGB() {
-        range1.reconfigure(CYAN_RED_TEXT, CYAN, RED);
-        range2.reconfigure(MAGENTA_GREEN_TEXT, MAGENTA, GREEN);
-        range3.reconfigure(YELLOW_BLUE_TEXT, YELLOW, BLUE);
+        range1.reconfigure(CYAN_RED_TEXT, "CR", CYAN, RED);
+        range2.reconfigure(MAGENTA_GREEN_TEXT, "MG", MAGENTA, GREEN);
+        range3.reconfigure(YELLOW_BLUE_TEXT, "YB", YELLOW, BLUE);
     }
 
     private void updateSlidersForOKLAB() {
-        range1.reconfigure(GUIText.RED_GREEN_A,
+        range1.reconfigure(GUIText.RED_GREEN_A, Channel.OK_A.getPresetKey(),
             Channel.OK_A.getDarkColor(), Channel.OK_A.getLightColor());
-        range2.reconfigure(GUIText.BLUE_YELLOW_B,
+        range2.reconfigure(GUIText.BLUE_YELLOW_B, Channel.OK_B.getPresetKey(),
             Channel.OK_B.getDarkColor(), Channel.OK_B.getLightColor());
-        range3.reconfigure("Dark-Light (L)", BLACK, WHITE);
+        range3.reconfigure("Dark-Light (L)", Channel.OK_L.getPresetKey(),
+            BLACK, WHITE);
     }
 
     @Override

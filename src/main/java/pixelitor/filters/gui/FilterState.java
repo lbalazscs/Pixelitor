@@ -22,8 +22,6 @@ import pixelitor.gui.utils.TaskAction;
 import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Captures the state of a list of {@link FilterParam}s.
@@ -48,12 +46,13 @@ public class FilterState implements Preset {
      * optionally including only animatable parameters.
      */
     public FilterState(ParamSet paramSet, boolean animOnly) {
-        Stream<FilterParam> paramStream = paramSet.getParams().stream();
-        if (animOnly) {
-            paramStream = paramStream.filter(FilterParam::isAnimatable);
+        states = new HashMap<>();
+        for (FilterParam param : paramSet.getParams()) {
+            if (!animOnly || param.isAnimatable()) {
+                ParamState<?> previous = states.put(param.getPresetKey(), param.copyState());
+                assert previous == null : "duplicate preset key " + param.getPresetKey();
+            }
         }
-        states = paramStream.collect(
-            Collectors.toMap(FilterParam::getPresetKey, FilterParam::copyState));
     }
 
     /**
@@ -76,18 +75,18 @@ public class FilterState implements Preset {
         if (progress < 0.0 || progress > 1.0) {
             throw new IllegalArgumentException("progress = " + progress);
         }
-        
-        Map<String, ParamState<?>> interpolatedStates = new HashMap<>();
+
+        Map<String, ParamState<?>> interpolatedStates = HashMap.newHashMap(states.size());
 
         // each ParamState is interpolated independently
         for (Map.Entry<String, ParamState<?>> entry : states.entrySet()) {
             String key = entry.getKey();
-            ParamState<?> startState = entry.getValue();
 
             // if the key was present in this state, it must also be present in the end state
             ParamState<?> endParamState = endState.get(key);
+            assert endParamState != null : "no end state for the key " + key;
 
-            ParamState<?> interpolated = interpolateSafely(startState, endParamState, progress);
+            ParamState<?> interpolated = interpolateSafely(entry.getValue(), endParamState, progress);
             interpolatedStates.put(key, interpolated);
         }
         return new FilterState(interpolatedStates);
@@ -143,6 +142,6 @@ public class FilterState implements Preset {
 
     @Override
     public String toString() {
-        return name;
+        return name != null ? name : "FilterState " + states;
     }
 }

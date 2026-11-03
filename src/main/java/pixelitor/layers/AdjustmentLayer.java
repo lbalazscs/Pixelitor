@@ -159,11 +159,50 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
         // Swaps the currently active filter object with the stored one.
         // Toggling the checkbox off swaps them back.
+        swapFilters();
+
+        holder.update(); // repaint with the currently active filter
+    }
+
+    /**
+     * Swaps the active filter with the stored backup.
+     */
+    private void swapFilters() {
         Filter tmp = filter;
         filter = filterBackup;
         filterBackup = tmp;
+    }
 
-        holder.update(); // repaint with the currently active filter
+    /**
+     * If the original is currently shown, undoes the reference swap
+     * done by setShowOriginal(true), so that 'filter' is the edited
+     * filter and 'filterBackup' is the pre-session state.
+     *
+     * @return true if the original was being shown
+     */
+    private boolean undoShowOriginalSwap() {
+        if (!showOriginal) {
+            return false;
+        }
+        swapFilters();
+        showOriginal = false;
+        return true;
+    }
+
+    /**
+     * Cleans up the transient state from the editing session.
+     */
+    private void endEditingSession() {
+        filterBackup = null;
+        showOriginal = false;
+    }
+
+    /**
+     * Returns true if the preview currently shows the original
+     * (pre-session) filter instead of the edited one.
+     */
+    protected boolean isShowingOriginal() {
+        return showOriginal;
     }
 
     @Override
@@ -181,42 +220,38 @@ public class AdjustmentLayer extends Layer implements Filterable {
 
     @Override
     public void onFilterDialogAccepted(String filterName) {
-        if (showOriginal) {
-            // We do not assume that accepting the dialog while "Show Original"
-            // is checked means the user wants to discard the changes.
-            // We switch the references, because filterBackup holds
-            // the modified state, and this is what we want to keep.
-            filter = filterBackup;
-            holder.update();
-        } else {
-            if (!tentative && filterSettingsChanged()) {
-                String editName = getName() + " Changed";
-                History.add(new FilterChangedEdit(editName, this, filterBackup, null));
-            }
+        // Accepting while "Show Original" is checked doesn't mean that the user
+        // wants to discard the changes. Undoing the swap makes 'filter' the edited
+        // filter and 'filterBackup' the pre-session state, as in the normal case.
+        boolean wasShowingOriginal = undoShowOriginalSwap();
+
+        if (!tentative && filterSettingsChanged()) {
+            String editName = getName() + " Changed";
+            History.add(new FilterChangedEdit(editName, this, filterBackup, null));
         }
 
-        // clean up the transient state from the editing session
-        filterBackup = null;
-        showOriginal = false;
+        endEditingSession();
+
+        if (wasShowingOriginal) {
+            // the display was showing the original settings
+            holder.update();
+        }
     }
 
     @Override
     public void onFilterDialogCanceled() {
-        // if showOriginal is true, filter already holds
-        // the original state, so no change is needed
-        if (!showOriginal) {
-            // restore the filter state from before the dialog was opened
-            filter = filterBackup;
+        // After this, 'filterBackup' is the pre-session state,
+        // whether or not "Show Original" was checked.
+        undoShowOriginalSwap();
 
-            // when the filter was copied, then it wasn't adjusted to the image size
-            adaptToContext();
+        // restore the filter state from before the dialog was opened
+        filter = filterBackup;
 
-            holder.update();
-        }
+        // the backup is a copy, which wasn't adapted to the image size
+        adaptToContext();
 
-        // clean up the transient state from the editing session
-        filterBackup = null;
-        showOriginal = false;
+        endEditingSession();
+        holder.update();
     }
 
     /**

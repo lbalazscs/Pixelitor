@@ -18,9 +18,12 @@
 package pixelitor.layers;
 
 import pixelitor.Composition;
+import pixelitor.gui.View;
 
 import java.awt.EventQueue;
 import java.io.Serial;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * A {@link ContentLayer} that is also a {@link LayerHolder},
@@ -52,9 +55,57 @@ public abstract class CompositeLayer extends ContentLayer implements LayerHolder
     }
 
     private void revalidateUI() {
-        LayersPanel layersPanel = comp.getView().getLayersPanel();
+        View view = comp.getView();
+        if (view == null) {
+            // the method runs via invokeLater, so the
+            // composition might have been closed in the meantime
+            return;
+        }
+        LayersPanel layersPanel = view.getLayersPanel();
         if (layersPanel != null) { // null in unit tests
             layersPanel.revalidate();
         }
+    }
+
+    // Layer's concrete implementation would win over the LayerHolder
+    // default, so the two must be combined explicitly: children first,
+    // then this layer and its mask.
+    @Override
+    public final void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
+        LayerHolder.super.forEachNestedLayer(action, includeMasks); // children
+        super.forEachNestedLayer(action, includeMasks);             // self, then mask
+    }
+
+    @Override
+    public final Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
+        Layer found = LayerHolder.super.findFirstLayerWhere(predicate, includeMasks);
+        if (found != null) {
+            return found;
+        }
+        return super.findFirstLayerWhere(predicate, includeMasks);
+    }
+
+    @Override
+    public final boolean contains(Layer layer) {
+        return super.contains(layer) || LayerHolder.super.contains(layer);
+    }
+
+    @Override
+    public void setComp(Composition comp) {
+        super.setComp(comp);
+
+        for (Layer child : directChildren()) {
+            child.setComp(comp);
+        }
+    }
+
+    @Override
+    public void updateUIAfterLayerInsertion(Layer newLayer, int index) {
+        updateChildrenUI();
+    }
+
+    @Override
+    public void updateUIAfterLayerDeletion(Layer deletedLayer) {
+        updateChildrenUI(); // not used by SmartObject, which has its own deleteLayer
     }
 }

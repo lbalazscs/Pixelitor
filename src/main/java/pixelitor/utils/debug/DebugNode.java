@@ -25,7 +25,7 @@ import pixelitor.utils.Utils;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -65,6 +65,8 @@ public class DebugNode extends DefaultMutableTreeNode {
 
     /**
      * Returns a JSON text representation of the tree.
+     * This is not necessarily a perfectly formatted and escaped JSON string,
+     * just something that can be conveniently inspected in a JSON editor.
      */
     public String toJson() {
         // start recursion with indentation level 0

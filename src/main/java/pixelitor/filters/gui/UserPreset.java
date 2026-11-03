@@ -26,7 +26,9 @@ import pixelitor.utils.Messages;
 
 import javax.swing.*;
 import java.awt.Color;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
@@ -41,13 +43,14 @@ import java.util.function.Function;
  * for saving to and loading from text files.
  */
 public class UserPreset implements Preset {
+    public static final String PRESET_EXTENSION = ".txt";
+    public static final String PRESETS_DIR = initPresetsDirectory();
+
     private final String name;
     private File file; // can be null for new or built-in presets
     private final String directoryName; // subdirectory for this type of preset
     private boolean contentLoaded; // whether the preset content is loaded in memory
     private final Map<String, String> content = new LinkedHashMap<>();
-
-    public static final String PRESETS_DIR = initPresetsDirectory();
 
     private static String initPresetsDirectory() {
         String baseDir = null;
@@ -119,7 +122,12 @@ public class UserPreset implements Preset {
         return this.get(key, null);
     }
 
-    private String get(String key, String legacyKey) {
+    /**
+     * Returns the value for the given key, falling back to the legacy key
+     * if the first one is missing. Returns null if neither is found.
+     */
+    public String get(String key, String legacyKey) {
+        assert key != null;
         String value = content.get(key);
         if (value == null && legacyKey != null) {
             value = content.get(legacyKey);
@@ -244,23 +252,24 @@ public class UserPreset implements Preset {
         return clazz.getEnumConstants()[0];
     }
 
-    //  uses a simple key=value format instead of
-    //  java.util.Properties to avoid escaping spaces in keys
-    private void loadFromFile() throws IOException {
+    private void loadFromFile() {
         assert !contentLoaded;
 
-        try (BufferedReader br = Files.newBufferedReader(file.toPath())) {
-            loadFromReader(br);
+        try {
+            loadFromLines(Files.readAllLines(file.toPath()));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
 
         contentLoaded = true;
     }
 
-    private void loadFromReader(BufferedReader br) throws IOException {
-        String line;
-        while ((line = br.readLine()) != null) {
+    // uses a simple key=value format instead of
+    // java.util.Properties to avoid escaping spaces in keys
+    private void loadFromLines(List<String> lines) {
+        for (String line : lines) {
             int index = line.indexOf('=');
-            if (index > 0) {
+            if (index > 0) { // lines without a key are ignored
                 String key = line.substring(0, index).trim();
                 String value = line.substring(index + 1).trim();
                 content.put(key, value);
@@ -269,11 +278,7 @@ public class UserPreset implements Preset {
     }
 
     public void loadFromString(String s) {
-        try {
-            loadFromReader(new BufferedReader(new StringReader(s)));
-        } catch (IOException e) {
-            Messages.showException(e);
-        }
+        loadFromLines(s.lines().toList());
     }
 
     /**
@@ -306,11 +311,7 @@ public class UserPreset implements Preset {
     public Action createAction(PresetOwner owner) {
         return new TaskAction(name, () -> {
             if (!contentLoaded) {
-                try {
-                    loadFromFile();
-                } catch (IOException ex) {
-                    throw new UncheckedIOException(ex);
-                }
+                loadFromFile();
             }
             owner.loadUserPreset(this);
         });
@@ -320,23 +321,18 @@ public class UserPreset implements Preset {
      * Detects all presets in the given directory by listing files
      * ending in ".txt". The presets' contents are not loaded into memory.
      */
-    public static List<UserPreset> detectPresetNames(String presetDirName) {
+    public static List<UserPreset> detectPresets(String presetDirName) {
         Objects.requireNonNull(presetDirName);
 
-        File presetsDir = getSaveDir(presetDirName);
-        if (!presetsDir.exists()) {
+        File[] files = getSaveDir(presetDirName).listFiles(
+            f -> f.isFile() && f.getName().endsWith(PRESET_EXTENSION));
+        if (files == null) {
             return List.of();
         }
 
-        String[] fileNames = presetsDir.list((_, name) -> name.endsWith(".txt"));
-        if (fileNames == null || fileNames.length == 0) {
-            return List.of();
-        }
-
-        return Arrays.stream(fileNames)
-            .sorted()
-            .map(fileName -> new File(presetsDir, fileName))
-            .map(file -> new UserPreset(file, presetDirName))
+        return Arrays.stream(files)
+            .sorted(Comparator.comparing(File::getName, String.CASE_INSENSITIVE_ORDER))
+            .map(f -> new UserPreset(f, presetDirName))
             .toList();
     }
 
@@ -355,10 +351,13 @@ public class UserPreset implements Preset {
                 throw new UncheckedIOException(e);
             }
         }
-        return new File(dir, name + ".txt");
+        return new File(dir, name + PRESET_EXTENSION);
     }
 
-    private static File getSaveDir(String presetDirName) {
+    /**
+     * Returns the directory where the user presets of the given type are stored.
+     */
+    public static File getSaveDir(String presetDirName) {
         return new File(PRESETS_DIR, presetDirName);
     }
 

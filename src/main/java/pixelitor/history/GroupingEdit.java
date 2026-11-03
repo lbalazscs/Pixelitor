@@ -30,16 +30,29 @@ import javax.swing.undo.CannotUndoException;
 public class GroupingEdit extends PixelitorEdit {
     private final LayerHolder holder;
     private final LayerGroup group;
-    private final int[] prevIndices;
+
+    // the indices of the group's children in the holder in the ungrouped state
+    private final int[] ungroupedIndices;
+    // the index of the group in the holder in the grouped state
+    // (can't be derived from the indices if the group is empty)
+    private final int groupIndex;
+
+    // the active layer before the original operation (can be null)
     private final Layer activeLayerBefore;
     private final boolean isGrouping; // whether this is a grouping or ungrouping
 
-    public GroupingEdit(LayerHolder holder, LayerGroup group, int[] prevIndices, Layer activeLayerBefore, boolean isGrouping) {
+    public GroupingEdit(LayerHolder holder, LayerGroup group,
+                        int[] ungroupedIndices, int groupIndex,
+                        Layer activeLayerBefore, boolean isGrouping) {
         super(isGrouping ? "Grouping" : "Ungrouping", holder.getComp());
+
+        assert ungroupedIndices != null;
+        assert groupIndex >= 0;
 
         this.holder = holder;
         this.group = group;
-        this.prevIndices = prevIndices;
+        this.ungroupedIndices = ungroupedIndices;
+        this.groupIndex = groupIndex;
         this.activeLayerBefore = activeLayerBefore;
         this.isGrouping = isGrouping;
     }
@@ -53,12 +66,15 @@ public class GroupingEdit extends PixelitorEdit {
         } else {
             group();
         }
+        restoreActiveLayer();
     }
 
     @Override
     public void redo() throws CannotRedoException {
         super.redo();
 
+        // the active layer is deliberately not restored here, because
+        // the original operation also left the new state's layer active
         if (isGrouping) {
             group();
         } else {
@@ -67,13 +83,14 @@ public class GroupingEdit extends PixelitorEdit {
     }
 
     private void ungroup() {
-        group.replaceWithUngrouped(prevIndices, false);
+        group.replaceWithUngrouped(ungroupedIndices, false);
     }
 
     private void group() {
-        holder.convertToGroup(prevIndices, group, false);
+        holder.regroup(ungroupedIndices, groupIndex, group);
+    }
 
-        // restore the active layer that was active before
+    private void restoreActiveLayer() {
         if (activeLayerBefore != null && comp.contains(activeLayerBefore)) {
             comp.setActiveLayer(activeLayerBefore, false, null);
         }

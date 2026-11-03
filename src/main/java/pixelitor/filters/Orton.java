@@ -18,6 +18,7 @@
 package pixelitor.filters;
 
 import com.jhlabs.composite.MultiplyComposite;
+import com.jhlabs.composite.ScreenComposite;
 import com.jhlabs.image.BoxBlurFilter;
 import pixelitor.filters.gui.Help;
 import pixelitor.filters.gui.RangeParam;
@@ -67,7 +68,13 @@ public class Orton extends ParametrizedFilter {
         var pt = new StatusBarProgressTracker(NAME, totalWorkUnits);
 
         dest = ImageUtils.copyImage(src);
-        ImageUtils.screenWithItself(dest, opacity);
+
+        // screen the image with itself
+        Graphics2D screenG = dest.createGraphics();
+        screenG.setComposite(new ScreenComposite(opacity));
+        screenG.drawImage(dest, 0, 0, null);
+        screenG.dispose();
+
         BufferedImage blurredMultiplied = ImageUtils.copyImage(dest);
 
         pt.unitsDone(blurWorkUnits / 2);

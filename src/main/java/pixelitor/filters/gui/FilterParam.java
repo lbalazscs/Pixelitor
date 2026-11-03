@@ -37,11 +37,6 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     }
 
     /**
-     * Sets a random value without triggering any filter update.
-     */
-    void randomize();
-
-    /**
      * Can be used to adapt the offered ranges/choices to the active
      * layer, composition or the list of open compositions.
      */
@@ -82,17 +77,10 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     /**
      * Loads the state from the given user preset,
      * updating the GUI, and without triggering the filter.
+     * Composite parameters override this method.
      */
     default void loadStateFrom(UserPreset preset) {
-        // overridden in the composite params
-        String savedValue = preset.get(getPresetKey());
-
-        if (savedValue == null) {
-            String legacyKey = getLegacyPresetKey();
-            if (legacyKey != null) {
-                savedValue = preset.get(legacyKey);
-            }
-        }
+        String savedValue = preset.get(getPresetKey(), getLegacyPresetKey());
 
         if (savedValue != null) { // presets don't have to include everything
             loadStateFrom(savedValue);
@@ -101,9 +89,9 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
 
     /**
      * Saves the current state to the given user preset.
+     * Composite parameters override this method.
      */
     default void saveStateTo(UserPreset preset) {
-        // overridden in the composite params
         preset.put(getPresetKey(), copyState().toPresetString());
     }
 
@@ -112,6 +100,12 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
      * allowing it to be interpolated for tweening animations.
      */
     boolean isAnimatable();
+
+    /**
+     * Sets a random value without triggering any filter update.
+     * Does nothing if {@link #shouldRandomize()} is false.
+     */
+    void randomize();
 
     /**
      * Indicates whether this parameter should be randomized when
@@ -130,9 +124,9 @@ public non-sealed interface FilterParam extends FilterSetting, Resettable, Debug
     String getName();
 
     /**
-     * Sets the display name of this parameter.
+     * Changes the display name and preset key of this parameter.
      */
-    void setName(String displayName);
+    void reconfigure(String displayName, String presetKey);
 
     /**
      * Sets a tooltip message for the GUI widget associated with this parameter.

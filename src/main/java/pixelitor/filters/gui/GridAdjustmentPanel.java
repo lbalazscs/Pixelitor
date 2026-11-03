@@ -25,7 +25,6 @@ import pixelitor.layers.Filterable;
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.awt.BorderLayout.CENTER;
@@ -38,51 +37,37 @@ import static java.awt.BorderLayout.SOUTH;
  */
 public class GridAdjustmentPanel extends ParametrizedFilterGUI {
     private static final int MAX_GRID_PARAMS = 4;
-    private boolean addGridLabels;
+    private final boolean addGridLabels;
 
     public GridAdjustmentPanel(ParametrizedFilter filter, Filterable layer,
-                               boolean addGridLabels, boolean showOriginal, boolean resetSettings) {
-        super(filter, layer, showOriginal, resetSettings);
+                               boolean addGridLabels, boolean showOriginal,
+                               boolean resetSettings) {
+        // assigned before super(...) so createFilterParamsPanel() sees the value
         this.addGridLabels = addGridLabels;
+        super(filter, layer, showOriginal, resetSettings);
     }
 
     @Override
     public JPanel createFilterParamsPanel(ParamSet paramSet) {
-        // hack, otherwise the setting of the flag in the constructor is too late,
-        // because this is called by the superclass constructor
-        boolean fourColorGradient = filter instanceof JHFourColorGradient;
-        if (fourColorGradient) {
-            addGridLabels = true;
-        }
+        List<FilterParam> params = paramSet.getParams();
+        int numGridParams = Math.min(params.size(), MAX_GRID_PARAMS);
 
-        // the central panel, with maximum MAX_GRID_PARAMS controls
+        // each param takes 1 cell, or 2 if it has a label
         int numCols = addGridLabels ? 4 : 2;
         JPanel gridPanel = new JPanel(new GridLayout(2, numCols, 5, 5));
-
-        List<FilterParam> paramList = paramSet.getParams();
-        int numParams = paramList.size();
-
-
-        List<FilterParam> extraParams = new ArrayList<>();
-        for (int i = 0; i < numParams; i++) {
-            FilterParam param = paramList.get(i);
-
-            // the first 4 are added into the 4 grid positions
-            if (i < MAX_GRID_PARAMS) {
-                if (addGridLabels) {
-                    gridPanel.add(new JLabel(param.getName() + ':'));
-                }
-                gridPanel.add(param.createGUI());
-            } else {
-                extraParams.add(param);
+        for (FilterParam param : params.subList(0, numGridParams)) {
+            if (addGridLabels) {
+                gridPanel.add(new JLabel(param.getName() + ':'));
             }
+            gridPanel.add(param.createGUI());
         }
 
-        if (numParams <= MAX_GRID_PARAMS) {
+        if (params.size() <= MAX_GRID_PARAMS) {
             return gridPanel;
         }
 
-        JPanel extraParamsPanel = fourColorGradient
+        List<FilterParam> extraParams = params.subList(MAX_GRID_PARAMS, params.size());
+        JPanel extraParamsPanel = filter instanceof JHFourColorGradient
             ? GUIUtils.createVerticalPanel(extraParams)
             : GUIUtils.createHorizontalPanel(extraParams);
 

@@ -119,20 +119,24 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         LayerHolder holder = comp.getHolderForNewLayers();
         holder.add(textLayer);
 
-        var settingsPanel = new TextSettingsPanel(textLayer);
-        boolean accepted = new DialogBuilder()
-            .title("Create Text Layer")
-            .menuBar(textLayer.getMenuBar())
-            .content(settingsPanel)
-            .withScrollbars()
-            .align(FRAME_RIGHT)
+        boolean accepted = textLayer.settingsDialogBuilder("Create Text Layer")
             .okAction(() ->
                 textLayer.finalizeCreation(prevActiveLayer, prevViewMode))
             .cancelAction(() -> holder.deleteLayer(textLayer, false))
-            .closeAction(settingsPanel::dispose)
             .show()
             .wasAccepted();
         return accepted ? textLayer : null;
+    }
+
+    private DialogBuilder settingsDialogBuilder(String title) {
+        var panel = new TextSettingsPanel(this);
+        return new DialogBuilder()
+            .title(title)
+            .menuBar(getMenuBar())
+            .content(panel)
+            .withScrollbars()
+            .align(FRAME_RIGHT)
+            .closeAction(panel::dispose);
     }
 
     /**
@@ -149,17 +153,10 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     @Override
     public boolean showEditUI() {
         TextSettings prevSettings = getSettings();
-        var settingsPanel = new TextSettingsPanel(this);
 
-        return new DialogBuilder()
-            .title("Edit Text Layer")
-            .menuBar(getMenuBar())
-            .content(settingsPanel)
-            .withScrollbars()
-            .align(FRAME_RIGHT)
+        return settingsDialogBuilder("Edit Text Layer")
             .okAction(() -> commitSettings(prevSettings))
             .cancelAction(() -> restorePrevSettings(prevSettings))
-            .closeAction(settingsPanel::dispose)
             .show()
             .wasAccepted();
     }
@@ -288,7 +285,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     public void prepareMovement() {
         super.prepareMovement();
         if (painter.isOnPath()) {
-            comp.getActivePath().getSubPath(0).saveImTransformRefPoints();
+            comp.getActivePath().saveImTransformRefPoints();
         }
     }
 
@@ -298,7 +295,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
         painter.setTranslation(getTx(), getTy());
         if (painter.isOnPath()) {
             AffineTransform at = AffineTransform.getTranslateInstance(imDx, imDy);
-            comp.getActivePath().getSubPath(0).imTransform(at);
+            comp.getActivePath().imTransform(at);
         }
     }
 
@@ -506,7 +503,7 @@ public class TextLayer extends ContentLayer implements DialogMenuOwner {
     /**
      * Switches this text layer to use path-based alignment.
      */
-    public void usePathEditing() {
+    public void switchToPathAlignment() {
         applySettings(settings.withAlignment(BoxAlignment.PATH));
         painter.pathChanged();
         update();

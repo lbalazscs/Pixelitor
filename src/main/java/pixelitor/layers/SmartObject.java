@@ -32,7 +32,6 @@ import pixelitor.gui.utils.TaskAction;
 import pixelitor.history.*;
 import pixelitor.io.FileChoosers;
 import pixelitor.io.FileIO;
-import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.Threads;
 import pixelitor.utils.Utils;
@@ -49,8 +48,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static pixelitor.layers.LayerMoveDirection.DOWN;
 import static pixelitor.layers.LayerMoveDirection.UP;
@@ -275,7 +272,8 @@ public class SmartObject extends CompositeLayer {
                     setContent(loadedComp);
                     invalidateIconImageCache();
                     holder.update();
-                }, onEDT);
+                }, onEDT)
+                .exceptionally(Messages::showExceptionOnEDT);
         } else {
             // if the user gives up, use the previously created transparent image
             linkedContentFile = null;
@@ -338,7 +336,8 @@ public class SmartObject extends CompositeLayer {
      * smart object when they are repainted.
      */
     public void propagateContentChanges(Composition content, boolean force) {
-        // the content reference might have been changed during editing (e.g., by undo)
+        // the content reference might have been changed during editing
+        // (e.g., by undo) or by reloading it from its file
         setContent(content);
 
         if (!content.isDirty() && !force) {
@@ -473,8 +472,8 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public void insertLayer(Layer newLayer, int index, boolean update) {
-        insertSmartFilter((SmartFilter) newLayer, index, update, true);
+    public void insertLayer(Layer newLayer, int index) {
+        insertSmartFilter((SmartFilter) newLayer, index, true, true);
     }
 
     private void rewireFilterChain() {
@@ -504,7 +503,7 @@ public class SmartObject extends CompositeLayer {
 
             // the new filter itself keeps its cache, which is important for undo
             newFilter.invalidateDownstream();
-            
+
             invalidateImageCache();
             invalidateIconImageCache();
             holder.update();
@@ -521,13 +520,21 @@ public class SmartObject extends CompositeLayer {
         if (index == -1) {
             throw new IllegalStateException(filter.getName() + " not found in " + getName());
         }
+
+        // must be created before the removal, because it captures
+        // the active layer and its mask view mode, and
+        // deleteSmartFilterAtIndex always activates a neighbor
+        DeleteLayerEdit deleteEdit = addToHistory
+            ? new DeleteLayerEdit(this, filter, index)
+            : null;
+
         deleteSmartFilterAtIndex(index);
 
         filter.setNext(null);
 
         fireSmartFilterCountChanged();
-        if (addToHistory) {
-            History.add(new DeleteLayerEdit(this, filter, index));
+        if (deleteEdit != null) {
+            History.add(deleteEdit);
         }
 
         invalidateImageCache();
@@ -597,13 +604,14 @@ public class SmartObject extends CompositeLayer {
     }
 
     private CompletableFuture<Composition> reloadLinkedContentAsync() {
-        return reloadContent(linkedContentFile);
-    }
+        // the timestamp is read before the loading starts, so that
+        // if the file is modified while it is being loaded,
+        // the next auto-check will still notice the newer version
+        updateLinkedContentTimestamp();
 
-    private CompletableFuture<Composition> reloadContent(File file) {
-        return FileIO.loadCompAsync(file)
+        return FileIO.loadCompAsync(linkedContentFile)
             .thenApplyAsync(loadedContent -> {
-                setContent(loadedContent);
+                // this also replaces the content reference
                 propagateContentChanges(loadedContent, true);
                 findNearestOpenView().repaint();
                 return loadedContent;
@@ -669,15 +677,6 @@ public class SmartObject extends CompositeLayer {
         return imageTransformer != null ? imageTransformer : content;
     }
 
-    @Override
-    public void setComp(Composition comp) {
-        super.setComp(comp);
-
-        for (SmartFilter filter : filters) {
-            filter.setComp(comp);
-        }
-    }
-
     /**
      * Returns the composition responsible for saving the contents of this smart object to its file.
      */
@@ -713,26 +712,11 @@ public class SmartObject extends CompositeLayer {
         double sy = newSize.getHeight() / comp.getCanvasHeight();
 
         setTranslation((int) (getTx() * sx), (int) (getTy() * sy));
-        AffineTransform newScaling = AffineTransform.getScaleInstance(sx, sy);
-
-        if (imageTransformer == null) {
-            imageTransformer = new ImageTransformer(content, newScaling, newSize.width, newSize.height);
-            rewireFilterChain();
-        } else {
-            imageTransformer.chainTransform(newScaling, newSize.width, newSize.height);
-        }
-        invalidateAllCaches(false);
-
-        if (filters.isEmpty()) {
-            return CompletableFuture.completedFuture(null);
-        }
+        applyImageTransform(AffineTransform.getScaleInstance(sx, sy),
+            newSize.width, newSize.height);
 
         List<CompletableFuture<Void>> futures = new ArrayList<>();
-        for (SmartFilter filter : filters) {
-            if (filter.hasMask()) {
-                futures.add(filter.getMask().resize(newSize));
-            }
-        }
+        forEachFilterMask(mask -> futures.add(mask.resize(newSize)));
         if (futures.isEmpty()) { // no smart filter has a mask
             return CompletableFuture.completedFuture(null);
         }
@@ -742,48 +726,101 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public void flip(FlipDirection direction, boolean layerTransform) {
-        AffineTransform flipTransform = direction.createImTransform(getVisibleImage());
-        int targetWidth = comp.getCanvasWidth();
-        int targetHeight = comp.getCanvasHeight();
-        if (imageTransformer == null) {
-            imageTransformer = new ImageTransformer(content, flipTransform, targetWidth, targetHeight);
-            rewireFilterChain();
-        } else {
-            imageTransformer.chainTransform(flipTransform, targetWidth, targetHeight);
-        }
-        invalidateAllCaches(false);
+        // A layer-only flip would need its own history edit. The only callers
+        // passing true (FlipDirection.createActiveLayerAction) accept only
+        // image layers, so this is never expected to happen for smart objects.
+        assert !layerTransform : "layer-only flip is not supported for smart objects";
 
-        for (SmartFilter filter : filters) {
-            if (filter.hasMask()) {
-                filter.getMask().flip(direction, false);
-            }
+        BufferedImage img = getVisibleImage();
+        int imgWidth = img.getWidth();
+        int imgHeight = img.getHeight();
+
+        // the same translation formulas as in ImageLayer.flip
+        int newTx;
+        int newTy;
+        if (direction == FlipDirection.HORIZONTAL) {
+            newTx = comp.getCanvasWidth() - imgWidth - getTx();
+            newTy = getTy();
+        } else {
+            newTx = getTx();
+            newTy = comp.getCanvasHeight() - imgHeight - getTy();
         }
+
+        // a flip doesn't change the image size
+        applyImageTransform(direction.createImTransform(img), imgWidth, imgHeight);
+        setTranslation(newTx, newTy);
+
+        forEachFilterMask(mask -> mask.flip(direction, false));
     }
 
     @Override
     public void rotate(QuadrantAngle angle, boolean layerTransform) {
-        AffineTransform rotation = angle.createImTransform(getVisibleImage());
-        int targetWidth = comp.getCanvasWidth();
-        int targetHeight = comp.getCanvasHeight();
+        // see the comment in flip()
+        assert !layerTransform : "layer-only rotation is not supported for smart objects";
 
-        if (imageTransformer == null) {
-            imageTransformer = new ImageTransformer(content, rotation, targetWidth, targetHeight);
-            rewireFilterChain();
-        } else {
-            imageTransformer.chainTransform(rotation, targetWidth, targetHeight);
-        }
-        invalidateAllCaches(false);
+        BufferedImage img = getVisibleImage();
+        int imgWidth = img.getWidth();
+        int imgHeight = img.getHeight();
 
-        for (SmartFilter filter : filters) {
-            if (filter.hasMask()) {
-                filter.getMask().rotate(angle, false);
+        // These are still the old canvas dimensions, because the layers
+        // are transformed before the canvas is resized. The translation
+        // formulas of ImageLayer.rotateFullComp rely on the same thing.
+        int canvasWidth = comp.getCanvasWidth();
+        int canvasHeight = comp.getCanvasHeight();
+
+        // the same translation formulas as in ImageLayer.rotateFullComp
+        int newTx;
+        int newTy;
+        switch (angle.getAngleDegrees()) {
+            case 90 -> {
+                newTx = canvasHeight - imgHeight - getTy();
+                newTy = getTx();
             }
+            case 270 -> {
+                newTx = getTy();
+                newTy = canvasWidth - imgWidth - getTx();
+            }
+            case 180 -> {
+                newTx = canvasWidth - imgWidth - getTx();
+                newTy = canvasHeight - imgHeight - getTy();
+            }
+            default -> throw new IllegalStateException("angle = " + angle.getAngleDegrees());
         }
+
+        // 90 and 270 degrees swap the image dimensions
+        boolean swapDimensions = angle != QuadrantAngle.ANGLE_180;
+        int newImgWidth = swapDimensions ? imgHeight : imgWidth;
+        int newImgHeight = swapDimensions ? imgWidth : imgHeight;
+
+        applyImageTransform(angle.createImTransform(img), newImgWidth, newImgHeight);
+        setTranslation(newTx, newTy);
+
+        forEachFilterMask(mask -> mask.rotate(angle, false));
     }
 
     @Override
     public void rotate(double angleRadians, boolean layerTransform) {
         throw new UnsupportedOperationException("not implemented yet");
+    }
+
+    // applies a new transform to the output of the content, creating
+    // the transformer on the first transform and chaining it afterwards
+    private void applyImageTransform(AffineTransform at, int targetWidth, int targetHeight) {
+        if (imageTransformer == null) {
+            imageTransformer = new ImageTransformer(content, at, targetWidth, targetHeight);
+            rewireFilterChain(); // the filters must now read from the transformer
+        } else {
+            imageTransformer.chainTransform(at, targetWidth, targetHeight);
+        }
+        invalidateAllCaches(false);
+    }
+
+    private void forEachFilterMask(Consumer<LayerMask> action) {
+        for (SmartFilter filter : filters) {
+            if (filter.hasMask()) {
+                action.accept(filter.getMask());
+            }
+        }
     }
 
     @Override
@@ -844,6 +881,7 @@ public class SmartObject extends CompositeLayer {
         // invalidate from the first of the swapped filters' new position
         filters.get(Math.min(indexA, indexB)).invalidateChain();
         invalidateImageCache();
+        invalidateIconImageCache();
         holder.update();
     }
 
@@ -874,42 +912,6 @@ public class SmartObject extends CompositeLayer {
             }
         }
         return null; // the smart object as a whole is selected
-    }
-
-    @Override
-    public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
-        action.accept(this);
-        if (includeMasks && hasMask()) {
-            action.accept(getMask());
-        }
-        for (SmartFilter filter : filters) {
-            action.accept(filter);
-            if (includeMasks && filter.hasMask()) {
-                action.accept(filter.getMask());
-            }
-        }
-    }
-
-    @Override
-    public Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
-        if (predicate.test(this)) {
-            return this;
-        }
-
-        if (includeMasks && hasMask() && predicate.test(getMask())) {
-            return getMask();
-        }
-
-        for (SmartFilter filter : filters) {
-            if (predicate.test(filter)) {
-                return filter;
-            }
-            if (includeMasks && filter.hasMask() && predicate.test(filter.getMask())) {
-                return filter.getMask();
-            }
-        }
-
-        return null;
     }
 
     @Override
@@ -990,6 +992,10 @@ public class SmartObject extends CompositeLayer {
 
     @Override
     public int indexOf(Layer layer) {
+        // All LayerHolder methods deliberately cast Layer arguments to
+        // SmartFilter, throwing a ClassCastException if used with any
+        // other child type. A smart object should only hold smart filters,
+        // so any other child type indicates a programming error.
         return filters.indexOf((SmartFilter) layer);
     }
 
@@ -1009,8 +1015,8 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public Stream<SmartFilter> directChildrenStream() {
-        return filters.stream();
+    public Iterable<SmartFilter> directChildren() {
+        return filters;
     }
 
     @Override
@@ -1038,37 +1044,6 @@ public class SmartObject extends CompositeLayer {
     }
 
     @Override
-    public boolean contains(Layer layer) {
-        if (layer == this) {
-            return true;
-        }
-        for (SmartFilter filter : filters) {
-            if (filter == layer) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean containsLayerOfType(Class<? extends Layer> type) {
-        // check if the smart object itself is of the given type
-        if (type.isInstance(this)) {
-            return true;
-        }
-
-        // check if any of the smart filters are of the given type
-        for (SmartFilter filter : filters) {
-            if (filter.containsLayerOfType(type)) {
-                return true;
-            }
-        }
-
-        // stop here; callers don't need to check the content.
-        return false;
-    }
-
-    @Override
     protected BufferedImage transformImage(BufferedImage src) {
         throw new UnsupportedOperationException();
     }
@@ -1091,7 +1066,7 @@ public class SmartObject extends CompositeLayer {
         if (image != null) {
             // this could be stale data, however this method is
             // called by the Move Tool, which doesn't modify the pixels
-            return ImageUtils.getPixelAt(this, image, p);
+            return HitTesting.getPixelAt(this, image, p);
         }
         return 0;
     }

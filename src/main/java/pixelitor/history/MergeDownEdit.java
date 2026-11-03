@@ -34,7 +34,6 @@ import java.awt.image.BufferedImage;
 public class MergeDownEdit extends PixelitorEdit {
     private final ImageEdit imageEdit;
     private final DeleteLayerEdit deleteLayerEdit;
-    private final MaskViewMode maskViewMode;
     private final Layer layer;
     private final ImageLayer belowLayer;
 
@@ -42,17 +41,19 @@ public class MergeDownEdit extends PixelitorEdit {
                          Layer layer,
                          ImageLayer belowLayer,
                          BufferedImage backupImage,
-                         MaskViewMode maskViewMode,
-                         int activeIndex) {
+                         Layer activeLayerBefore,
+                         MaskViewMode maskViewModeBefore,
+                         int layerIndex) {
         super(GUIText.MERGE_DOWN, holder.getComp(), true);
 
         this.layer = layer;
-        this.maskViewMode = maskViewMode;
         this.belowLayer = belowLayer;
 
         imageEdit = new ImageEdit("", comp, belowLayer, backupImage, true);
         imageEdit.setEmbedded(true);
-        deleteLayerEdit = new DeleteLayerEdit(holder, layer, activeIndex);
+        // the embedded edit restores the active layer and its mask view mode
+        deleteLayerEdit = new DeleteLayerEdit(holder, layer, layerIndex,
+            activeLayerBefore, maskViewModeBefore);
         deleteLayerEdit.setEmbedded(true);
     }
 
@@ -63,12 +64,7 @@ public class MergeDownEdit extends PixelitorEdit {
         imageEdit.undo();
         deleteLayerEdit.undo();
 
-        belowLayer.updateIconImage();
-
-        // restore the original mask view mode of the merged layer
-        if (layer.hasMask()) {
-            maskViewMode.restoreOn(layer);
-        }
+        refreshBelowLayer();
     }
 
     @Override
@@ -78,6 +74,11 @@ public class MergeDownEdit extends PixelitorEdit {
         imageEdit.redo();
         deleteLayerEdit.redo();
 
+        refreshBelowLayer();
+    }
+
+    private void refreshBelowLayer() {
+        belowLayer.invalidateMaskedImageCache();
         belowLayer.updateIconImage();
     }
 
@@ -86,6 +87,7 @@ public class MergeDownEdit extends PixelitorEdit {
         super.die();
 
         imageEdit.die();
+        deleteLayerEdit.die();
     }
 
     @Override
@@ -94,7 +96,6 @@ public class MergeDownEdit extends PixelitorEdit {
 
         node.add(layer.createDebugNode());
         node.add(belowLayer.createDebugNode());
-        node.addAsString("mask view mode", maskViewMode);
         node.add(imageEdit.createDebugNode("image edit"));
         node.add(deleteLayerEdit.createDebugNode("delete layer edit"));
 

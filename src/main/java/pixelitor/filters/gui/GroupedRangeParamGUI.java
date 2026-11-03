@@ -17,7 +17,6 @@
 
 package pixelitor.filters.gui;
 
-import pixelitor.gui.utils.GUIUtils;
 import pixelitor.gui.utils.GridBagHelper;
 import pixelitor.gui.utils.SliderSpinner;
 
@@ -50,7 +49,7 @@ public class GroupedRangeParamGUI extends JPanel implements ParamGUI {
         addSliderSpinners();
 
         if (model.isLinkable()) {
-            linkedCB = GUIUtils.createLinkCheckBox(this.model);
+            linkedCB = Linkable.createLinkedCheckBox(this.model);
             gbh.addLabelAndControl(i18n("linked") + ":", linkedCB, numChildren);
         } else {
             linkedCB = null;

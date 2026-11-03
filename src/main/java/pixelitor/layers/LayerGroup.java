@@ -40,9 +40,6 @@ import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static pixelitor.utils.Thumbnails.createThumbnail;
 
@@ -88,6 +85,14 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public void afterDeserialization() {
+        // the cached image of an isolated group is rendered from its children,
+        // so nested composite layers (smart objects, groups) must be
+        // initialized first, otherwise their images would be missing
+        for (Layer layer : layers) {
+            if (layer instanceof CompositeLayer composite) {
+                composite.afterDeserialization();
+            }
+        }
         recalcCachedImage();
     }
 
@@ -106,6 +111,18 @@ public class LayerGroup extends CompositeLayer {
         for (Layer layer : layers) {
             layer.setHolder(this);
         }
+    }
+
+    @Override
+    public int getTx() {
+        // a layer group has no translation of its own: its children
+        // carry translations, and its composite cache is canvas-sized
+        return 0;
+    }
+
+    @Override
+    public int getTy() {
+        return 0;
     }
 
     /**
@@ -143,29 +160,37 @@ public class LayerGroup extends CompositeLayer {
 
         // TODO Currently the layer mask of isolated
         //   (non-passthrough) groups is ignored.
-        g.setComposite(blendingMode.getComposite(getOpacity()));
+        setupComposite(g, firstVisibleLayer);
         g.drawImage(getCachedImage(), 0, 0, null);
 
-        return currentComposite;
+        return null;
     }
 
     private BufferedImage renderPassThrough(Graphics2D g, BufferedImage currentComposite, boolean firstVisibleLayer) {
         // Apply the layers as if they were directly in the parent holder.
         // The algorithm is similar to ImageUtils.calcComposite(),
         // but here we have to consider the existing state of the composition.
+        BufferedImage initialComposite = currentComposite;
+        Graphics2D currentG = g;
+
         for (Layer layer : layers) {
             if (!layer.isVisible()) {
                 continue;
             }
-            BufferedImage result = layer.render(g, currentComposite, firstVisibleLayer);
-            if (result != null) { // adjustment layer or watermarking text layer
+            BufferedImage result = layer.render(currentG, currentComposite, firstVisibleLayer);
+            if (result != null && result != currentComposite) { // adjustment layer or watermarking text layer
                 currentComposite = result;
-                g.dispose();
-                g = currentComposite.createGraphics();
+                currentG.dispose();
+                currentG = currentComposite.createGraphics();
             }
             firstVisibleLayer = false;
         }
-        return currentComposite;
+
+        if (currentG != g) {
+            currentG.dispose();
+        }
+
+        return currentComposite != initialComposite ? currentComposite : null;
     }
 
     @Override
@@ -175,24 +200,29 @@ public class LayerGroup extends CompositeLayer {
     }
 
     private void recalcCachedImage() {
+        clearCachedImage();
         if (isPassThrough()) {
-            cachedImage = null;
-        } else {
-            cachedImage = ImageUtils.calcComposite(layers, comp.getCanvas());
-            if (needsIconUpdate) {
-                updateIconImage();
-                needsIconUpdate = false;
-            }
+            return;
+        }
+
+        cachedImage = ImageUtils.calcComposite(layers, comp.getCanvas());
+        if (needsIconUpdate) {
+            needsIconUpdate = false;
+            updateIconImage();
         }
     }
 
     @Override
     public void invalidateImageCache() {
+        clearCachedImage();
+        holder.invalidateImageCache();
+    }
+
+    private void clearCachedImage() {
         if (cachedImage != null) {
             cachedImage.flush();
             cachedImage = null;
         }
-        holder.invalidateImageCache();
     }
 
     @Override
@@ -231,14 +261,23 @@ public class LayerGroup extends CompositeLayer {
         }
         boolean wasPassThrough = isPassThrough();
         super.setBlendingMode(newMode, addToHistory, false);
+        boolean isolationChanged = wasPassThrough != isPassThrough();
+
+        if (isolationChanged) {
+            // the cached image and the thumbnail depend on whether the group
+            // is isolated, so they must be consistent even without an update
+            thumb = null;
+            clearCachedImage();
+        }
 
         if (update) {
-            if (wasPassThrough != isPassThrough()) {
+            if (isolationChanged) {
                 recalcCachedImage();
-                thumb = null;
                 updateIconImage();
             }
-            update();
+            // no update(): the group's own composite doesn't
+            // change, only how it's blended into its holder
+            propertyChangeUpdate();
         }
     }
 
@@ -275,67 +314,6 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void forEachNestedLayer(Consumer<Layer> action, boolean includeMasks) {
-        for (Layer layer : layers) {
-            layer.forEachNestedLayer(action, includeMasks);
-        }
-
-        // run on itself only after the children
-        // (this ordering is needed for initialization)
-        action.accept(this);
-        if (includeMasks && hasMask()) {
-            action.accept(getMask());
-        }
-    }
-
-    @Override
-    public Layer findFirstLayerWhere(Predicate<Layer> predicate, boolean includeMasks) {
-        // search through all the child layers first to be consistent with forEachNestedLayer
-        for (Layer layer : layers) {
-            Layer foundLayer = layer.findFirstLayerWhere(predicate, includeMasks);
-            if (foundLayer != null) {
-                return foundLayer;
-            }
-        }
-
-        if (predicate.test(this)) {
-            return this;
-        }
-
-        if (includeMasks && hasMask() && predicate.test(getMask())) {
-            return getMask();
-        }
-
-        return null;
-    }
-
-    @Override
-    public boolean contains(Layer target) {
-        if (target == this) {
-            return true;
-        }
-        for (Layer layer : layers) {
-            if (layer.contains(target)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean containsLayerOfType(Class<? extends Layer> type) {
-        if (type.isInstance(this)) {
-            return true;
-        }
-        for (Layer layer : layers) {
-            if (layer.containsLayerOfType(type)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public int indexOf(Layer layer) {
         return layers.indexOf(layer);
     }
@@ -356,8 +334,8 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public Stream<? extends Layer> directChildrenStream() {
-        return layers.stream();
+    public Iterable<? extends Layer> directChildren() {
+        return layers;
     }
 
     @Override
@@ -373,41 +351,8 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void deleteLayer(Layer layer, boolean addToHistory) {
-        assert layer.getComp() == comp;
-        assert layer.isDirectChildOf(this);
-
-        int layerIndex = layers.indexOf(layer);
-
-        if (addToHistory) {
-            History.add(new DeleteLayerEdit(this, layer, layerIndex));
-        }
-
-        layers.remove(layer);
-
-        if (layer.contains(comp.getActiveLayer())) {
-            Layer newActive = layers.isEmpty()
-                ? this
-                : layers.get(Math.max(layerIndex - 1, 0));
-            comp.setActiveLayer(newActive);
-        }
-
-        updateChildrenUI();
-        update();
-    }
-
-    @Override
-    public void insertLayer(Layer newLayer, int index, boolean update) {
-        if (update) {
-            adder().atIndex(index).add(newLayer);
-        } else {
-            layers.add(index, newLayer);
-        }
-    }
-
-    @Override
     public void smartObjectChanged(boolean linked) {
-        cachedImage = null;
+        clearCachedImage();
         holder.smartObjectChanged(linked);
     }
 
@@ -417,29 +362,11 @@ public class LayerGroup extends CompositeLayer {
     }
 
     @Override
-    public void replaceLayer(Layer before, Layer after) {
-        boolean containedActive = before.contains(comp.getActiveLayer());
-
-        before.transferMaskAndUITo(after);
-
-        int layerIndex = indexOf(before);
-        assert layerIndex != -1;
-        layers.set(layerIndex, after);
-
-        if (containedActive) {
-            // TODO see comments in Composition.replaceLayer
-            comp.setActiveLayer(after);
-        }
-        comp.checkInvariants();
-    }
-
-    @Override
     public void updateIconImage() {
-        if (!isPassThrough()) {
-            if (cachedImage == null) {
-                needsIconUpdate = true; // postpone
-                return;
-            }
+        if (!isPassThrough() && cachedImage == null) {
+            // postponed until the cached image is calculated
+            needsIconUpdate = true;
+            return;
         }
         thumb = null;
         super.updateIconImage();
@@ -456,9 +383,8 @@ public class LayerGroup extends CompositeLayer {
         } else if (cachedImage != null) {
             thumb = createThumbnail(cachedImage, thumbCheckerboardPainter);
         } else {
-            // isolated groups should always have a cached image
-            throw new IllegalStateException();
-//            thumb = ImageUtils.createCircleThumb(new Color(0, 0, 203));
+            throw new IllegalStateException(
+                "isolated group '" + name + "' has no cached image");
         }
 
         return thumb;
@@ -475,37 +401,75 @@ public class LayerGroup extends CompositeLayer {
         replaceWithUngrouped(null, true);
     }
 
-    public void replaceWithUngrouped(int[] prevIndices, boolean addToHistory) {
+    /**
+     * Replaces this group with its children in the holder.
+     *
+     * @param ungroupedIndices the (ascending) indices where the children are inserted
+     *                         (used by undo/redo), or null to insert them at the group's position
+     * @param addToHistory     false if called from undo/redo
+     */
+    public void replaceWithUngrouped(int[] ungroupedIndices, boolean addToHistory) {
+        assert ungroupedIndices == null || ungroupedIndices.length == layers.size();
+
         Layer activeBefore = comp.getActiveLayer();
-        boolean activeWasThis = this == activeBefore;
+        boolean activeWasThis = activeBefore == this;
         boolean activeWasInside = !activeWasThis && contains(activeBefore);
 
-        int indexInHolder = holder.indexOf(this);
+        int groupIndex = holder.indexOf(this);
+        assert groupIndex != -1;
         holder.removeDirectChild(this, true);
 
         int numLayers = layers.size();
         int[] insertIndices = new int[numLayers];
         for (int i = 0; i < numLayers; i++) {
             Layer layer = layers.get(i);
+            if (layer.hasUI()) {
+                layer.getUI().detach();
+            }
 
-            layer.getUI().detach();
-
-            int insertIndex = prevIndices != null ? prevIndices[i] : indexInHolder;
-            holder.insertLayer(layer, insertIndex, true);
-            insertIndices[i] = insertIndex;
-            indexInHolder++;
+            insertIndices[i] = ungroupedIndices != null
+                ? ungroupedIndices[i]
+                : groupIndex + i;
+            holder.adder()
+                .atIndex(insertIndices[i])
+                .skipCompUpdate() // the holder is updated once, below
+                .add(layer);
         }
 
         if (activeWasInside) {
-            // inserting the layers into the parent will make
-            // the last inserted layer active
+            // inserting the layers made the last one active
             activeBefore.activate();
+        } else if (activeWasThis && numLayers == 0) {
+            // the active layer disappeared together with the empty group
+            comp.setActiveLayer(holder.layerToActivateAfterRemoval(groupIndex));
         }
 
-        assert comp.getActiveLayer().getTopLevelLayer() != this;
+        if (numLayers == 0) {
+            // no insertion happened, so nothing else refreshed the holder's UI
+            refreshHolderUI();
+        }
+        holder.update();
 
-        if (addToHistory) { // wasn't called from undo
-            History.add(new GroupingEdit(holder, this, insertIndices, activeBefore, false));
+        assert holder.getNumLayers() > 0 || holder.canBeEmpty();
+        assert comp.getActiveLayer().getTopLevelLayer() != this;
+        assert comp.checkInvariants(); // also catches a dangling active layer in nested groups
+
+        if (addToHistory) { // wasn't called from undo/redo
+            History.add(new GroupingEdit(holder, this,
+                insertIndices, groupIndex, activeBefore, false));
+        }
+    }
+
+    // refreshes what LayerAdder would have refreshed if a child had been inserted
+    private void refreshHolderUI() {
+        if (isTopLevel()) {
+            // removeDirectChild has already removed the group's UI from the view
+            if (comp.isOpen()) {
+                comp.fireLayerUICountChanged();
+            }
+        } else {
+            // the removed group's UI is still in the parent's children panel
+            ((CompositeLayer) holder).updateChildrenUI();
         }
     }
 
@@ -517,27 +481,11 @@ public class LayerGroup extends CompositeLayer {
     @Override
     public int getPixelAtPoint(Point p) {
         if (isPassThrough()) {
-            // should be handled recursively
-            throw new IllegalStateException();
-        } else {
-            // for an isolated group, get the pixel from its cached composite image
-            return ImageUtils.getPixelAt(this, getCachedImage(), p);
+            throw new IllegalStateException(
+                "pass-through group '" + name + "' must be hit-tested recursively");
         }
-    }
-
-    @Override
-    public ContentLayer findTopmostOpaqueLayer(Point p) {
-        // a small opacity makes the layer effectively invisible for hit-testing.
-        if (!isVisible() || getOpacity() < 0.05f) {
-            return null;
-        }
-
-        if (isPassThrough()) {
-            return ContentLayer.findTopmostOpaqueLayer(layers, p);
-        } else {
-            // for an isolated group, treat it as a single entity
-            return super.findTopmostOpaqueLayer(p);
-        }
+        // for an isolated group, get the pixel from its cached composite image
+        return HitTesting.getPixelAt(this, getCachedImage(), p);
     }
 
     @Override
@@ -562,38 +510,22 @@ public class LayerGroup extends CompositeLayer {
 
     @Override
     public PixelitorEdit finalizeMovement() {
-        MultiEdit fullEdit = new MultiEdit(ContentLayerMoveEdit.NAME, comp);
-        PixelitorEdit maskEdit = createLinkedMovementEdit();
-        if (maskEdit != null) {
-            fullEdit.add(maskEdit);
-        }
+        resetDragOffsets();
+
+        List<PixelitorEdit> edits = new ArrayList<>(layers.size() + 1);
+        edits.add(createLinkedMovementEdit()); // the mask edit, can be null
         for (Layer layer : layers) {
-            PixelitorEdit layerEdit = layer.finalizeMovement();
-            if (layerEdit != null) {
-                fullEdit.add(layerEdit);
-            }
+            edits.add(layer.finalizeMovement());
         }
 
         invalidateImageCache();
 
-        if (fullEdit.isEmpty()) {
-            return null;
-        }
-        return fullEdit;
+        return MultiEdit.combineNonNull(ContentLayerMoveEdit.NAME, comp, edits);
     }
 
     @Override
     PixelitorEdit createMovementEdit(int prevTx, int prevTy) {
         return null; // the group has no content of its own
-    }
-
-    @Override
-    public void setComp(Composition comp) {
-        super.setComp(comp);
-
-        for (Layer layer : layers) {
-            layer.setComp(comp);
-        }
     }
 
     @Override
@@ -605,8 +537,7 @@ public class LayerGroup extends CompositeLayer {
     public JPopupMenu createLayerIconPopupMenu() {
         JPopupMenu popup = super.createLayerIconPopupMenu();
 
-        popup.add(new TaskAction("Ungroup", () ->
-            replaceWithUngrouped(null, true)));
+        popup.add(new TaskAction("Ungroup", this::ungroup));
 
         return popup;
     }
@@ -616,16 +547,11 @@ public class LayerGroup extends CompositeLayer {
         if (!super.checkInvariants()) {
             return false;
         }
-        for (Layer layer : layers) {
-            if (layer.getComp() != comp) {
-                throw new AssertionError("bad comp in layer '%s' (that comp='%s', this='%s')".formatted(
-                    layer.getName(), layer.getComp().getDebugName(), comp.getDebugName()));
-            }
-            if (!layer.isDirectChildOf(this)) {
-                throw new AssertionError("bad holder in layer '%s' (that holder='%s', this='%s')".formatted(
-                    layer.getName(), layer.getHolder().getName(), getName()));
-            }
-            assert layer.checkInvariants();
+        checkDirectChildLinks();
+        // the children's own invariants are checked by the traversal in
+        // Composition.checkInvariants(), so there is no recursion here
+        if (isPassThrough() && cachedImage != null) {
+            throw new AssertionError("pass-through group '" + name + "' has a cached image");
         }
         return true;
     }

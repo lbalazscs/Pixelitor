@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -17,27 +17,24 @@
 
 package pixelitor.filters.gui;
 
+import java.util.List;
+
 /**
  * A {@link PresetOwner} that can use a {@link DialogMenuBar} to
  * add menus to configuration dialogs.
  */
 public interface DialogMenuOwner extends PresetOwner {
     default boolean hasBuiltinPresets() {
-        return false;
+        return !getBuiltinPresets().isEmpty();
     }
 
-    default Preset[] getBuiltinPresets() {
+    default List<Preset> getBuiltinPresets() {
         // should be overridden by subclasses that have built-in presets
-        throw new UnsupportedOperationException();
-    }
-
-    default boolean hasHelp() {
-        // should be overridden by subclasses that have help
-        return false;
+        return List.of();
     }
 
     default Help getHelp() {
         // should be overridden by subclasses that have help
-        throw new UnsupportedOperationException();
+        return null;
     }
 }

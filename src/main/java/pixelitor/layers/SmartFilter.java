@@ -245,30 +245,29 @@ public class SmartFilter extends AdjustmentLayer implements ImageSource {
 
     @Override
     public void onFilterDialogAccepted(String filterName) {
-        // capture the filter reference currently in use
-        Filter preAcceptFilter = this.filter;
-
-        // if "Show Original" was checked, this method
-        // swaps 'this.filter' back to the backup
-        super.onFilterDialogAccepted(filterName);
-
-        // if the filter reference changed, the current cache is now stale
-        if (this.filter != preAcceptFilter) {
+        // If "Show Original" is on, the cache was computed from the original
+        // filter, but the edited one is about to become active again.
+        // Invalidate before super, which updates the holder.
+        if (isShowingOriginal()) {
             invalidateAll();
         }
+
+        super.onFilterDialogAccepted(filterName);
 
         smartObject.updateIconImage();
     }
 
     @Override
     public void onFilterDialogCanceled() {
-        boolean changed = filterSettingsChanged();
-        super.onFilterDialogCanceled();
-        if (changed) {
-            // force recalculating the image if this dialog session
-            // changed the filter (and therefore the image)
+        // The cache is stale if it was computed from the edited settings.
+        // If the original was shown, the cache comes from the unadapted backup
+        // copy, which super is about to adapt to the context, so it is
+        // invalidated too. This must happen before super updates the holder.
+        if (isShowingOriginal() || filterSettingsChanged()) {
             invalidateAll();
         }
+
+        super.onFilterDialogCanceled();
     }
 
     @Override

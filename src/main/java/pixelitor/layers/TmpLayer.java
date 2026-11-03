@@ -17,6 +17,7 @@
 
 package pixelitor.layers;
 
+import pixelitor.Canvas;
 import pixelitor.Composition;
 import pixelitor.selection.Selection;
 import pixelitor.utils.ImageUtils;
@@ -42,6 +43,12 @@ public class TmpLayer {
 
     private int selStartX = 0;
     private int selStartY = 0;
+
+    // A canvas-sized scratch image used by the image layer to merge its
+    // own content with this temporary layer on each repaint. It is created
+    // lazily and reused during the stroke, to avoid allocating a large
+    // image on every repaint. It is released in dispose().
+    private BufferedImage mergeBuffer;
 
     public TmpLayer(ImageLayer imageLayer, Composite composite, boolean softSelection) {
         this.composite = Objects.requireNonNull(composite);
@@ -100,9 +107,31 @@ public class TmpLayer {
         targetG.drawImage(image, tx + selStartX, ty + selStartY, null);
     }
 
+    /**
+     * Returns a canvas-sized scratch image that is reused between calls.
+     * Its content is undefined (it can contain leftovers from a previous
+     * repaint), so the caller must overwrite or clear it before use.
+     */
+    public BufferedImage getMergeBuffer(Canvas canvas) {
+        if (mergeBuffer != null && canvas.hasDifferentSizeThan(mergeBuffer)) {
+            // the canvas size changed in the meantime
+            mergeBuffer.flush();
+            mergeBuffer = null;
+        }
+        if (mergeBuffer == null) {
+            mergeBuffer = canvas.createTmpImage();
+        }
+        return mergeBuffer;
+    }
+
     public void dispose() {
         g.dispose();
         image.flush();
         image = null;
+
+        if (mergeBuffer != null) {
+            mergeBuffer.flush();
+            mergeBuffer = null;
+        }
     }
 }

@@ -45,9 +45,6 @@ public class ToolButton extends JToggleButton {
 
     private final Tool tool;
 
-    private JPopupMenu presetsMenu;
-    private boolean popupMenuPopulated = false;
-
     public ToolButton(Tool tool) {
         this.tool = tool;
         tool.setButton(this);
@@ -57,7 +54,7 @@ public class ToolButton extends JToggleButton {
 
         putClientProperty("JComponent.sizeVariant", "mini");
 
-        setupIcons(tool);
+        setupIcons();
 
         setToolTipText("<html>" + tool.getName() + " (<b>" + tool.getHotkey() + "</b>)");
 
@@ -79,12 +76,12 @@ public class ToolButton extends JToggleButton {
     public void updateUI() {
         // this method can be called by the super constructor before 'tool' is initialized
         if (tool != null) { // changing the theme
-            setupIcons(tool);
+            setupIcons();
         }
         super.updateUI();
     }
 
-    private void setupIcons(Tool tool) {
+    private void setupIcons() {
         VectorIcon toolIcon = VectorIcon.createToolIcon(tool.createIconPainter());
         setIcon(toolIcon);
 
@@ -99,16 +96,14 @@ public class ToolButton extends JToggleButton {
      * load, and manage configuration presets for this tool.
      */
     private void initPresetsPopup() {
-        presetsMenu = new JPopupMenu();
+        JPopupMenu presetsMenu = new JPopupMenu();
 
-        // the popup menu is populated only when it is about to become visible
+        // the popup menu is populated only when it is about to become visible for the first time
         presetsMenu.addPopupMenuListener(new PopupMenuListener() {
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent event) {
-                if (!popupMenuPopulated) {
-                    populatePresetsMenu();
-                    popupMenuPopulated = true;
-                }
+                populatePresetsMenu(presetsMenu);
+                presetsMenu.removePopupMenuListener(this); // populate only once
             }
 
             @Override
@@ -126,7 +121,7 @@ public class ToolButton extends JToggleButton {
     /**
      * Loads presets from disk and populates the menu items.
      */
-    private void populatePresetsMenu() {
+    private void populatePresetsMenu(JPopupMenu presetsMenu) {
         if (AppMode.isDevelopment()) {
             presetsMenu.add(new TaskAction("Internal State...", () ->
                 Debug.showTree(tool, tool.getName())));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -27,17 +27,26 @@ import static pixelitor.utils.Texts.i18n;
  * The vertical direction for reordering layers in the layer stack.
  */
 public enum LayerMoveDirection {
-    UP("raise_layer", "raise_layer_tt", Icons.getUpArrowIcon()),
-    DOWN("lower_layer", "lower_layer_tt", Icons.getDownArrowIcon());
+    UP("raise_layer", "raise_layer_tt", Icons.getUpArrowIcon(), 1),
+    DOWN("lower_layer", "lower_layer_tt", Icons.getDownArrowIcon(), -1);
 
     private final String name;
     private final String toolTip;
     private final Icon icon;
+    private final int indexStep; // +1 = towards the top of the stack
 
-    LayerMoveDirection(String nameKey, String toolTipKey, Icon icon) {
+    LayerMoveDirection(String nameKey, String toolTipKey, Icon icon, int indexStep) {
         this.name = i18n(nameKey);
         this.toolTip = i18n(toolTipKey);
         this.icon = icon;
+        this.indexStep = indexStep;
+    }
+
+    /**
+     * Returns the index of the neighbor in this direction (not range-checked).
+     */
+    public int neighborIndex(int index) {
+        return index + indexStep;
     }
 
     public String getName() {

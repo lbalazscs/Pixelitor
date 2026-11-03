@@ -29,7 +29,6 @@ import pixelitor.gui.utils.MlpAlignmentSelector;
 import pixelitor.tools.pen.Path;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.PathSampler;
-import pixelitor.utils.Shapes;
 import pixelitor.utils.debug.DebugNode;
 import pixelitor.utils.debug.DebugNodes;
 import pixelitor.utils.debug.Debuggable;
@@ -170,10 +169,6 @@ public class TransformedTextPainter implements Debuggable {
 
     private SoftReference<BufferedImage> renderCache;
 
-    // debug settings
-    private static final boolean DISABLE_CACHE = false;
-    private static final boolean DEBUG_LAYOUT = false;
-
     /**
      * Paints the text. The given Graphics2D is used only for drawing,
      * and its state (rendering hints, color, font, transform) is the
@@ -182,18 +177,6 @@ public class TransformedTextPainter implements Debuggable {
     public void paint(Graphics2D g, int width, int height, Composition comp) {
         if (!prepareForPainting(width, height, comp)) {
             return; // blank text
-        }
-
-        if (DEBUG_LAYOUT) {
-            Shapes.draw(currentBounds(), Color.RED, g);
-            if (transformedRect != null) {
-                Shapes.draw(transformedRect.asShape(), Color.BLUE, g);
-            }
-        }
-
-        if (DISABLE_CACHE) {
-            paintDirectly(g, color);
-            return;
         }
 
         // not getBoundingBox(), because the layout is already up to date
@@ -210,6 +193,24 @@ public class TransformedTextPainter implements Debuggable {
         }
 
         g.drawImage(cachedImg, bounds.x, bounds.y, null);
+    }
+
+    /**
+     * Paints the text directly without using the render cache.
+     * The given Graphics2D is used only for drawing, and its state
+     * (rendering hints, color, font, transform) is the same after
+     * the call as it was before.
+     */
+    public void paintUncached(Graphics2D g, int width, int height, Composition comp) {
+        if (!prepareForPainting(width, height, comp)) {
+            return; // blank text
+        }
+
+        if (currentBounds().isEmpty()) {
+            return;
+        }
+
+        paintDirectly(g, color);
     }
 
     /**
@@ -256,13 +257,17 @@ public class TransformedTextPainter implements Debuggable {
     private BufferedImage createCachedImage(Rectangle bounds) {
         BufferedImage img = GraphicsUtilities.createCompatibleTranslucentImage(
             bounds.width, bounds.height);
-        Graphics2D cacheG = img.createGraphics();
+        return renderToImage(img, bounds, color);
+    }
+
+    private BufferedImage renderToImage(BufferedImage img, Rectangle area, Color paintColor) {
+        Graphics2D g = img.createGraphics();
         try {
-            setHighQualityRendering(cacheG);
-            cacheG.translate(-bounds.x, -bounds.y);
-            paintText(cacheG, color);
+            setHighQualityRendering(g);
+            g.translate(-area.x, -area.y);
+            paintText(g, paintColor);
         } finally {
-            cacheG.dispose();
+            g.dispose();
         }
         return img;
     }
@@ -514,15 +519,7 @@ public class TransformedTextPainter implements Debuggable {
 
         BufferedImage img = new BufferedImage(
             Math.max(1, area.width), Math.max(1, area.height), BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = img.createGraphics();
-        try {
-            setHighQualityRendering(g);
-            g.translate(-area.x, -area.y);
-            paintText(g, color);
-        } finally {
-            g.dispose();
-        }
-        return img;
+        return renderToImage(img, area, color);
     }
 
     private void updateLayout(int width, int height, Composition comp) {
@@ -621,8 +618,8 @@ public class TransformedTextPainter implements Debuggable {
         double fontLineHeight = metrics.getHeight();
         float lineHeight = (float) (fontLineHeight * relLineHeight);
 
-        // First pass: create the shape of each line exactly once and
-        // find the visual width of the entire text block.
+        // first pass: create the shape of each line exactly once
+        // and find the visual width of the entire text block
         int numLines = textLines.length;
         Shape[] lineShapes = new Shape[numLines];
         Rectangle2D[] bareBounds = new Rectangle2D[numLines];
@@ -639,18 +636,14 @@ public class TransformedTextPainter implements Debuggable {
         }
         int textWidth = (int) Math.ceil(maxVisualWidth);
 
-        // calculate the final text block dimensions using font metrics
-        int textHeight;
+        // calculate the final text block dimensions using font metrics:
+        // height is from the top of the first line's ascent to the bottom of the last line's descent
+        assert numLines > 0;
         float ascent = metrics.getAscent();
-        if (numLines == 0) {
-            textHeight = 0;
-        } else {
-            // height is from the top of the first line's ascent to the bottom of the last line's descent
-            float descent = metrics.getDescent();
-            textHeight = (int) Math.ceil(ascent + ((numLines - 1) * lineHeight) + descent);
-        }
+        float descent = metrics.getDescent();
+        int textHeight = (int) Math.ceil(ascent + ((numLines - 1) * lineHeight) + descent);
 
-        // Second pass: position the lines, now that the width is known.
+        // second pass: position the lines, now that the width is known
         Path2D fullShape = new Path2D.Float();
         float currentY = effectsPadding + ascent;
         for (int i = 0; i < numLines; i++) {
@@ -667,8 +660,7 @@ public class TransformedTextPainter implements Debuggable {
             AffineTransform lineTransform = AffineTransform.getTranslateInstance(
                 drawX - bareLineBounds.getX(), currentY);
 
-            Shape positionedLineShape = lineTransform.createTransformedShape(lineShapes[i]);
-            fullShape.append(positionedLineShape.getPathIterator(null), false);
+            fullShape.append(lineShapes[i].getPathIterator(lineTransform), false);
 
             currentY += lineHeight;
         }
@@ -878,8 +870,7 @@ public class TransformedTextPainter implements Debuggable {
     }
 
     /**
-     * Combines the glyph outlines of a line with its underline and/or
-     * strikethrough.
+     * Combines the glyph outlines of a line with its underline and/or strikethrough.
      */
     private Shape addDecorations(Shape glyphsOutline, String line,
                                  FontRenderContext frc, FontMetrics metrics,
@@ -894,44 +885,27 @@ public class TransformedTextPainter implements Debuggable {
         int stringWidth = metrics.stringWidth(line);
 
         if (hasUnderline) {
-            combinedOutline.add(
-                createUnderlineShape(lineMetrics, stringWidth));
+            combinedOutline.add(decorationLine(
+                lineMetrics.getUnderlineOffset(), lineMetrics.getUnderlineThickness(), stringWidth));
         }
 
         if (hasStrikeThrough) {
-            combinedOutline.add(
-                createStrikethroughShape(lineMetrics, stringWidth));
+            combinedOutline.add(decorationLine(
+                lineMetrics.getStrikethroughOffset(), lineMetrics.getStrikethroughThickness(), stringWidth));
         }
 
         return combinedOutline;
     }
 
     /**
-     * Generates the rectangular shape for an underline.
+     * Generates a rectangular area for a text decoration line (underline or strikethrough).
      */
-    private static Area createUnderlineShape(LineMetrics lineMetrics, int stringWidth) {
-        float underlineOffset = lineMetrics.getUnderlineOffset();
-        float underlineThickness = lineMetrics.getUnderlineThickness();
-        Shape underLineShape = new Rectangle2D.Float(
+    private static Area decorationLine(float offset, float thickness, int width) {
+        return new Area(new Rectangle2D.Float(
             0.0f,
-            underlineOffset - underlineThickness / 2.0f,
-            stringWidth,
-            underlineThickness);
-        return new Area(underLineShape);
-    }
-
-    /**
-     * Generates the rectangular shape for a strikethrough.
-     */
-    private static Area createStrikethroughShape(LineMetrics lineMetrics, int stringWidth) {
-        float strikethroughOffset = lineMetrics.getStrikethroughOffset();
-        float strikethroughThickness = lineMetrics.getStrikethroughThickness();
-        Shape strikethroughShape = new Rectangle2D.Float(
-            0.0f,
-            strikethroughOffset - strikethroughThickness / 2.0f,
-            stringWidth,
-            strikethroughThickness);
-        return new Area(strikethroughShape);
+            offset - thickness / 2.0f,
+            width,
+            thickness));
     }
 
     public void setBoxAlignment(BoxAlignment newAlignment) {

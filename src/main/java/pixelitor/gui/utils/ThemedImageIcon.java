@@ -17,6 +17,7 @@
 
 package pixelitor.gui.utils;
 
+import pixelitor.utils.Icons;
 import pixelitor.utils.ImageUtils;
 
 import javax.swing.*;
@@ -46,13 +47,13 @@ public class ThemedImageIcon extends ImageIcon {
     private BufferedImage darkThemeImage;
 
     public ThemedImageIcon(String iconFileName, int darkThemePixelColor) {
-        lightThemeImage = ImageUtils.loadResourceImage(iconFileName);
+        lightThemeImage = Icons.loadResourceImage(iconFileName);
         this.darkThemePixelColor = darkThemePixelColor;
     }
 
     public ThemedImageIcon(String ltIconFileName, String dtIconFileName) {
-        lightThemeImage = ImageUtils.loadResourceImage(ltIconFileName);
-        darkThemeImage = ImageUtils.loadResourceImage(dtIconFileName);
+        lightThemeImage = Icons.loadResourceImage(ltIconFileName);
+        darkThemeImage = Icons.loadResourceImage(dtIconFileName);
 
         assert lightThemeImage.getWidth() == darkThemeImage.getWidth();
         assert lightThemeImage.getHeight() == darkThemeImage.getHeight();

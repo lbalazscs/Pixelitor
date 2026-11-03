@@ -52,10 +52,10 @@ public class RangeWithColorsParam extends RangeParam {
     }
 
     /**
-     * Changes the name and both colors.
+     * Changes the name, preset key, and both colors.
      */
-    public void reconfigure(String displayName, Color left, Color right) {
-        setName(displayName);
+    public void reconfigure(String displayName, String presetKey, Color left, Color right) {
+        reconfigure(displayName, presetKey);
         this.leftColor = Objects.requireNonNull(left);
         this.rightColor = Objects.requireNonNull(right);
 

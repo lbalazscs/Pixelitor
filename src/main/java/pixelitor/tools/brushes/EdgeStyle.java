@@ -18,7 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.colors.Colors;
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.BrushImageUtils;
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
@@ -45,7 +45,7 @@ sealed interface EdgeStyle {
 
         SoftEdge(int diameter) {
             this.diameter = diameter;
-            this.transparencyImage = ImageUtils.createSoftTransparencyImage(diameter);
+            this.transparencyImage = BrushImageUtils.createSoftTransparencyImage(diameter);
         }
 
         @Override

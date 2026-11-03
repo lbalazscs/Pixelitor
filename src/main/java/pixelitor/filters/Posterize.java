@@ -23,8 +23,8 @@ import pixelitor.filters.gui.GroupedRangeParam;
 import pixelitor.filters.gui.IntChoiceParam;
 import pixelitor.filters.gui.RangeParam;
 import pixelitor.filters.lookup.RGBLookup;
+import pixelitor.filters.util.Channel;
 import pixelitor.filters.util.ColorSpace;
-import pixelitor.gui.GUIText;
 import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.progress.SubtaskProgressTracker;
 import pixelitor.utils.Dithering;
@@ -81,19 +81,22 @@ public class Posterize extends ParametrizedFilter {
     private void updateChannelSliderLabels() {
         switch (colorSpace.getSelected()) {
             case SRGB -> {
-                levels1.setName(i18n("red"));
-                levels2.setName(i18n("green"));
-                levels3.setName(i18n("blue"));
+                reconfigure(levels1, Channel.RED);
+                reconfigure(levels2, Channel.GREEN);
+                reconfigure(levels3, Channel.BLUE);
             }
             case OKLAB -> {
-                levels1.setName(GUIText.RED_GREEN_A);
-                levels2.setName(GUIText.BLUE_YELLOW_B);
-                levels3.setName(GUIText.LIGHTNESS);
+                reconfigure(levels1, Channel.OK_A);
+                reconfigure(levels2, Channel.OK_B);
+                reconfigure(levels3, Channel.OK_L);
             }
         }
         levelsParam.updateGUIAppearance();
     }
 
+    private void reconfigure(RangeParam param, Channel channel) {
+        param.reconfigure(channel.getDisplayName(), channel.getPresetKey());
+    }
 
     @Override
     public BufferedImage transform(BufferedImage src, BufferedImage dest) {

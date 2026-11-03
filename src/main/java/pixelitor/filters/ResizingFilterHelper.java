@@ -20,6 +20,7 @@ package pixelitor.filters;
 import com.jhlabs.image.AbstractBufferedImageOp;
 import pixelitor.progress.ProgressTracker;
 import pixelitor.progress.SubtaskProgressTracker;
+import pixelitor.utils.ImageResizeUtils;
 import pixelitor.utils.ImageUtils;
 
 import java.awt.Graphics2D;
@@ -60,13 +61,13 @@ public class ResizingFilterHelper {
             @Override
             public BufferedImage scaleUp(BufferedImage src, BufferedImage smallDest,
                                          double resizeFactor, ProgressTracker pt) {
-                return ImageUtils.enlargeSmoothly(smallDest, src.getWidth(), src.getHeight(),
+                return ImageResizeUtils.enlargeSmoothly(smallDest, src.getWidth(), src.getHeight(),
                     VALUE_INTERPOLATION_BILINEAR, 1.1, pt);
             }
 
             @Override
             public int getWorkUnits(double resizeFactor) {
-                return ImageUtils.calcEnlargeSmoothlySteps(resizeFactor, 1.1);
+                return ImageResizeUtils.calcEnlargeSmoothlySteps(resizeFactor, 1.1);
             }
         };
 

@@ -41,7 +41,7 @@ import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.EAST;
 import static java.awt.Desktop.Action.*;
 import static java.awt.Taskbar.Feature.ICON_IMAGE;
-import static pixelitor.utils.ImageUtils.findImageURL;
+import static pixelitor.utils.Icons.findImageURL;
 import static pixelitor.utils.Texts.i18n;
 import static pixelitor.utils.Threads.callInfo;
 import static pixelitor.utils.Threads.calledOnEDT;

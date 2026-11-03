@@ -40,6 +40,9 @@ public interface ParamState<S extends ParamState<S>> extends Serializable {
 
     /**
      * Returns a string representation suitable for saving this state to a text file.
+     *
+     * @throws UnsupportedOperationException if this state can't be represented
+     *         as a single string (i.e. for composite parameter states)
      */
     String toPresetString();
 }

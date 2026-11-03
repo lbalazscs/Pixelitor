@@ -150,6 +150,18 @@ public class Path implements Serializable, Debuggable {
         return path;
     }
 
+    public void saveImTransformRefPoints() {
+        for (SubPath subPath : subPaths) {
+            subPath.saveImTransformRefPoints();
+        }
+    }
+
+    public void imTransform(AffineTransform at) {
+        for (SubPath subPath : subPaths) {
+            subPath.imTransform(at);
+        }
+    }
+
     public void deleteSubPath(SubPath subPath) {
         assert comp.getActivePath() == this;
 

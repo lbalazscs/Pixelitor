@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -21,6 +21,7 @@ import pixelitor.layers.ContentLayer;
 import pixelitor.layers.SmartFilter;
 import pixelitor.layers.SmartObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,9 +43,11 @@ public class SmartObjectAssert extends ContentLayerAssert<SmartObjectAssert, Sma
     public SmartObjectAssert smartFilterNamesAre(String... expected) {
         isNotNull();
 
-        List<String> actualNames = actual.directChildrenStream()
-            .map(SmartFilter::getName)
-            .toList();
+        List<String> actualNames = new ArrayList<>();
+        Iterable<SmartFilter> smartFilters = actual.directChildren();
+        for (SmartFilter smartFilter : smartFilters) {
+            actualNames.add(smartFilter.getName());
+        }
         assertThat(actualNames).containsExactly(expected);
 
         return myself;

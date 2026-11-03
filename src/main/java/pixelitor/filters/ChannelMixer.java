@@ -193,7 +193,7 @@ public class ChannelMixer extends ParametrizedFilter {
             greenPercentageGroup,
             bluePercentageGroup);
 
-        paramSet.setAfterResetAllAction(this::afterResetAll);
+        paramSet.setAfterResetAllAction(this::enablePresets);
         enablePresets();
     }
 
@@ -239,9 +239,9 @@ public class ChannelMixer extends ParametrizedFilter {
                 int g = (rgb >>> 8) & 0xFF;
                 int b = rgb & 0xFF;
 
-                int newRed = (int) (rfr * r + rfg * g + rfb * b);
-                int newGreen = (int) (gfr * r + gfg * g + gfb * b);
-                int newBlue = (int) (bfr * r + bfg * g + bfb * b);
+                int newRed = (int) (rfr * r + rfg * g + rfb * b + 0.5f);
+                int newGreen = (int) (gfr * r + gfg * g + gfb * b + 0.5f);
+                int newBlue = (int) (bfr * r + bfg * g + bfb * b + 0.5f);
 
                 newRed = PixelUtils.clamp(newRed);
                 newGreen = PixelUtils.clamp(newGreen);
@@ -320,10 +320,6 @@ public class ChannelMixer extends ParametrizedFilter {
             getParamSet().runFilter();
         }
         assert !autoBW || isMonochromeConsistent();
-    }
-
-    private void afterResetAll() {
-        enablePresets();
     }
 
     private void enablePresets() {

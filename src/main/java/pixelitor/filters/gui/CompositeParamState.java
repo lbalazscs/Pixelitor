@@ -27,7 +27,7 @@ import java.util.List;
  * Allows treating multiple {@link ParamState} objects as a single
  * {@link ParamState} ("Composite design pattern").
  */
-public class CompositeParamState implements ParamState<CompositeParamState> {
+public class CompositeParamState implements ParamState<CompositeParamState>, Iterable<ParamState<?>> {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -37,7 +37,7 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
      * Creates a composite state from a list of child states.
      */
     public CompositeParamState(List<ParamState<?>> children) {
-        this.children = children;
+        this.children = List.copyOf(children);
     }
 
     /**
@@ -55,13 +55,15 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
     public CompositeParamState interpolate(CompositeParamState endState, double progress) {
         int numChildren = children.size();
         if (numChildren != endState.children.size()) {
-            throw new IllegalStateException("%d != %d".formatted(
-                numChildren, endState.children.size()));
+            throw new IllegalStateException(
+                "Different number of child states: %d vs %d".formatted(
+                    numChildren, endState.children.size()));
         }
         List<ParamState<?>> interpolatedStates = new ArrayList<>(numChildren);
         for (int i = 0; i < numChildren; i++) {
             // each ParamState is interpolated independently
-            interpolatedStates.add(interpolateChild(endState, progress, i));
+            interpolatedStates.add(interpolateChild(
+                children.get(i), endState.children.get(i), progress, i));
         }
         return new CompositeParamState(interpolatedStates);
     }
@@ -70,23 +72,22 @@ public class CompositeParamState implements ParamState<CompositeParamState> {
      * Interpolates a single child state with its corresponding end state.
      */
     @SuppressWarnings("unchecked")
-    private <T extends ParamState<T>> ParamState<T> interpolateChild(CompositeParamState endState, double progress, int i) {
-        ParamState<?> startChildState = children.get(i);
-        ParamState<?> endChildState = endState.get(i);
-
-        if (!startChildState.getClass().equals(endChildState.getClass())) {
-            throw new IllegalStateException(String.format(
-                "Incompatible types at index %d: %s vs %s",
-                i, startChildState.getClass(), endChildState.getClass()));
+    private static <T extends ParamState<T>> ParamState<T> interpolateChild(
+        ParamState<?> startChild, ParamState<?> endChild, double progress, int index) {
+        if (!startChild.getClass().equals(endChild.getClass())) {
+            throw new IllegalStateException(
+                "Incompatible types at index %d: %s vs %s".formatted(
+                    index, startChild.getClass(), endChild.getClass()));
         }
 
-        // the cast is safe because we checked the runtime types
-        T start = (T) startChildState;
-        T end = (T) endChildState;
+        // the casts are safe because we checked the runtime types
+        T start = (T) startChild;
+        T end = (T) endChild;
 
         return start.interpolate(end, progress);
     }
 
+    @Override
     public Iterator<ParamState<?>> iterator() {
         return children.iterator();
     }

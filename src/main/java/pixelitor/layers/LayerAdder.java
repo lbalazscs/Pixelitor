@@ -36,6 +36,7 @@ public class LayerAdder {
     private Position position = ABOVE_ACTIVE;
     private boolean addToUI = true;
     private boolean updateComp = true;
+    private boolean activate = true;
 
     public enum Position {ABOVE_ACTIVE, BELOW_ACTIVE}
 
@@ -62,9 +63,10 @@ public class LayerAdder {
      * Sets a specific index where the layer should be inserted.
      * Takes precedence over {@link #atPosition(Position)}.
      */
-    public LayerAdder atIndex(int targetIndex) {
-        assert targetIndex >= 0;
-        this.insertionIndex = targetIndex;
+    public LayerAdder atIndex(int index) {
+        assert index >= 0 && index <= holder.getNumLayers() : "index = " + index;
+
+        this.insertionIndex = index;
         return this;
     }
 
@@ -90,6 +92,14 @@ public class LayerAdder {
     }
 
     /**
+     * Skips activating the newly added layer.
+     */
+    public LayerAdder skipActivation() {
+        activate = false;
+        return this;
+    }
+
+    /**
      * Calculates the insertion index based on the relative position setting.
      */
     private int calcIndexFromPosition() {
@@ -110,6 +120,9 @@ public class LayerAdder {
      * The final operation, which actually adds the layer.
      */
     public void add(Layer layer) {
+        assert layer.getComp() == comp;
+        assert !holder.hasDirectChild(layer);
+
         layer.setHolder(holder);
         Layer prevActiveLayer = null;
         MaskViewMode prevMaskViewMode = null;
@@ -123,15 +136,12 @@ public class LayerAdder {
         int index = insertionIndex != -1 ? insertionIndex : calcIndexFromPosition();
 
         holder.insertDirectChild(layer, index);
-        comp.setActiveLayer(layer);
+        if (activate) {
+            comp.setActiveLayer(layer);
+        }
 
         if (addToUI) {
-            if (holder == comp) {
-                comp.getView().addLayerUI(layer, index);
-                comp.fireLayerUICountChanged();
-            } else {
-                ((CompositeLayer) holder).updateChildrenUI();
-            }
+            holder.updateUIAfterLayerInsertion(layer, index);
 
             // mocked views will not set a UI
             assert AppMode.isUnitTesting() || layer.hasUI();

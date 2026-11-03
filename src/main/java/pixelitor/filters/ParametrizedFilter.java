@@ -22,6 +22,7 @@ import pixelitor.layers.Filterable;
 import pixelitor.utils.debug.DebugNode;
 
 import java.io.Serial;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -56,16 +57,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     /**
-     * Initializes the filter parameters from a single {@link FilterParam}.
-     */
-    public ParamSet initParams(FilterParam param) {
-        paramSet.addParam(param);
-        paramSet.addCommonActions();
-        return paramSet;
-    }
-
-    /**
-     * Initializes the filter parameters from multiple {@link FilterParam}s.
+     * Initializes the filter parameters from the given {@link FilterParam}s.
      */
     public ParamSet initParams(FilterParam... params) {
         paramSet.addParams(params);
@@ -107,12 +99,7 @@ public abstract class ParametrizedFilter extends FilterWithGUI {
     }
 
     @Override
-    public boolean hasBuiltinPresets() {
-        return paramSet.hasBuiltinPresets();
-    }
-
-    @Override
-    public Preset[] getBuiltinPresets() {
+    public List<Preset> getBuiltinPresets() {
         return paramSet.getBuiltinPresets();
     }
 

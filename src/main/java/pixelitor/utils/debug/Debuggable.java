@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Laszlo Balazs-Csiki and Contributors
+ * Copyright 2026 Laszlo Balazs-Csiki and Contributors
  *
  * This file is part of Pixelitor. Pixelitor is free software: you
  * can redistribute it and/or modify it under the terms of the GNU
@@ -23,6 +23,9 @@ package pixelitor.utils.debug;
 public interface Debuggable {
     /**
      * Returns a {@link DebugNode} representing the internal state of this object.
+     *
+     * @param key the name under which the node appears in its parent
+     *            (it must be unique among the siblings)
      */
     DebugNode createDebugNode(String key);
 }

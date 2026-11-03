@@ -37,9 +37,7 @@ public final class FilterButtonModel implements FilterSetting {
     private ParamAdjustmentListener adjustmentListener;
     private JButton button;
 
-    private boolean enabledByFilterLogic = true;
-    private boolean enabledByAnimationSetting = true;
-    private boolean enabledByParent = true;
+    private final EnabledState enabledState = new EnabledState();
 
     // most buttons should be enabled in the final animation settings
     private boolean affectedByAnimationMode = false;
@@ -132,15 +130,8 @@ public final class FilterButtonModel implements FilterSetting {
      */
     @Override
     public void setEnabled(boolean enabled, EnabledReason reason) {
-        switch (reason) {
-            case FILTER_LOGIC -> enabledByFilterLogic = enabled;
-            case ANIMATION_ENDING_STATE -> {
-                if (!affectedByAnimationMode) {
-                    return;
-                }
-                enabledByAnimationSetting = enabled;
-            }
-            case PARENT_PARAM -> enabledByParent = enabled;
+        if (reason != EnabledReason.ANIMATION_ENDING_STATE || affectedByAnimationMode) {
+            enabledState.set(reason, enabled);
         }
         if (button != null) {
             button.setEnabled(isEnabled());
@@ -148,13 +139,13 @@ public final class FilterButtonModel implements FilterSetting {
     }
 
     @Override
-    public void setAdjustmentListener(ParamAdjustmentListener listener) {
-        adjustmentListener = listener;
+    public boolean isEnabled() {
+        return enabledState.isEnabled();
     }
 
     @Override
-    public boolean isEnabled() {
-        return enabledByFilterLogic && enabledByAnimationSetting && enabledByParent;
+    public void setAdjustmentListener(ParamAdjustmentListener listener) {
+        adjustmentListener = listener;
     }
 
     @Override

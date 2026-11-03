@@ -61,32 +61,27 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
      * The returned image is always a new instance, never {@code src}.
      */
     public final BufferedImage transformImage(BufferedImage src) {
-        boolean convertedToRgb = false;
-
         // handle grayscale images (in layer masks) if
         // the filter doesn't support them directly
-        if (isGrayscale(src) && !supportsGray()) {
-            // converting grayscale to RGB
-            convertedToRgb = true;
+        boolean convertedToRgb = isGrayscale(src) && !supportsGray();
+        if (convertedToRgb) {
             src = ImageUtils.toSysCompatibleImage(src);
         }
 
         // create a destination image if the filter requires it
-        BufferedImage dest = createDefaultDestImg() ?
-            ImageUtils.createImageWithSameCM(src) : null;
+        BufferedImage dest = createDefaultDestImg()
+            ? ImageUtils.createImageWithSameCM(src)
+            : null;
 
-        // apply the filter transformation
         dest = transform(src, dest);
-        assert src != dest : getName() + " returned src";
+        assert dest != null : getName() + " returned null image";
+        assert dest != src : getName() + " returned src";
 
         if (convertedToRgb) { // convert the result back
             dest = ImageUtils.convertToGrayscaleImage(dest);
         }
 
         executionCount++;
-
-        assert dest != null : getName() + " returned null image";
-
         return dest;
     }
 
@@ -236,7 +231,7 @@ public abstract class Filter implements Serializable, PresetOwner, Debuggable {
         private void restoreFilter(Filter filter) {
             filter.setName(filterName);
             if (filter.supportsUserPresets() && filterState != null) {
-                UserPreset preset = new UserPreset("", null);
+                UserPreset preset = new UserPreset("");
                 preset.loadFromString(filterState);
                 filter.loadUserPreset(preset);
             }

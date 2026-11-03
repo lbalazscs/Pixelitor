@@ -23,9 +23,8 @@ import pixelitor.utils.debug.DebugNode;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.CompoundEdit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Represents multiple edits that need to be undone/redone together.
@@ -54,6 +53,11 @@ public class MultiEdit extends PixelitorEdit {
         Collections.addAll(children, edits);
     }
 
+    private MultiEdit(String name, Composition comp, List<PixelitorEdit> children) {
+        super(name, comp);
+        this.children = children;
+    }
+
     /**
      * Combines two possibly null edits into a single edit.
      */
@@ -74,7 +78,25 @@ public class MultiEdit extends PixelitorEdit {
         return new MultiEdit(name, first.getComp(), first, second);
     }
 
+    /**
+     * Combines the non-null edits into one: null if there are none,
+     * the edit itself if there is only one, otherwise a new MultiEdit.
+     */
+    public static PixelitorEdit combineNonNull(String name, Composition comp,
+                                               Collection<? extends PixelitorEdit> edits) {
+        List<PixelitorEdit> nonNull = edits.stream()
+            .filter(Objects::nonNull)
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        return switch (nonNull.size()) {
+            case 0 -> null;
+            case 1 -> nonNull.getFirst();
+            default -> new MultiEdit(name, comp, nonNull);
+        };
+    }
+
     public void add(PixelitorEdit edit) {
+        assert edit != null;
         children.add(edit);
     }
 

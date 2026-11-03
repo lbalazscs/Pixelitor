@@ -57,12 +57,9 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
      * Returns a menu bar if help or presets are available, or null otherwise.
      */
     public JMenuBar getMenuBar() {
-        boolean hasPresets = shouldHaveUserPresetsMenu() || hasBuiltinPresets();
-        if (!hasPresets && !hasHelp()) {
-            return null;
-        }
-
-        return new DialogMenuBar(this, hasPresets);
+        return DialogMenuBar.hasMenus(this)
+            ? new DialogMenuBar(this)
+            : null;
     }
 
     @Override
@@ -75,11 +72,6 @@ public abstract class FilterWithGUI extends Filter implements DialogMenuOwner {
     public String getPresetDirName() {
         // uses the filter's name as the directory name for storing presets
         return getName();
-    }
-
-    @Override
-    public boolean hasHelp() {
-        return help != null;
     }
 
     @Override

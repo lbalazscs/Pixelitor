@@ -21,7 +21,6 @@ import com.bric.util.JVM;
 import pixelitor.AppMode;
 import pixelitor.Composition;
 import pixelitor.filters.gui.FilterParam;
-import pixelitor.filters.gui.Linkable;
 import pixelitor.filters.gui.ParamSet;
 import pixelitor.gui.BlendingModePanel;
 import pixelitor.gui.GUIText;
@@ -434,14 +433,6 @@ public final class GUIUtils {
     public static void replaceMouseListeners(JComponent c, MouseListener newListener) {
         removeAllMouseListeners(c);
         c.addMouseListener(newListener);
-    }
-
-    public static JCheckBox createLinkCheckBox(Linkable linkable) {
-        JCheckBox linkedCB = new JCheckBox();
-        linkedCB.setModel(linkable.getLinkedModel());
-        linkedCB.setToolTipText(linkable.getLinkedToolTip());
-        linkedCB.addActionListener(_ -> linkable.setLinked(linkedCB.isSelected()));
-        return linkedCB;
     }
 
     public static boolean isCtrlPressed(ActionEvent e) {

@@ -20,62 +20,66 @@ package pixelitor.filters.gui;
 import pixelitor.gui.GUIText;
 
 import javax.swing.*;
+import java.util.List;
 
 /**
  * A menu bar for dialogs that support presets or help.
  * Intended for components that implement {@link DialogMenuOwner}.
  */
 public class DialogMenuBar extends JMenuBar {
-    private final DialogMenuOwner owner;
-    private JMenu presetsMenu;
-
     public DialogMenuBar(DialogMenuOwner owner) {
-        this(owner, true);
-    }
-
-    public DialogMenuBar(DialogMenuOwner owner, boolean hasPresets) {
-        this.owner = owner;
-
-        if (hasPresets) {
-            addPresetsMenu();
+        if (hasPresets(owner)) {
+            add(createPresetsMenu(owner));
         }
 
-        if (owner.hasHelp()) {
-            add(owner.getHelp().createMenu());
+        Help help = owner.getHelp();
+        if (help != null) {
+            add(help.createMenu());
         }
     }
 
-    private void addPresetsMenu() {
-        presetsMenu = new JMenu(GUIText.PRESETS);
+    /**
+     * Returns true if a {@link DialogMenuBar} for this owner would have at least one menu.
+     */
+    public static boolean hasMenus(DialogMenuOwner owner) {
+        return hasPresets(owner) || owner.getHelp() != null;
+    }
 
-        if (owner.hasBuiltinPresets()) {
-            addBuiltInPresets();
+    private static boolean hasPresets(DialogMenuOwner owner) {
+        return owner.hasBuiltinPresets() || owner.shouldHaveUserPresetsMenu();
+    }
+
+    private static JMenu createPresetsMenu(DialogMenuOwner owner) {
+        JMenu presetsMenu = new JMenu(GUIText.PRESETS);
+
+        List<Preset> builtinPresets = owner.getBuiltinPresets();
+        if (!builtinPresets.isEmpty()) {
+            presetsMenu.add(createBuiltinPresetsMenu(owner, builtinPresets));
         }
 
         if (owner.shouldHaveUserPresetsMenu()) {
-            addUserPresets();
+            addUserPresets(owner, presetsMenu);
         }
 
         assert presetsMenu.getMenuComponentCount() > 0;
-        add(presetsMenu);
+        return presetsMenu;
     }
 
-    private void addUserPresets() {
+    private static JMenu createBuiltinPresetsMenu(DialogMenuOwner owner, List<Preset> presets) {
+        JMenu builtinPresets = new JMenu(GUIText.BUILT_IN_PRESETS);
+
+        for (Preset preset : presets) {
+            builtinPresets.add(preset.createAction(owner));
+        }
+        return builtinPresets;
+    }
+
+    private static void addUserPresets(DialogMenuOwner owner, JMenu presetsMenu) {
         if (owner.hasBuiltinPresets()) {
             presetsMenu.addSeparator();
         }
 
         new UserPresetMenuHelper(owner, presetsMenu, presetsMenu)
             .addSaveAndUserPresets();
-    }
-
-    private void addBuiltInPresets() {
-        JMenu builtinPresets = new JMenu(GUIText.BUILT_IN_PRESETS);
-        Preset[] presets = owner.getBuiltinPresets();
-
-        for (Preset preset : presets) {
-            builtinPresets.add(preset.createAction(owner));
-        }
-        presetsMenu.add(builtinPresets);
     }
 }

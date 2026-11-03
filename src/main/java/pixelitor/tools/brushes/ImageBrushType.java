@@ -18,7 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.AbstractBrushTool;
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.BrushImageUtils;
 
 import java.awt.image.BufferedImage;
 
@@ -29,17 +29,17 @@ public enum ImageBrushType {
     REAL {
         @Override
         public BufferedImage createTemplateImage() {
-            return ImageUtils.createGrayRandomPointsBrushImage(SIZE, 0.2f);
+            return BrushImageUtils.createGrayRandomPointsBrushImage(SIZE, 0.2f);
         }
     }, HAIR {
         @Override
         public BufferedImage createTemplateImage() {
-            return ImageUtils.createGrayRandomPointsBrushImage(SIZE, 0.03f);
+            return BrushImageUtils.createGrayRandomPointsBrushImage(SIZE, 0.03f);
         }
     }, SOFT {
         @Override
         public BufferedImage createTemplateImage() {
-            return ImageUtils.createSoftGrayBrushImage(SIZE);
+            return BrushImageUtils.createSoftGrayBrushImage(SIZE);
         }
     };
 

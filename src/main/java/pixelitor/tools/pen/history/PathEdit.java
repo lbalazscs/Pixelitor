@@ -68,7 +68,7 @@ public class PathEdit extends PixelitorEdit {
         setPath(before);
         for (TextLayer textLayer : formerUsers) {
             if (isPathDeletion()) {
-                textLayer.usePathEditing();
+                textLayer.switchToPathAlignment();
             } else {
                 textLayer.pathChanged(false);
             }

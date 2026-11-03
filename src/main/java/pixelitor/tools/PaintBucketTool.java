@@ -26,6 +26,7 @@ import pixelitor.history.PartialImageEdit;
 import pixelitor.layers.Drawable;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.FloodFill;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.debug.DebugNode;
 
@@ -224,7 +225,7 @@ public class PaintBucketTool extends Tool {
         // tracker to check if any pixels were actually changed during the traversal
         boolean[] modified = new boolean[1];
 
-        ImageUtils.floodFill(pixels, imgWidth, imgHeight, x, y, tolerance,
+        FloodFill.floodFill(pixels, imgWidth, imgHeight, x, y, tolerance,
             // define the action: fill pixels and expand the bounding box
             (segY, segX1, segX2) -> {
                 // expand the bounding box to include the new segment
@@ -264,7 +265,7 @@ public class PaintBucketTool extends Tool {
         boolean modified = false;
 
         for (int i = 0; i < pixels.length; i++) {
-            if (ImageUtils.isSimilar(pixels[i], rgbAtMouse, tolerance)) {
+            if (FloodFill.isSimilar(pixels[i], rgbAtMouse, tolerance)) {
                 if (pixels[i] != newRGB) {
                     pixels[i] = newRGB;
                     modified = true;

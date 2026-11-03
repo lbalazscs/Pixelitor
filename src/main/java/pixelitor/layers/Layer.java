@@ -370,6 +370,7 @@ public abstract class Layer implements Serializable, Debuggable {
     public void setHolder(LayerHolder holder) {
         assert holder != null;
         assert holder != this;
+        assert holder.getComp() == comp;
 
         this.holder = holder;
     }
@@ -417,7 +418,7 @@ public abstract class Layer implements Serializable, Debuggable {
         Layer current = this;
         while (!current.isTopLevel()) {
             // non-top-level holders must be layers
-            current = (Layer) current.holder;
+            current = (Layer) current.getHolder();
         }
 
         // smart filters should never be top-level
@@ -493,6 +494,7 @@ public abstract class Layer implements Serializable, Debuggable {
                                         boolean createEdit, boolean addToHistory,
                                         String editName, boolean deselect) {
         assert mask == null;
+        assert createEdit || !addToHistory; // adding to the history needs an edit
 
         // new masks are always canvas-sized (no translation),
         // even if their owner layer is bigger than the canvas
@@ -507,7 +509,7 @@ public abstract class Layer implements Serializable, Debuggable {
 
         if (!createEdit) {
             // either history and UI update will be handled by
-            // the caller, or we are in a test setup
+            // the caller, or we are in a test setup (deselect is ignored)
             return null;
         }
 
@@ -521,10 +523,8 @@ public abstract class Layer implements Serializable, Debuggable {
         PixelitorEdit edit = new AddLayerMaskEdit(editName, comp, this);
         if (deselect) {
             assert comp.hasSelection();
-            DeselectEdit deselectEdit = comp.deselect(false);
-            if (deselectEdit != null) {
-                edit = new MultiEdit(editName, comp, edit, deselectEdit);
-            }
+            // deselect(false) returns null if there was nothing to deselect
+            edit = MultiEdit.combine(edit, comp.deselect(false), editName);
         }
 
         if (isActive()) {
@@ -690,6 +690,9 @@ public abstract class Layer implements Serializable, Debuggable {
      * Transfers the mask and UI from this layer to a new owner layer.
      */
     public void transferMaskAndUITo(Layer newOwner) {
+        assert newOwner.mask == null;
+        assert newOwner.ui == null;
+
         if (hasMask()) {
             mask.changeOwner(newOwner);
 
@@ -701,6 +704,7 @@ public abstract class Layer implements Serializable, Debuggable {
             newOwner.maskEnabled = maskEnabled;
             newOwner.editingMask = editingMask;
             mask = null;
+            editingMask = false;
         }
 
         newOwner.ui = this.ui;
@@ -1031,7 +1035,6 @@ public abstract class Layer implements Serializable, Debuggable {
             return;
         }
         SmartObject so = new SmartObject(this);
-        so.setHolder(holder);
 
         holder.replaceLayer(this, so);
         History.add(new ReplaceLayerEdit(this, so, "Convert to Smart Object"));
@@ -1103,8 +1106,10 @@ public abstract class Layer implements Serializable, Debuggable {
         var rasterizedImage = toImage(false, false);
         assert rasterizedImage != null;
 
+        // some layers might return a cached image
+        rasterizedImage = ImageUtils.copyImage(rasterizedImage);
+
         var newImageLayer = new ImageLayer(comp, rasterizedImage, getRasterizedName());
-        newImageLayer.setHolder(holder);
         copyCommonPropertiesTo(newImageLayer);
         holder.replaceLayer(this, newImageLayer);
         History.add(new ReplaceLayerEdit(this, newImageLayer, "Rasterize " + getTypeString()));
@@ -1147,14 +1152,6 @@ public abstract class Layer implements Serializable, Debuggable {
     public boolean contains(Layer layer) {
         // by default it only contains itself, overridden for composite layers
         return layer == this;
-    }
-
-    /**
-     * Checks if this layer (or its children) is an instance of, or contains a layer of, the given type.
-     */
-    public boolean containsLayerOfType(Class<? extends Layer> type) {
-        // by default check only itself, overridden for composite layers
-        return type.isInstance(this);
     }
 
     /**

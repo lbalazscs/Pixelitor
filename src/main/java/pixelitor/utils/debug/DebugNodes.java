@@ -211,7 +211,7 @@ public class DebugNodes {
     public static DebugNode createFontNode(String name, Font font) {
         DebugNode node = new DebugNode(name, font);
 
-        node.addQuotedString("family name", font.getName());
+        node.addQuotedString("family name", font.getFamily());
         node.addQuotedString("face name", font.getFontName());
         node.addInt("size", font.getSize());
         node.addBoolean("bold", font.isBold());
@@ -232,7 +232,7 @@ public class DebugNodes {
         node.add(comp.getCanvas().createDebugNode("canvas"));
         node.addInt("dpi", comp.getDpi());
 
-        node.add(comp.getActiveLayer().createDebugNode("active layer"));
+        node.addNullableDebuggable("active layer", comp.getActiveLayer());
 
         comp.forEachTopLevelLayer(layer -> node.add(layer.createDebugNode()));
 
@@ -250,8 +250,9 @@ public class DebugNodes {
         node.addBoolean("is smart object content", comp.isSmartObjectContent());
         if (comp.isSmartObjectContent()) {
             DebugNode ownersNode = new DebugNode("referencing SO owner names", comp.getOwners());
+            int index = 0;
             for (SmartObject owner : comp.getOwners()) {
-                ownersNode.addString("name", owner.getName());
+                ownersNode.addString("owner " + index++, owner.getName());
             }
             node.add(ownersNode);
         }
@@ -260,6 +261,7 @@ public class DebugNodes {
 
         node.addNullableDebuggable("draft selection", comp.getDraftSelection());
         node.addNullableDebuggable("selection", comp.getSelection());
+
         return node;
     }
 }

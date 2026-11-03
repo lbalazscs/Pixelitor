@@ -52,11 +52,6 @@ public class EnlargeCanvas extends SimpleCompAction {
     }
 
     @Override
-    public boolean supportsSmartObjects() {
-        return false;
-    }
-
-    @Override
     protected void updateCanvasSize(Canvas newCanvas, View view) {
         enlargement.resizeCanvas(newCanvas, view);
         newCanvasSize = newCanvas.getSize();

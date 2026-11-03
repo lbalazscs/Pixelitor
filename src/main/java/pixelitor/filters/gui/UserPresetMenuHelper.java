@@ -22,7 +22,6 @@ import pixelitor.tools.gui.ToolButton;
 
 import javax.swing.*;
 import java.awt.Component;
-import java.util.List;
 
 /**
  * Encapsulates the logic for building and updating user preset menus.
@@ -32,59 +31,52 @@ public class UserPresetMenuHelper {
     private static final String USER_PRESET_MENU_KEY = "isUserPreset";
 
     private final PresetOwner owner;
-    private final JComponent menu; // a JMenu or a JPopupMenu
+    private final JPopupMenu popupMenu; // the popup of a JMenu, or a standalone JPopupMenu
     private final Component dialogParent;
-    private boolean managePresetsMenuAdded = false;
+    private boolean userPresetSectionStarted; // "Manage Presets" item + separator added
 
     public UserPresetMenuHelper(PresetOwner owner, JComponent menu, Component dialogParent) {
         this.owner = owner;
-        this.menu = menu;
+        this.popupMenu = switch (menu) {
+            case JMenu m -> m.getPopupMenu();
+            case JPopupMenu pm -> pm;
+            default -> throw new IllegalArgumentException(
+                "Unsupported menu type: " + menu.getClass().getName());
+        };
         this.dialogParent = dialogParent;
     }
 
     public void addSaveAndUserPresets() {
         addSavePresetMenuItem();
 
-        List<UserPreset> userPresets = UserPreset.detectPresetNames(owner.getPresetDirName());
-        if (!userPresets.isEmpty()) {
-            addManagePresetsMenu();
-            addSeparator();
-            managePresetsMenuAdded = true;
-
-            for (UserPreset preset : userPresets) {
-                addUserPresetMenuItem(preset);
-            }
+        for (UserPreset preset : UserPreset.detectPresets(owner.getPresetDirName())) {
+            addUserPreset(preset); // the first call also starts the user preset section
         }
     }
 
     private void addSavePresetMenuItem() {
         Action savePresetAction = PresetActions.createSaveAction(
             owner, dialogParent,
-            this::addNewUserPreset,
+            this::addUserPreset,
             this::removeUserPreset);
 
         JMenuItem presetMI = new JMenuItem(savePresetAction);
         presetMI.setName("savePreset");
-        menu.add(presetMI);
+        popupMenu.add(presetMI);
     }
 
     private void addManagePresetsMenu() {
-        if (!GUIUtils.CAN_USE_FILE_MANAGER) {
-            return;
-        }
-        Action manageAction = PresetActions.createManageAction(owner, dialogParent);
-        if (menu instanceof JMenu m) {
-            m.add(manageAction);
-        } else if (menu instanceof JPopupMenu pm) {
-            pm.add(manageAction);
+        if (GUIUtils.CAN_USE_FILE_MANAGER) {
+            popupMenu.add(PresetActions.createManageAction(owner, dialogParent));
         }
     }
 
-    private void addNewUserPreset(UserPreset preset) {
-        if (!managePresetsMenuAdded) {
+    private void addUserPreset(UserPreset preset) {
+        if (!userPresetSectionStarted) {
+            // the first user preset is preceded by the "Manage Presets" item and a separator
             addManagePresetsMenu();
-            addSeparator();
-            managePresetsMenuAdded = true;
+            popupMenu.addSeparator();
+            userPresetSectionStarted = true;
         }
         addUserPresetMenuItem(preset);
     }
@@ -96,7 +88,7 @@ public class UserPresetMenuHelper {
         // ensure that user presets can be distinguished from utility menu items
         presetMI.putClientProperty(USER_PRESET_MENU_KEY, Boolean.TRUE);
 
-        menu.add(presetMI);
+        popupMenu.add(presetMI);
     }
 
     /**
@@ -104,47 +96,30 @@ public class UserPresetMenuHelper {
      * Called when a preset is about to be overwritten.
      */
     private void removeUserPreset(UserPreset preset) {
-        Component[] menuComponents;
-        if (menu instanceof JMenu m) {
-            menuComponents = m.getMenuComponents();
-        } else {
-            menuComponents = menu.getComponents();
-        }
+        String presetName = preset.getName();
+        JMenuItem caseInsensitiveMatch = null;
 
-        JMenuItem fallbackMatch = null;
-
-        for (Component item : menuComponents) {
-            if (item instanceof JMenuItem menuItem) {
-                if (isMenuItemUserPreset(menuItem)) {
-                    String itemName = menuItem.getName();
-
-                    if (preset.getName().equals(itemName)) {
-                        // exact match found (preferable for case-sensitive OS like Linux)
-                        menu.remove(menuItem);
-                        return;
-                    } else if (preset.getName().equalsIgnoreCase(itemName)) {
-                        // keep track of a case-insensitive match for Windows/Mac collisions
-                        fallbackMatch = menuItem;
-                    }
+        for (Component c : popupMenu.getComponents()) {
+            if (c instanceof JMenuItem menuItem && isMenuItemUserPreset(menuItem)) {
+                String itemName = menuItem.getName();
+                if (presetName.equals(itemName)) {
+                    // exact match (preferable for Linux)
+                    popupMenu.remove(menuItem);
+                    return;
+                }
+                if (caseInsensitiveMatch == null && presetName.equalsIgnoreCase(itemName)) {
+                    // file name collision on Windows
+                    caseInsensitiveMatch = menuItem;
                 }
             }
         }
 
-        // if no exact case match was found, use the case-insensitive fallback
-        if (fallbackMatch != null) {
-            menu.remove(fallbackMatch);
+        if (caseInsensitiveMatch != null) {
+            popupMenu.remove(caseInsensitiveMatch);
         }
     }
 
     private static boolean isMenuItemUserPreset(JMenuItem menuItem) {
         return Boolean.TRUE.equals(menuItem.getClientProperty(USER_PRESET_MENU_KEY));
-    }
-
-    private void addSeparator() {
-        if (menu instanceof JMenu m) {
-            m.addSeparator();
-        } else if (menu instanceof JPopupMenu pm) {
-            pm.addSeparator();
-        }
     }
 }

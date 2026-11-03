@@ -161,7 +161,7 @@ final class TextOnPathLayouter {
             // calculate the target distance for the glyph's center
             double centerTargetDist = nextGlyphLeftEdgeDist + halfAdvance;
 
-            // update the position for the next glyph's left edge.
+            // Update the position for the next glyph's left edge.
             // This must happen before skipping, because the skipped
             // glyphs also take up space along the path.
             nextGlyphLeftEdgeDist += advance;
@@ -193,7 +193,7 @@ final class TextOnPathLayouter {
             glyphTransform.translate(-(origGlyphPos.getX() + baseHalfAdvance), -origGlyphPos.getY());
 
             Shape glyph = glyphVector.getGlyphOutline(glyphIndex);
-            result.append(glyphTransform.createTransformedShape(glyph), false);
+            result.append(glyph.getPathIterator(glyphTransform), false);
         }
         return result;
     }

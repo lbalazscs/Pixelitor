@@ -127,6 +127,12 @@ public class ImagePositionParamGUI extends JPanel implements ParamGUI {
     }
 
     @Override
+    public void dispose() {
+        xSliderModel.guiDisposed();
+        ySliderModel.guiDisposed();
+    }
+
+    @Override
     public void setToolTip(String tip) {
         positionSelector.setToolTipText(tip);
     }

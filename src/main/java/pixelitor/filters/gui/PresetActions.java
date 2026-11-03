@@ -29,8 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-import static pixelitor.filters.gui.UserPreset.PRESETS_DIR;
-
 /**
  * Static utility methods related to preset actions.
  */
@@ -45,8 +43,7 @@ public class PresetActions {
     public static TaskAction createManageAction(PresetOwner owner, Component dialogParent) {
         return new TaskAction("Manage Presets...", () -> {
             try {
-                String dirPath = PRESETS_DIR + File.separator + owner.getPresetDirName();
-                File directory = new File(dirPath);
+                File directory = UserPreset.getSaveDir(owner.getPresetDirName());
                 if (!directory.exists()) {
                     Dialogs.showDirectoryNotFoundError(dialogParent, directory);
                     return;
@@ -84,17 +81,19 @@ public class PresetActions {
             return;
         }
 
-        if (preset.fileExists()) {
-            boolean overwrite = confirmOverwrite(parent, preset.getName());
-            if (!overwrite) {
-                return;
-            }
-            // if the user overwrites an existing preset,
+        boolean overwriting = preset.fileExists();
+        if (overwriting && !confirmOverwrite(parent, preset.getName())) {
+            return;
+        }
+
+        // throws if writing fails, so the menu stays consistent with the disk
+        preset.save();
+
+        if (overwriting) {
             // remove the old menu item before adding the new one
             menuRemover.accept(preset);
         }
-        preset.save();
-        menuAdder.accept(preset); // add the new preset to the menu
+        menuAdder.accept(preset);
     }
 
     private static boolean confirmOverwrite(Component parent, String presetName) {

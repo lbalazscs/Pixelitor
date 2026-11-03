@@ -149,7 +149,7 @@ public class ChaosGame extends ParametrizedFilter {
             .with(midpointJump, NO)
             .with(restrict, NO);
 
-        paramSet.setBuiltinPresets(triangle, carpet, vicsek, penta, hexa);
+        paramSet.setBuiltinPresets(List.of(triangle, carpet, vicsek, penta, hexa));
     }
 
     @Override

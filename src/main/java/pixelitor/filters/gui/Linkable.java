@@ -23,12 +23,24 @@ import javax.swing.*;
  * A {@link FilterParam} that can have a "Linked" checkbox.
  */
 public interface Linkable extends FilterParam {
+    static JCheckBox createLinkedCheckBox(Linkable linkable) {
+        JCheckBox linkedCB = new JCheckBox();
+        linkedCB.setModel(linkable.getLinkedModel());
+        linkedCB.setToolTipText(linkable.getLinkedToolTip());
+        linkedCB.addActionListener(_ -> linkable.setLinked(linkedCB.isSelected()));
+        return linkedCB;
+    }
+
     /**
      * Returns the model of the "Linked" checkbox,
      * or null if this instance isn't linkable.
      */
     ButtonModel getLinkedModel();
 
+    /**
+     * Returns the tooltip of the "Linked" checkbox.
+     * Only meaningful if {@link #isLinkable()} is true.
+     */
     String getLinkedToolTip();
 
     /**

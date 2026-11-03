@@ -30,6 +30,7 @@ import pixelitor.layers.*;
 import pixelitor.progress.ProgressTracker;
 import pixelitor.progress.StatusBarProgressTracker;
 import pixelitor.progress.SubtaskProgressTracker;
+import pixelitor.utils.ImageResizeUtils;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Thumbnails;
 import pixelitor.utils.Utils;
@@ -419,7 +420,7 @@ public class OpenRaster {
         // without upscaling or changing the aspect ratio."
         Dimension thumbSize = Thumbnails.calcThumbDimensions(
             src.getWidth(), src.getHeight(), THUMBNAIL_MAX_DIMENSION, false);
-        return ImageUtils.resize(src, thumbSize.width, thumbSize.height);
+        return ImageResizeUtils.resize(src, thumbSize.width, thumbSize.height);
     }
 
     /**

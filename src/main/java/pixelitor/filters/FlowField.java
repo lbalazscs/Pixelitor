@@ -266,7 +266,7 @@ public class FlowField extends ParametrizedFilter {
         UserPreset smoke = createSmokePreset();
         UserPreset vanGogh = createVanGoghPreset();
         FilterState vortex = createVortexPreset(forceMixerParam);
-        paramSet.setBuiltinPresets(confetti, smoke, vanGogh, vortex);
+        paramSet.setBuiltinPresets(List.of(confetti, smoke, vanGogh, vortex));
 
         noiseParam.setToolTip("Add smooth randomness to the flow of particles.");
         sinkParam.setToolTip("Make particles flow towards the center point.");

@@ -18,7 +18,7 @@
 package pixelitor.tools.brushes;
 
 import pixelitor.tools.util.PPoint;
-import pixelitor.utils.ImageUtils;
+import pixelitor.utils.BrushImageUtils;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -116,7 +116,7 @@ public class ImageDabsBrush extends DabsBrush {
      */
     private void recreateColoredBrushImage(Color color) {
         int colorNoAlpha = color.getRGB() & 0x00_FF_FF_FF;
-        coloredBrushImg = ImageUtils.maskToTransparency(templateImg, colorNoAlpha);
+        coloredBrushImg = BrushImageUtils.maskToTransparency(templateImg, colorNoAlpha);
     }
 
     @Override

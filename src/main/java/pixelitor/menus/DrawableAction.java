@@ -28,41 +28,66 @@ import java.awt.EventQueue;
 import java.util.function.Consumer;
 
 /**
- * An action that operates on a {@link Drawable}, and can optionally
- * rasterize other layer types or apply to smart objects.
+ * An action that operates on a {@link Drawable}.
+ * <p>
+ * Depending on the active layer, the task is run
+ * <ul>
+ *   <li>on the layer's mask, if the mask is being edited,
+ *   <li>on the layer itself, if it is a {@link Drawable},
+ *   <li>on the smart object, if a smart object (or one of its smart filters)
+ *   is active and a smart object action was given,
+ *   <li>otherwise on a newly rasterized image layer, if the user
+ *   agrees to rasterize the active layer.
+ * </ul>
+ * Layers that are edited by the active tool itself (those whose
+ * {@link Layer#getPreferredTool()} is the active tool) never get here:
+ * they are filtered out earlier by
+ * {@link pixelitor.tools.toolhandlers.DrawableCheckHandler}.
  */
 public class DrawableAction extends AbstractViewEnabledAction {
-    protected final String name;
-    private final boolean allowSmartObjects;
+    private final String name;
 
     /**
-     * Defines the core task for this action, which operates on a {@link Drawable}
-     * that is either the original active layer or a newly rasterized one.
+     * The core task of this action. It receives the active layer if it is a
+     * {@link Drawable}, the active layer's mask if the mask is being edited,
+     * or a newly rasterized image layer that replaced the active layer.
      */
     private final Consumer<Drawable> action;
 
+    /**
+     * Handles smart objects (and smart filters, via their smart object)
+     * directly. If null, smart objects are offered for rasterization
+     * like any other non-drawable layer.
+     */
     private final Consumer<SmartObject> smartObjectAction;
 
     public DrawableAction(String name, Consumer<Drawable> action) {
-        this(name, true, false, action, null);
+        this(name, true, action, null);
     }
 
-    public DrawableAction(String name, boolean hasDialog, boolean allowSmartObjects,
-                          Consumer<Drawable> action, Consumer<SmartObject> smartObjectAction) {
+    /**
+     * @param smartObjectAction handles smart objects directly;
+     *                          if null, smart objects are offered for rasterization
+     */
+    public DrawableAction(String name, boolean hasDialog,
+                          Consumer<Drawable> action,
+                          Consumer<SmartObject> smartObjectAction) {
         super(name);
-        this.allowSmartObjects = allowSmartObjects;
-        this.action = action;
-        this.smartObjectAction = smartObjectAction;
         assert name != null;
         assert action != null;
 
         this.name = name;
-        String menuName = hasDialog ? name + "..." : name;
-        setText(menuName);
+        this.action = action;
+        this.smartObjectAction = smartObjectAction;
+
+        setText(hasDialog ? name + "..." : name);
     }
 
     /**
-     * Runs the given task on the active layer if it is a {@link Drawable}.
+     * Runs the given task on the active layer (or on its mask if the mask
+     * is being edited). If the active layer isn't a {@link Drawable}, the user
+     * may be asked to rasterize it, and the task then runs on the rasterized layer.
+     * The task is started asynchronously, after the current event is handled.
      */
     public static void run(String taskName, Consumer<Drawable> task) {
         var drawableAction = new DrawableAction(taskName, task);
@@ -98,27 +123,9 @@ public class DrawableAction extends AbstractViewEnabledAction {
             // for a smart filter, the action applies to its parent smart object
             handleSmartObject(smartFilter.getSmartObject());
         } else if (layer.isRasterizable()) {
-            handleRasterizableLayer(layer);
+            askAndRasterize(layer);
         } else {
             handleUnsupportedLayer(layer);
-        }
-    }
-
-    private void handleRasterizableLayer(Layer layer) {
-        if (RandomGuiTest.isRunning()) {
-            return;
-        }
-
-        // special case: the gradient tool is handled by activating the tool
-        // itself, so this action should do nothing on a gradient fill layer
-        if (layer.getClass() == GradientFillLayer.class && name.equals("Gradient Tool")) {
-            return;
-        }
-
-        boolean rasterize = Dialogs.showRasterizeQuestion(layer, name);
-        if (rasterize) {
-            ImageLayer rasterizedLayer = layer.replaceWithRasterized();
-            action.accept(rasterizedLayer);
         }
     }
 
@@ -127,7 +134,7 @@ public class DrawableAction extends AbstractViewEnabledAction {
             Dialogs.showError("Adjustment Layer",
                 name + " can't be used on adjustment layers.");
         } else if (layer instanceof LayerGroup group) {
-            // isolated groups can be rasterized and are handled by handleRasterizableLayer
+            // isolated groups can be rasterized and are handled by askAndRasterize
             assert group.isPassThrough();
             Messages.showUnrasterizableLayerGroupError(group, name);
         } else {
@@ -137,16 +144,27 @@ public class DrawableAction extends AbstractViewEnabledAction {
     }
 
     private void handleSmartObject(SmartObject so) {
-        if (allowSmartObjects) {
-            if (smartObjectAction != null) {
-                smartObjectAction.accept(so);
-            }
+        if (smartObjectAction != null) {
+            smartObjectAction.accept(so);
+        } else {
+            askAndRasterize(so);
+        }
+    }
+
+    /**
+     * Asks the user whether the layer should be rasterized, and if so,
+     * replaces it with an image layer and runs the action on that.
+     * <p>
+     * Does nothing in {@link RandomGuiTest}: the robot can't close dialogs,
+     * and silently rasterizing would also gradually turn the special layers
+     * (text, shapes, smart objects...) into image layers, reducing test coverage.
+     */
+    private void askAndRasterize(Layer layer) {
+        if (RandomGuiTest.isRunning()) {
             return;
         }
-        boolean rasterize = Dialogs.showRasterizeQuestion(so, name);
-        if (rasterize) {
-            ImageLayer rasterizedLayer = so.replaceWithRasterized();
-            action.accept(rasterizedLayer);
+        if (Dialogs.showRasterizeQuestion(layer, name)) {
+            action.accept(layer.replaceWithRasterized());
         }
     }
 }

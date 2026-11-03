@@ -23,7 +23,7 @@ package pixelitor.filters.gui;
 @FunctionalInterface
 public interface ParamAdjustmentListener {
     /**
-     * Called when a parameter is adjusted in the GUI.
+     * Called when a filter setting is adjusted or activated in the GUI.
      * Implementations should handle any necessary updates,
      * such as recalculating a filter preview.
      */

@@ -22,5 +22,12 @@ package pixelitor.filters.gui;
  * "Randomize Settings" button in the filter's dialog is pressed.
  */
 public enum RandomizeMode {
-    IGNORE, ALLOW
+    /**
+     * The parameter keeps its value when the settings are randomized.
+     */
+    IGNORE,
+    /**
+     * The parameter is randomized (if it is also enabled).
+     */
+    ALLOW
 }

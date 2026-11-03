@@ -31,7 +31,6 @@ import pixelitor.history.History;
 import pixelitor.history.MultiEdit;
 import pixelitor.history.PixelitorEdit;
 import pixelitor.layers.Layer;
-import pixelitor.layers.SmartObject;
 import pixelitor.selection.Selection;
 import pixelitor.selection.SelectionActions;
 import pixelitor.selection.ShapeCombinator;
@@ -91,11 +90,6 @@ public class Crop implements CompAction {
      */
     @Override
     public CompletableFuture<Composition> process(Composition srcComp) {
-        if (srcComp.containsLayerOfType(SmartObject.class)) {
-            Messages.showSmartObjectUnsupportedInfo("Cropping");
-            return CompletableFuture.completedFuture(srcComp);
-        }
-
         // use integer coordinates because cropping is pixel-based
         Rectangle roundedImCropRect = Shapes.roundRect(imCropRect);
         Canvas srcCanvas = srcComp.getCanvas();

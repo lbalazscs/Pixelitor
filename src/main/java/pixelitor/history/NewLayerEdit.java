@@ -40,6 +40,7 @@ public class NewLayerEdit extends PixelitorEdit {
                         MaskViewMode prevMaskViewMode) {
         super(name, layer.getComp());
 
+        assert prevActiveLayer != null;
         assert prevActiveLayer != layer;
 
         this.holder = layer.getHolder();
@@ -53,8 +54,13 @@ public class NewLayerEdit extends PixelitorEdit {
     public void undo() throws CannotUndoException {
         super.undo();
 
-        holder.deleteLayer(layer, false);
+        // Activate first, so that deleteLayer doesn't have to pick
+        // (and fire events for) an arbitrary neighbor. This is safe,
+        // because prevActiveLayer is never nested in the new layer,
+        // so deleteLayer won't change the active layer afterwards.
         comp.setActiveLayer(prevActiveLayer);
+        holder.deleteLayer(layer, false);
+        // the activation above reset the mask view mode, so restore it last
         comp.setMaskViewMode(prevMaskViewMode, prevActiveLayer);
     }
 

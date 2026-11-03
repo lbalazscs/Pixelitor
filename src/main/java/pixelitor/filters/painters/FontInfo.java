@@ -76,8 +76,9 @@ public record FontInfo(
     }
 
     private static int extractTracking(Map<TextAttribute, ?> map) {
-        Float trackingValue = (Float) map.get(TRACKING);
-        return trackingValue != null ? Math.round(100 * trackingValue) : 0;
+        return map.get(TRACKING) instanceof Number n
+            ? Math.round(100 * n.floatValue())
+            : 0;
     }
 
     public void saveStateTo(UserPreset preset) {

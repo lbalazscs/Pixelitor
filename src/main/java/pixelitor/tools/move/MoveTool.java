@@ -24,6 +24,7 @@ import pixelitor.gui.CompositionReplacedContext;
 import pixelitor.gui.View;
 import pixelitor.history.History;
 import pixelitor.history.PixelitorEdit;
+import pixelitor.layers.HitTesting;
 import pixelitor.layers.ImageLayer;
 import pixelitor.layers.Layer;
 import pixelitor.selection.Selection;
@@ -112,7 +113,8 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
             }
         } else { // regular move mode
             if (activeMode.movesLayer() && isAutoSelecting()) {
-                Layer targetLayer = e.getComp().findTopmostOpaqueLayer(e.toImPoint());
+                Composition composition = e.getComp();
+                Layer targetLayer = HitTesting.findTopmostOpaqueLayer(composition, e.toImPoint());
 
                 if (targetLayer == null) {
                     drag.cancel();
@@ -160,7 +162,8 @@ public class MoveTool extends DragTool implements SelectionChangeListener {
     private void updateMoveCursor(View view, MouseEvent e) {
         if (isAutoSelecting()) {
             Point p = Geometry.round(view.componentToImageSpace(e.getPoint()));
-            Layer movedLayer = view.getComp().findTopmostOpaqueLayer(p);
+            Composition composition = view.getComp();
+            Layer movedLayer = HitTesting.findTopmostOpaqueLayer(composition, p);
             if (movedLayer == null) {
                 view.setCursor(Cursors.DEFAULT);
                 return;

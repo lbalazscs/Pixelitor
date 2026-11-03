@@ -55,23 +55,19 @@ public class TextFilter extends FilterWithGUI {
             return ImageUtils.copy(src, dest);
         }
 
-        var textPainter = new TransformedTextPainter();
-        settings.configurePainter(textPainter);
+        var painter = new TransformedTextPainter();
+        settings.configurePainter(painter);
 
-        if (settings.hasWatermark()) {
-            dest = textPainter.createWatermark(src, null);
-        } else {
-            int width = dest.getWidth();
-            int height = dest.getHeight();
+        return settings.hasWatermark()
+            ? painter.createWatermark(src, null)
+            : createPaintedImage(src, painter);
+    }
 
-            textPainter.setColor(settings.getColor());
-
-            dest = ImageUtils.copyImage(src);
-            Graphics2D g = dest.createGraphics();
-            textPainter.paint(g, width, height, null);
-            g.dispose();
-        }
-
+    private static BufferedImage createPaintedImage(BufferedImage src, TransformedTextPainter painter) {
+        BufferedImage dest = ImageUtils.copyImage(src);
+        Graphics2D g = dest.createGraphics();
+        painter.paintUncached(g, src.getWidth(), src.getHeight(), null);
+        g.dispose();
         return dest;
     }
 
@@ -135,5 +131,10 @@ public class TextFilter extends FilterWithGUI {
     @Override
     public boolean supportsGray() {
         return !settings.hasWatermark();
+    }
+
+    @Override
+    protected boolean createDefaultDestImg() {
+        return false;
     }
 }

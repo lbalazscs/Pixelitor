@@ -200,7 +200,7 @@ public class Dialogs {
         String msg = format("<html>The file <b>%s</b> is not writable." +
             "<br>To keep your changes, save the image " +
             "with a new name or in another folder.", file.getAbsolutePath());
-        showError(parent, "File not writable", msg);
+        showError(parent, "File Not Writable", msg);
     }
 
     public static void showDirectoryNotFoundError(Component parent, File dir) {
@@ -232,8 +232,7 @@ public class Dialogs {
             System.err.printf("ERROR: Dialogs.showException called on %s%n", threadName());
 
             // call this method on the EDT
-            Throwable finalE = e;
-            EventQueue.invokeLater(() -> showException(finalE, srcThread));
+            EventQueue.invokeLater(() -> showException(e, srcThread));
             return;
         }
 
@@ -244,23 +243,13 @@ public class Dialogs {
 
         RandomGuiTest.stop();
 
-        if (e instanceof OutOfMemoryError) {
-            showOutOfMemoryError((OutOfMemoryError) e);
+        Throwable cause = unwrap(e);
+        if (cause instanceof OutOfMemoryError oom) {
+            showOutOfMemoryError(oom);
             return;
         }
 
         notifyIfGuiTest(e);
-
-        // unwrap exceptions
-        while (e instanceof CompletionException ||
-            e instanceof UncheckedIOException ||
-            e instanceof InvocationTargetException) {
-            Throwable cause = e.getCause();
-            if (cause == null) {
-                break;
-            }
-            e = cause;
-        }
 
         Frame parent = getMainWindow();
         String errorReportMessage = """
@@ -269,9 +258,19 @@ public class Dialogs {
             Please consider reporting this error to the developers by creating a new issue on github.com (see "Help/Report an Issue..." in the menus).
             If you do, then open "Details", click "Copy to Clipboard", and paste the details into the issue.""";
         var errorInfo = new ErrorInfo("Program Error",
-            errorReportMessage, null, null, e,
+            errorReportMessage, null, null, cause,
             Level.SEVERE, null);
         JXErrorPane.showDialog(parent, errorInfo);
+    }
+
+    private static Throwable unwrap(Throwable e) {
+        Throwable t = e;
+        while ((t instanceof CompletionException
+            || t instanceof UncheckedIOException
+            || t instanceof InvocationTargetException) && t.getCause() != null) {
+            t = t.getCause();
+        }
+        return t;
     }
 
     private static void notifyIfGuiTest(Throwable e) {
@@ -336,7 +335,7 @@ public class Dialogs {
             "<li>decreasing the number of layers" +
             "<li>working with smaller images" +
             "<li>putting more RAM into your computer";
-        String title = "Out of memory error";
+        String title = "Out of Memory Error";
         showError(title, msg);
     }
 
@@ -352,7 +351,7 @@ public class Dialogs {
     }
 
     public static void showFileNotReadableError(Component parent, File f) {
-        showError(parent, "File not readable",
+        showError(parent, "File Not Readable",
             "<html>The file <b>" + f.getAbsolutePath()
                 + "</b> isn't readable. " +
                 "<br>Change the file's permissions and try again."

@@ -33,6 +33,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.transform.Transformable;
 import pixelitor.tools.util.PPoint;
 import pixelitor.tools.util.PRectangle;
+import pixelitor.utils.ImageResizeUtils;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 import pixelitor.utils.debug.Debug;
@@ -351,6 +352,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
         BufferedImage prevRef = image;
         image = requireNonNull(newImage);
 
+        assert image != prevRef;
         imageRefChanged();
 
         assert Assertions.rasterStartsAtOrigin(newImage);
@@ -537,7 +539,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
     @Override
     public int getPixelAtPoint(Point p) {
-        return ImageUtils.getPixelAt(this, image, p);
+        return HitTesting.getPixelAt(this, image, p);
     }
 
     private boolean imageDoesNotCoverCanvas() {
@@ -682,7 +684,6 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             throw new IllegalArgumentException("tx = " + tx + ", ty = " + ty + ", this = " + this);
         }
         super.setTranslation(tx, ty);
-        invalidateMaskedImageCache();
     }
 
     /**
@@ -906,7 +907,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
         int finalTx = newTx;
         int finalTy = newTy;
-        return ImageUtils
+        return ImageResizeUtils
             .resizeAsync(image, imgTargetWidth, imgTargetHeight)
             .thenAcceptAsync(resizedImg -> {
                 setImage(resizedImg);
@@ -940,7 +941,7 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
 
             if (tmpLayer == null) {
                 paintWithoutTmpLayer(g, visibleImage, firstVisibleLayer);
-            } else { // we are in the middle of a brush draw
+            } else { // we are in the middle of a brush stroke
                 paintWithTmpLayer(g, visibleImage);
             }
         }
@@ -961,21 +962,43 @@ public class ImageLayer extends ContentLayer implements Drawable, Transformable 
             g.drawImage(visibleImage, getTx(), getTy(), null);
             tmpLayer.paintOn(g, 0, 0);
         } else {
-            // the composite of the graphics is already set up, but
-            // the drawing layer still has to be considered
+            // The composite of the graphics is already set up, but the layer
+            // and the temporary layer must be merged first, and only the
+            // result can be painted with the layer's blending mode and opacity.
+            // Only the canvas area is visible, so a canvas-sized buffer is
+            // enough. It is owned by the TmpLayer and reused during the stroke.
+            BufferedImage merged = tmpLayer.getMergeBuffer(comp.getCanvas());
+            int tx = getTx();
+            int ty = getTy();
 
-            // first create a merged layer-brush image
-            BufferedImage mergedLayerBrushImg = copyImage(visibleImage);
-            // TODO a canvas-sized image would be enough?
-            Graphics2D mergedLayerBrushG = mergedLayerBrushImg.createGraphics();
+            Graphics2D mergedG = merged.createGraphics();
+            try {
+                // Normally the layer image covers the canvas, so the Src
+                // drawing below overwrites every pixel of the reused buffer.
+                // Otherwise (for example while the layer is being dragged)
+                // the leftovers from a previous repaint must be cleared.
+                boolean coversCanvas = tx <= 0 && ty <= 0
+                    && tx + visibleImage.getWidth() >= merged.getWidth()
+                    && ty + visibleImage.getHeight() >= merged.getHeight();
+                if (!coversCanvas) {
+                    mergedG.setComposite(AlphaComposite.Clear);
+                    mergedG.fillRect(0, 0, merged.getWidth(), merged.getHeight());
+                }
 
-            // draw the drawing layer on the layer
-            tmpLayer.paintOn(mergedLayerBrushG, -getTx(), -getTy());
-            mergedLayerBrushG.dispose();
+                // exact copy of the layer content into canvas space
+                mergedG.setComposite(AlphaComposite.Src);
+                mergedG.drawImage(visibleImage, tx, ty, null);
 
-            // now draw the merged layer-brush on the target Graphics
+                // The buffer is in canvas space, so no offset is needed.
+                // paintOn also sets the composite of the temporary layer.
+                tmpLayer.paintOn(mergedG, 0, 0);
+            } finally {
+                mergedG.dispose();
+            }
+
+            // now draw the merged layer-brush image on the target Graphics
             // with the layer composite
-            g.drawImage(mergedLayerBrushImg, getTx(), getTy(), null);
+            g.drawImage(merged, 0, 0, null);
         }
     }
 

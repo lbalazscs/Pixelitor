@@ -27,8 +27,6 @@ import pixelitor.guides.Guides;
 import pixelitor.history.CompositionReplacedEdit;
 import pixelitor.history.History;
 import pixelitor.layers.ContentLayer;
-import pixelitor.layers.SmartObject;
-import pixelitor.layers.TextLayer;
 import pixelitor.selection.SelectionActions;
 import pixelitor.utils.Messages;
 
@@ -56,15 +54,6 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
 
     @Override
     public CompletableFuture<Composition> process(Composition srcComp) {
-        if (!supportsSmartObjects() && srcComp.containsLayerOfType(SmartObject.class)) {
-            Messages.showSmartObjectUnsupportedInfo(getText());
-            return CompletableFuture.completedFuture(srcComp);
-        }
-        if (!supportsTextLayers() && srcComp.containsLayerOfType(TextLayer.class)) {
-            Messages.showTextLayerUnsupportedWarning(getText());
-            return CompletableFuture.completedFuture(srcComp);
-        }
-
         View view = srcComp.getView();
         Composition newComp = srcComp.copy(CopyOptions.fullStateBackup(true, false));
         Canvas newCanvas = newComp.getCanvas();
@@ -106,12 +95,6 @@ public abstract class SimpleCompAction extends AbstractViewEnabledAction impleme
         Messages.showPlainStatusMessage(getStatusBarMessage());
 
         return CompletableFuture.completedFuture(newComp);
-    }
-
-    public abstract boolean supportsSmartObjects();
-
-    protected boolean supportsTextLayers() {
-        return true;
     }
 
     /**

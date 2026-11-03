@@ -28,6 +28,7 @@ import pixelitor.tools.Tools;
 import pixelitor.tools.util.OverlayType;
 import pixelitor.tools.util.PMouseEvent;
 import pixelitor.utils.Cursors;
+import pixelitor.utils.FloodFill;
 import pixelitor.utils.ImageUtils;
 import pixelitor.utils.Messages;
 
@@ -164,7 +165,7 @@ public class MagicWandSelectionTool extends AbstractSelectionTool {
 
         // select pixels using flood-fill
         boolean[] mask = new boolean[width * height];
-        ImageUtils.floodFill(pixels, width, height, seedX, seedY, tolerance,
+        FloodFill.floodFill(pixels, width, height, seedX, seedY, tolerance,
             // mark the pixels in the segment as true in the mask
             (segY, segX1, segX2) -> {
                 int offset = segY * width;

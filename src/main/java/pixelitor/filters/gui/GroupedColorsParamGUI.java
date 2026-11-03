@@ -19,7 +19,6 @@ package pixelitor.filters.gui;
 
 import com.bric.swing.ColorSwatch;
 import pixelitor.colors.Colors;
-import pixelitor.gui.utils.GUIUtils;
 
 import javax.swing.*;
 import java.awt.FlowLayout;
@@ -51,7 +50,7 @@ public class GroupedColorsParamGUI extends JPanel implements ParamGUI {
 
         if (model.isLinkable()) {
             add(new JLabel(i18n("linked") + ":"));
-            linkedCB = GUIUtils.createLinkCheckBox(model);
+            linkedCB = Linkable.createLinkedCheckBox(model);
             linkedCB.addItemListener(_ -> resetButton.updateState());
             add(linkedCB);
         } else {

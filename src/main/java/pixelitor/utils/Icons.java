@@ -16,7 +16,6 @@
  */
 package pixelitor.utils;
 
-import pixelitor.gui.utils.Dialogs;
 import pixelitor.gui.utils.ThemedImageIcon;
 import pixelitor.gui.utils.VectorIcon;
 
@@ -24,13 +23,13 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
-import java.awt.image.BaseMultiResolutionImage;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 
 /**
- * Icon-related static utility methods
+ * Icon-related static utility methods.
  */
 public final class Icons {
     private static final Shape TEXT_LAYER_ICON_SHAPE = createTextLayerIconShape();
@@ -76,23 +75,8 @@ public final class Icons {
 
     public static Icon load(String iconFileName) {
         assert iconFileName != null;
-        URL imgURL = ImageUtils.findImageURL(iconFileName);
+        URL imgURL = findImageURL(iconFileName);
         return new ImageIcon(imgURL);
-    }
-
-    public static Icon loadMultiRes(String baseIconFileName, String bigIconFileName) {
-        try {
-            URL imgURL1 = ImageUtils.findImageURL(baseIconFileName);
-            BufferedImage img1 = ImageIO.read(imgURL1);
-
-            URL imgURL2 = ImageUtils.findImageURL(bigIconFileName);
-            BufferedImage img2 = ImageIO.read(imgURL2);
-
-            return new ImageIcon(new BaseMultiResolutionImage(img1, img2));
-        } catch (IOException e) {
-            Dialogs.showException(e);
-            return null;
-        }
     }
 
     public static Icon getUpArrowIcon() {
@@ -179,5 +163,32 @@ public final class Icons {
         path.closePath();
 
         return path;
+    }
+
+    /**
+     * Converts an image filename to a resource URL within the 'images' directory.
+     */
+    public static URL findImageURL(String fileName) {
+        assert fileName != null;
+
+        String path = "/images/" + fileName;
+        URL imgURL = Icons.class.getResource(path);
+        if (imgURL == null) {
+            throw new IllegalStateException("Image resource not found: " + path);
+        }
+        return imgURL;
+    }
+
+    public static BufferedImage loadResourceImage(String fileName) {
+        URL imgURL = findImageURL(fileName);
+        try {
+            BufferedImage image = ImageIO.read(imgURL);
+            if (image == null) {
+                throw new IOException("No image reader found for " + imgURL);
+            }
+            return image;
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not read " + fileName, e);
+        }
     }
 }

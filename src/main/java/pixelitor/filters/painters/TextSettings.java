@@ -36,8 +36,6 @@ import pixelitor.utils.debug.Debuggable;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Map;
@@ -50,10 +48,9 @@ import static java.awt.font.TextAttribute.KERNING_ON;
  * All the configurable properties of text layers and the text filter.
  * Edited by the {@link TextSettingsPanel}.
  * <p>
- * Instances are treated as immutable: {@link TextSettingsPanel} creates
+ * Instances are immutable: {@link TextSettingsPanel} creates
  * a new object for every change, and the {@code withX} methods return
- * modified copies. The few fields that are not final are the ones
- * that {@code readObject} must assign when migrating old PXC files.
+ * modified copies.
  */
 public class TextSettings implements Serializable, Debuggable {
     @Serial
@@ -85,18 +82,17 @@ public class TextSettings implements Serializable, Debuggable {
     private final boolean watermark;
     private final double rotation;
 
-    // the following fields are not final only because readObject()
-    // has to assign them when loading old PXC files that lack them
-    private int mlpAlignment; // alignment for multiline text or text on a path
-    private double sx;
-    private double sy;
-    private double shx;
-    private double shy;
-    private double relLineHeight;
+    private final int mlpAlignment; // alignment for multiline text or text on a path
+    private final double sx;
+    private final double sy;
+    private final double shx;
+    private final double shy;
+    private final double relLineHeight;
 
-    // a flag indicating whether newer transformation fields
-    // (sx, sy, etc.) are present in the serialized PXC file
-    private boolean transformFieldsInPxc = true;
+    // A flag indicating whether newer transformation fields
+    // (sx, sy, etc.) are present in the serialized PXC file.
+    // Not a compile-time constant so that reads in readResolve() are not inlined.
+    private final boolean transformFieldsInPxc;
 
     public TextSettings(String text, Font font, Color color,
                         AreaEffects effects,
@@ -123,27 +119,16 @@ public class TextSettings implements Serializable, Debuggable {
         this.sy = sy;
         this.shx = shx;
         this.shy = shy;
+        this.transformFieldsInPxc = true;
     }
 
     /**
      * Default settings.
      */
     public TextSettings(Composition comp) {
-        areaEffects = new AreaEffects();
-        color = WHITE;
-        font = calcDefaultFont(comp);
-        horizontalAlignment = HorizontalAlignment.CENTER;
-        text = DEFAULT_TEXT;
-        verticalAlignment = VerticalAlignment.CENTER;
-        watermark = false;
-        mlpAlignment = MlpAlignmentSelector.LEFT;
-
-        rotation = 0;
-        relLineHeight = 1.0;
-        sx = 1.0;
-        sy = 1.0;
-        shx = 0.0;
-        shy = 0.0;
+        this(DEFAULT_TEXT, calcDefaultFont(comp), WHITE, new AreaEffects(),
+            HorizontalAlignment.CENTER, VerticalAlignment.CENTER,
+            MlpAlignmentSelector.LEFT, false, 0, 1.0, 1.0, 1.0, 0.0, 0.0);
     }
 
     /**
@@ -158,8 +143,6 @@ public class TextSettings implements Serializable, Debuggable {
             horizontalAlignment, verticalAlignment, other.mlpAlignment,
             watermark, other.rotation, other.relLineHeight,
             other.sx, other.sy, other.shx, other.shy);
-
-        assert other.transformFieldsInPxc; // readObject() should have set it by now
     }
 
     public TextSettings(UserPreset preset) {
@@ -196,6 +179,7 @@ public class TextSettings implements Serializable, Debuggable {
         sy = preset.getDouble(PRESET_KEY_SY, 1.0);
         shx = preset.getDouble(PRESET_KEY_SHX, 0.0);
         shy = preset.getDouble(PRESET_KEY_SHY, 0.0);
+        transformFieldsInPxc = true;
     }
 
     public static TextSettings createRandomized() {
@@ -222,21 +206,18 @@ public class TextSettings implements Serializable, Debuggable {
     }
 
     @Serial
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        if (!transformFieldsInPxc) {
-            // migrate old pxc files
-            relLineHeight = 1.0;
-            sx = 1.0;
-            sy = 1.0;
-            shx = 0.0;
-            shy = 0.0;
-            transformFieldsInPxc = true; // the newer fields are initialized now
+    private Object readResolve() {
+        boolean oldFile = !transformFieldsInPxc;
+        if (!oldFile && mlpAlignment != 0) {
+            return this;
         }
-        if (mlpAlignment == 0) {
-            // field not found in old pxc files
-            mlpAlignment = MlpAlignmentSelector.LEFT;
-        }
+        return new TextSettings(text, font, color, areaEffects,
+            horizontalAlignment, verticalAlignment,
+            mlpAlignment == 0 ? MlpAlignmentSelector.LEFT : mlpAlignment,
+            watermark, rotation,
+            oldFile ? 1.0 : relLineHeight,
+            oldFile ? 1.0 : sx, oldFile ? 1.0 : sy,
+            oldFile ? 0.0 : shx, oldFile ? 0.0 : shy);
     }
 
     public TextSettings copy() {

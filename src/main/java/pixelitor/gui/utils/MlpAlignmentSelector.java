@@ -155,6 +155,7 @@ public class MlpAlignmentSelector extends JPanel {
 
     @Override
     public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
         leftAlignButton.setEnabled(enabled);
         centerAlignButton.setEnabled(enabled);
         rightAlignButton.setEnabled(enabled);

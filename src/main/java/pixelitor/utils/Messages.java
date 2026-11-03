@@ -166,16 +166,6 @@ public class Messages {
         showError("Layer Group", msg.formatted(group.getName(), name));
     }
 
-    public static void showSmartObjectUnsupportedInfo(String opName) {
-        msgHandler.showInfo("Feature Not Supported",
-            opName + " isn't yet supported if one of the layers is a smart object.", null);
-    }
-
-    public static void showTextLayerUnsupportedWarning(String what) {
-        msgHandler.showInfo("Feature Not Supported",
-            what + " isn't yet supported if one of the layers is a text layer.", null);
-    }
-
     public static void showFileOpenedMessage(Composition comp) {
         showStatusMessage("<b>" + comp.getName() + "</b> ("
             + comp.getCanvas().getSizeString() + ") was opened.");

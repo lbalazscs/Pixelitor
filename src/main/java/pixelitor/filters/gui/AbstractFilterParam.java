@@ -28,9 +28,7 @@ import java.util.Objects;
 public abstract class AbstractFilterParam implements FilterParam {
     private String name;
     protected ParamAdjustmentListener adjustmentListener;
-    private boolean enabledByAnimation = true;
-    private boolean enabledByFilterLogic = true;
-    private boolean enabledByParent = true;
+    private final EnabledState enabledState = new EnabledState();
     protected ParamGUI paramGUI;
     private RandomizeMode randomizeMode;
     private String toolTip;
@@ -44,7 +42,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     protected AbstractFilterParam(String name, RandomizeMode randomizeMode) {
         this.name = Objects.requireNonNull(name);
-        this.randomizeMode = randomizeMode;
+        this.randomizeMode = Objects.requireNonNull(randomizeMode);
     }
 
     /**
@@ -89,9 +87,10 @@ public abstract class AbstractFilterParam implements FilterParam {
         if (adjustmentListener != null) {
             button.setAdjustmentListener(adjustmentListener);
         }
-        button.setEnabled(enabledByFilterLogic, EnabledReason.FILTER_LOGIC);
-        button.setEnabled(enabledByAnimation, EnabledReason.ANIMATION_ENDING_STATE);
-        button.setEnabled(enabledByParent, EnabledReason.PARENT_PARAM);
+        // copy the whole state, so that new reasons can't be forgotten
+        for (EnabledReason reason : EnabledReason.values()) {
+            button.setEnabled(enabledState.isEnabledFor(reason), reason);
+        }
 
         return this;
     }
@@ -102,8 +101,9 @@ public abstract class AbstractFilterParam implements FilterParam {
     }
 
     @Override
-    public void setName(String displayName) {
-        this.name = displayName;
+    public void reconfigure(String displayName, String presetKey) {
+        this.name = Objects.requireNonNull(displayName);
+        this.presetKey = Objects.requireNonNull(presetKey);
     }
 
     @Override
@@ -137,27 +137,22 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public void setEnabled(boolean enabled, EnabledReason reason) {
-        switch (reason) {
-            case FILTER_LOGIC -> enabledByFilterLogic = enabled;
-            case ANIMATION_ENDING_STATE -> {
-                // animation ending mode only affects non-animatable parameters
-                if (!isAnimatable()) {
-                    enabledByAnimation = enabled;
-                }
-            }
-            case PARENT_PARAM -> enabledByParent = enabled;
+        // the animation ending state only affects non-animatable parameters
+        if (reason != EnabledReason.ANIMATION_ENDING_STATE || !isAnimatable()) {
+            enabledState.set(reason, enabled);
         }
 
-        if (paramGUI != null) {
-            updateGUIEnabledState();
-        }
+        updateGUIEnabledState();
         if (sideButtonModel != null) {
+            // the side button decides for itself whether it is affected
             sideButtonModel.setEnabled(enabled, reason);
         }
     }
 
     private void updateGUIEnabledState() {
-        paramGUI.setEnabled(isEnabled());
+        if (paramGUI != null) {
+            paramGUI.setEnabled(isEnabled());
+        }
     }
 
     /**
@@ -178,7 +173,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public boolean isEnabled() {
-        return enabledByFilterLogic && enabledByAnimation && enabledByParent;
+        return enabledState.isEnabled();
     }
 
     @Override
@@ -206,7 +201,7 @@ public abstract class AbstractFilterParam implements FilterParam {
 
     @Override
     public void setRandomizeMode(RandomizeMode mode) {
-        randomizeMode = mode;
+        randomizeMode = Objects.requireNonNull(mode);
     }
 
     @Override

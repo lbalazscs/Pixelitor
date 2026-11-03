@@ -42,11 +42,13 @@ import static pixelitor.filters.gui.FilterSetting.EnabledReason.ANIMATION_ENDING
  * The GUI of the filter can be built automatically based on the contents of this class.
  */
 public class ParamSet implements Debuggable {
+    private static final Map<String, RandomGeneratorFactory<?>> RND_FACTORIES = new HashMap<>();
+
     private final List<FilterParam> params = new ArrayList<>();
     private final List<FilterButtonModel> actions = new ArrayList<>(3);
     private ParamAdjustmentListener adjustmentListener;
     private Runnable afterResetAction;
-    private Preset[] builtinPresets;
+    private List<Preset> builtinPresets = List.of();
 
     // reseed support
     private static final String SEED_KEY = "Seed";
@@ -55,9 +57,6 @@ public class ParamSet implements Debuggable {
     private OpenSimplex2F simplex;
     private boolean savesSeed;
     private LongConsumer seedChangedAction;
-
-    public ParamSet() {
-    }
 
     public void addParam(FilterParam newParam) {
         params.add(newParam);
@@ -87,7 +86,7 @@ public class ParamSet implements Debuggable {
     }
 
     public ParamSet withActions(FilterButtonModel... newActions) {
-        actions.addAll(List.of(newActions));
+        Collections.addAll(actions, newActions);
         return this;
     }
 
@@ -189,6 +188,8 @@ public class ParamSet implements Debuggable {
     }
 
     public void guiDisposed() {
+        adjustmentListener = null;
+
         for (FilterParam param : params) {
             param.guiDisposed();
         }
@@ -299,7 +300,7 @@ public class ParamSet implements Debuggable {
         }
         if (savesSeed) {
             seed = preset.getLong(SEED_KEY, seed);
-            simplex = null; // make sure getLastSeedSimplex() is also reset
+            simplex = null; // make sure getSimplexWithLastSeed() is also reset
             if (seedChangedAction != null) {
                 seedChangedAction.accept(seed);
             }
@@ -344,16 +345,12 @@ public class ParamSet implements Debuggable {
         modified.loadStateFrom(value);
     }
 
-    public void setBuiltinPresets(Preset... presets) {
+    public void setBuiltinPresets(List<Preset> presets) {
         this.builtinPresets = presets;
     }
 
-    public Preset[] getBuiltinPresets() {
+    public List<Preset> getBuiltinPresets() {
         return builtinPresets;
-    }
-
-    public boolean hasBuiltinPresets() {
-        return builtinPresets != null;
     }
 
     /**
@@ -424,12 +421,14 @@ public class ParamSet implements Debuggable {
         return new SplittableRandom(seed);
     }
 
-    private static final Map<String, RandomGeneratorFactory> rndFactoryMap = new HashMap<>();
-
+    /**
+     * Returns a generator of the given algorithm (for example
+     * "Xoroshiro128PlusPlus"), seeded to the last seed.
+     */
     public RandomGenerator getGeneratorWithLastSeed(String className) {
         assert Threads.calledOnEDT();
 
-        RandomGeneratorFactory factory = rndFactoryMap.computeIfAbsent(
+        RandomGeneratorFactory<?> factory = RND_FACTORIES.computeIfAbsent(
             className,
             _ -> RandomGeneratorFactory.of(className));
         return factory.create(seed);
